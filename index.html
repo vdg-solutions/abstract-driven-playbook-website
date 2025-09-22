@@ -195,6 +195,169 @@ export class UserController {
                     </div>
                 </div>
 
+                <div class="layer-detail" data-layer="core">
+                    <div class="layer-content">
+                        <h3><i class="fas fa-heart"></i> Core Abstractions</h3>
+                        <p>Defines business concepts and rules through entities, value objects, ports, and domain events.</p>
+                        <ul>
+                            <li>Domain entities and value objects</li>
+                            <li>Business rules and invariants</li>
+                            <li>Port interfaces (Repository, Service)</li>
+                            <li>Domain events</li>
+                        </ul>
+                    </div>
+                    <div class="layer-code">
+                        <pre><code class="language-typescript">// Core Abstractions - User Entity
+export class User {
+  constructor(
+    public readonly id: UserId,
+    public readonly email: Email,
+    public readonly fullName: FullName,
+    public readonly isActive: boolean
+  ) {
+    this.validateBusinessRules();
+  }
+
+  static create(email: string, fullName: string): User {
+    return new User(
+      UserId.generate(),
+      new Email(email),
+      FullName.fromString(fullName),
+      true
+    );
+  }
+
+  private validateBusinessRules(): void {
+    if (!this.email.isValid()) {
+      throw new InvalidEmailError();
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="layer-detail" data-layer="operators">
+                    <div class="layer-content">
+                        <h3><i class="fas fa-cogs"></i> Operators</h3>
+                        <p>Orchestrates business workflows, coordinates transactions, and manages use case implementation.</p>
+                        <ul>
+                            <li>Use case orchestration</li>
+                            <li>Business workflow coordination</li>
+                            <li>DTO ↔ Entity mapping</li>
+                            <li>Cross-cutting concerns</li>
+                        </ul>
+                    </div>
+                    <div class="layer-code">
+                        <pre><code class="language-typescript">// Operators - Business Logic
+export class UserOperator {
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly emailService: IEmailService
+  ) {}
+
+  async createUser(dto: CreateUserDto): Promise&lt;UserResponseDto&gt; {
+    // Business validation
+    await this.validateUniqueEmail(dto.email);
+
+    // Create entity
+    const user = User.create(dto.email, dto.fullName);
+
+    // Persist
+    await this.userRepository.save(user);
+
+    // Side effects
+    await this.emailService.sendWelcomeEmail(user.email);
+
+    return this.mapToResponse(user);
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="layer-detail" data-layer="implementations">
+                    <div class="layer-content">
+                        <h3><i class="fas fa-database"></i> Implementations</h3>
+                        <p>Provides concrete implementations of ports, handles external systems, and manages technical concerns.</p>
+                        <ul>
+                            <li>Database repositories</li>
+                            <li>External service adapters</li>
+                            <li>Infrastructure concerns</li>
+                            <li>Technical integrations</li>
+                        </ul>
+                    </div>
+                    <div class="layer-code">
+                        <pre><code class="language-typescript">// Implementations - Technical Details
+export class PostgresUserRepository implements IUserRepository {
+  constructor(private readonly pool: Pool) {}
+
+  async save(user: User): Promise&lt;void&gt; {
+    const query = `
+      INSERT INTO users (id, email, full_name, is_active)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    await this.pool.query(query, [
+      user.id.value,
+      user.email.value,
+      user.fullName.value,
+      user.isActive
+    ]);
+  }
+
+  async findById(id: UserId): Promise&lt;User | null&gt; {
+    const result = await this.pool.query(
+      'SELECT * FROM users WHERE id = $1',
+      [id.value]
+    );
+
+    return result.rows[0] ? this.mapToUser(result.rows[0]) : null;
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="layer-detail" data-layer="bootstrap">
+                    <div class="layer-content">
+                        <h3><i class="fas fa-play-circle"></i> Bootstrap</h3>
+                        <p>Configures dependency injection, manages application lifecycle, and wires all layers together.</p>
+                        <ul>
+                            <li>Dependency injection setup</li>
+                            <li>Application configuration</li>
+                            <li>Service registration</li>
+                            <li>Application startup</li>
+                        </ul>
+                    </div>
+                    <div class="layer-code">
+                        <pre><code class="language-typescript">// Bootstrap - Dependency Injection
+export class Container {
+  private services = new Map();
+
+  register(): void {
+    // Register implementations
+    this.services.set('userRepository',
+      new PostgresUserRepository(dbPool)
+    );
+
+    this.services.set('emailService',
+      new SendGridEmailService(apiKey)
+    );
+
+    // Register operators
+    this.services.set('userOperator',
+      new UserOperator(
+        this.get('userRepository'),
+        this.get('emailService')
+      )
+    );
+  }
+
+  get&lt;T&gt;(key: string): T {
+    return this.services.get(key);
+  }
+}</code></pre>
+                    </div>
+                </div>
+
                 <div class="layer-tabs">
                     <button class="tab-btn active" data-layer="boundary">Boundary</button>
                     <button class="tab-btn" data-layer="core">Core Abstractions</button>

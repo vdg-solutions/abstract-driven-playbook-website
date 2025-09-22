@@ -24,13 +24,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             tabs.forEach((tab, index) => {
                 tab.addEventListener('click', function() {
+                    const dataAttribute = this.getAttribute('data-example') || this.getAttribute('data-tab');
+
                     // Remove active class from all tabs and panels
                     tabs.forEach(t => t.classList.remove('active'));
                     panels.forEach(p => p.classList.remove('active'));
 
-                    // Add active class to clicked tab and corresponding panel
+                    // Add active class to clicked tab
                     tab.classList.add('active');
-                    if (panels[index]) {
+
+                    // Show corresponding panel by data attribute or index
+                    if (dataAttribute) {
+                        const targetPanel = container.parentElement.querySelector(`[id="${dataAttribute}-example"], [data-example="${dataAttribute}"], [data-tab="${dataAttribute}"]`);
+                        if (targetPanel) {
+                            targetPanel.classList.add('active');
+                        }
+                    } else if (panels[index]) {
                         panels[index].classList.add('active');
                     }
                 });
@@ -38,8 +47,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Layer tab functionality for architecture section
+    function initializeLayerTabs() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const layerDetails = document.querySelectorAll('.layer-detail');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetLayer = this.getAttribute('data-layer');
+
+                // Remove active class from all buttons and details
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                layerDetails.forEach(detail => detail.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Show corresponding layer detail
+                const targetDetail = document.querySelector(`.layer-detail[data-layer="${targetLayer}"]`);
+                if (targetDetail) {
+                    targetDetail.classList.add('active');
+                }
+            });
+        });
+    }
+
     // Initialize tabs
     initializeTabs();
+
+    // Initialize layer tabs (Architecture section)
+    initializeLayerTabs();
 
     // Copy to clipboard functionality for code blocks
     function initializeCopyButtons() {
