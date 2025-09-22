@@ -8,6 +8,10 @@ pre {
     border-radius: 8px;
     overflow-x: auto;
     position: relative;
+    max-width: 100%;
+    white-space: pre;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 
 code {
@@ -299,6 +303,21 @@ pre {
 /* Code block copy button */
 .code-block {
     position: relative;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: var(--space-lg);
+    background: var(--gray-900);
+    color: #e2e8f0;
+    border: 1px solid var(--gray-700);
+    border-radius: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .copy-button {
@@ -467,10 +486,25 @@ pre {
     pre {
         padding: var(--space-md);
         font-size: 0.8rem;
-        margin: var(--space-sm) -var(--space-md);
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
+        margin: var(--space-sm) 0;
+        border-radius: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .code-block {
+        margin: var(--space-sm) 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .code-block pre {
+        padding: var(--space-md);
+        font-size: 0.8rem;
+        overflow-x: auto;
+        white-space: pre;
+        word-wrap: normal;
+        word-break: normal;
     }
 
     .code-with-lines .line {

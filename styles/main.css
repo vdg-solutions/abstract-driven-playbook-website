@@ -763,3 +763,60 @@ html {
         padding: var(--space-lg) 0;
     }
 }
+
+/* Code Block Container Fixes */
+.docs-section {
+    overflow: hidden;
+    width: 100%;
+}
+
+.docs-section .code-block {
+    max-width: 100%;
+    overflow: hidden;
+    margin: var(--space-lg) 0;
+}
+
+.docs-section .code-block pre {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+/* Ensure docs main content doesn't overflow */
+.docs-main {
+    min-width: 0; /* This allows flex items to shrink below their content size */
+    overflow-x: auto;
+}
+
+/* Container constraints */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+    overflow-x: auto;
+}
+
+/* Mobile specific fixes */
+@media (max-width: 768px) {
+    .docs-section .code-block {
+        margin: var(--space-md) -var(--space-md);
+        border-radius: 0;
+        max-width: calc(100vw - 2 * var(--space-md));
+        box-sizing: border-box;
+    }
+
+    .docs-section .code-block pre {
+        border-radius: 0;
+        padding: var(--space-md);
+    }
+
+    .container {
+        padding: 0 var(--space-md);
+        max-width: 100vw;
+        box-sizing: border-box;
+        overflow-x: auto;
+    }
+}
