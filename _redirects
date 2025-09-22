@@ -1,0 +1,27 @@
+# Redirect rules for clean URLs and better SEO
+
+# Redirect common documentation URLs to the main documentation page
+/docs                /documentation.html    301
+/documentation       /documentation.html    301
+/guide              /documentation.html    301
+/guides             /documentation.html    301
+
+# Redirect legacy pattern URLs (if any)
+/patterns           /index.html#patterns   301
+/principles         /index.html#principles 301
+/examples           /index.html#examples   301
+
+# Redirect common misspellings
+/documention        /documentation.html    301
+/documentaton       /documentation.html    301
+
+# API or future endpoints (if needed)
+/api/*              /index.html            404
+
+# Force HTTPS (Netlify will handle this automatically, but explicit is better)
+https://abstractdriven.netlify.app/* https://abstractdriven.com/:splat 301!
+http://abstractdriven.com/* https://abstractdriven.com/:splat 301!
+
+# Catch-all: serve index.html for any unmatched routes (SPA fallback)
+# This allows for future client-side routing if needed
+/*                  /index.html            200

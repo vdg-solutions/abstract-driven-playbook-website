@@ -1,0 +1,41 @@
+{
+  "name": "abstract-driven-development-website",
+  "version": "1.0.0",
+  "description": "Official website for Abstract Driven Development (ADD) - A proven 5-layer architecture pattern",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx http-server",
+    "dev": "npx live-server",
+    "format": "prettier --write \"**/*.{html,css,js,json,md}\"",
+    "validate": "html-validate *.html"
+  },
+  "keywords": [
+    "abstract-driven-development",
+    "ADD",
+    "software-architecture",
+    "clean-architecture",
+    "dependency-inversion",
+    "design-patterns",
+    "static-website"
+  ],
+  "author": "Abstract Driven Development Team",
+  "license": "MIT",
+  "homepage": "https://abstractdriven.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abstractdriven/abstract-driven-playbook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abstractdriven/abstract-driven-playbook/issues"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
+    "html-validate": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
