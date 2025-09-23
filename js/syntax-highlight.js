@@ -1,6 +1,13 @@
 // Syntax highlighting and code block functionality
 // This file provides enhanced code block features without external dependencies
 
+// Debug logging utility (matches main.js)
+function debugLog(...args) {
+    if (typeof DEBUG !== 'undefined' && DEBUG) {
+        console.log(...args);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeCodeBlocks();
     initializeCodeTabs();
@@ -32,8 +39,8 @@ function initializeCodeBlocks() {
             addLineNumbers(codeBlock);
         }
 
-        // Enhance syntax highlighting
-        enhanceSyntaxHighlighting(codeBlock);
+        // Enhance syntax highlighting - temporarily disabled
+        // enhanceSyntaxHighlighting(codeBlock);
     });
 }
 
@@ -159,6 +166,12 @@ function addLineNumbers(codeBlock) {
 }
 
 function enhanceSyntaxHighlighting(codeBlock) {
+    // Check if already highlighted (has token spans)
+    if (codeBlock.querySelector('.token')) {
+        debugLog('Code block already highlighted, skipping');
+        return;
+    }
+
     // Basic syntax highlighting for common patterns
     // This is a simple implementation that adds basic token classes
 
@@ -198,22 +211,31 @@ function getCodeBlockLanguage(codeBlock) {
 
 function highlightJavaScript(content) {
     // Basic JavaScript/TypeScript highlighting
-    return content
-        // Keywords
-        .replace(/\b(const|let|var|function|class|interface|type|export|import|from|return|if|else|for|while|try|catch|finally|async|await|new|this|super|extends|implements|public|private|protected|static)\b/g,
-            '<span class="token keyword">$1</span>')
-        // Strings
-        .replace(/(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g,
-            '<span class="token string">$1$2$1</span>')
-        // Numbers
-        .replace(/\b(\d+\.?\d*)\b/g,
-            '<span class="token number">$1</span>')
-        // Comments
-        .replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
-            '<span class="token comment">$1</span>')
-        // Functions
-        .replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g,
-            '<span class="token function">$1</span>(');
+    // Apply highlighting in careful order to avoid conflicts
+
+    let highlighted = content;
+
+    // 1. Comments first (to protect them from other replacements)
+    highlighted = highlighted.replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/gm,
+        '<span class="token comment">$1</span>');
+
+    // 2. Strings (to protect them from keyword replacement)
+    highlighted = highlighted.replace(/(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g,
+        '<span class="token string">$1$2$1</span>');
+
+    // 3. Numbers
+    highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g,
+        '<span class="token number">$1</span>');
+
+    // 4. Keywords (simple approach without lookbehind)
+    highlighted = highlighted.replace(/\b(const|let|var|function|class|interface|type|export|import|from|return|if|else|for|while|try|catch|finally|async|await|new|this|super|extends|implements|public|private|protected|static)\b/g,
+        '<span class="token keyword">$1</span>');
+
+    // 5. Functions (simple approach)
+    highlighted = highlighted.replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g,
+        '<span class="token function">$1</span>(');
+
+    return highlighted;
 }
 
 function highlightJSON(content) {
