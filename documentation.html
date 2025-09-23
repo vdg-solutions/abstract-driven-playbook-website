@@ -30,6 +30,9 @@
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -65,22 +68,11 @@
         </div>
     </nav>
 
-    <!-- Documentation Header -->
-    <section class="docs-header">
-        <div class="container">
-            <div class="docs-header-content">
-                <h1>Documentation</h1>
-                <p class="lead">Complete guide to Abstract Driven Development - from core principles to advanced patterns and real-world implementation strategies.</p>
-            </div>
 
-            <div class="docs-search">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search documentation..." id="docs-search">
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Floating Progress Bar -->
+    <div class="docs-progress-container">
+        <div class="docs-progress-bar" id="docs-progress"></div>
+    </div>
 
     <!-- Documentation Navigation -->
     <section class="docs-nav">
@@ -808,22 +800,29 @@ export class Container {
 
                         <h2>Reference Rules Between Layers</h2>
 
-                        <div class="code-block">
-                            <pre><code class="language-mermaid">graph BT
-  Boundary[Boundary Layer]
-  CoreAbstractions[Core Abstractions]
-  Operators[Operators Layer]
-  Implementations[Implementations]
-  Bootstrap[Bootstrap Layer]
+                        <div class="mermaid-diagram">
+                            <div class="mermaid">
+graph BT
+    subgraph " "
+        S[Bootstrap Layer]
+        O[Operators Layer]
+        I[Implementations]
+        B[Boundary Layer]
+        C[Core Abstractions]
+    end
 
-  style CoreAbstractions fill:#fff7ed,stroke:#c2410c,stroke-width:2px
-  style Boundary fill:#eff6ff,stroke:#1d4ed8,stroke-width:2px
+    O --> B
+    O --> C
+    I --> C
+    S --> O
+    S --> I
 
-  Operators --> Boundary
-  Operators --> CoreAbstractions
-  Implementations --> CoreAbstractions
-  Bootstrap --> Operators
-  Bootstrap --> Implementations</code></pre>
+    style C fill:#fff7ed,stroke:#c2410c,stroke-width:2px
+    style B fill:#eff6ff,stroke:#1d4ed8,stroke-width:2px
+    style O fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style I fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style S fill:#f3e8ff,stroke:#9333ea,stroke-width:2px
+                            </div>
                         </div>
 
                         <div class="alert alert-warning">
@@ -854,8 +853,9 @@ export class Container {
 
                         <h3>Processing Flow</h3>
 
-                        <div class="code-block">
-                            <pre><code class="language-mermaid">sequenceDiagram
+                        <div class="mermaid-diagram">
+                            <div class="mermaid">
+sequenceDiagram
   participant Ext as External System
   participant Boundary
   participant Operators
@@ -866,7 +866,8 @@ export class Container {
   Boundary->>Operators: DTO
   Operators->>Impl: Call via interface (from Core)
   Impl-->>Operators: Entity/Result
-  Operators-->>Boundary: Response DTO / Boundary Event</code></pre>
+  Operators-->>Boundary: Response DTO / Boundary Event
+                            </div>
                         </div>
                     </section>
 
@@ -891,26 +892,29 @@ export class Container {
 
                         <p>Define abstract interfaces (ports) in Core Abstractions that express business needs, then implement concrete adapters in Implementations that handle the technical details.</p>
 
-                        <div class="code-block">
-                            <pre><code class="language-mermaid">graph TB
-    subgraph "Core Abstractions"
-        Port[Port - Interface]
-    end
+                        <div class="mermaid-diagram">
+                            <div class="mermaid">
+graph LR
+    subgraph " "
+        subgraph "Core Abstractions"
+            Port[Port - Interface]
+        end
 
-    subgraph "Operators"
-        Operator[Operator]
-    end
+        subgraph "Operators"
+            Operator[Operator]
+        end
 
-    subgraph "Implementations"
-        Adapter1[PostgreSQL Adapter]
-        Adapter2[MongoDB Adapter]
-        Adapter3[In-Memory Adapter]
-    end
+        subgraph "Implementations"
+            Adapter1[PostgreSQL Adapter]
+            Adapter2[MongoDB Adapter]
+            Adapter3[In-Memory Adapter]
+        end
 
-    subgraph "External Systems"
-        DB[(PostgreSQL)]
-        Mongo[(MongoDB)]
-        Memory[Memory Store]
+        subgraph "External Systems"
+            DB[(PostgreSQL)]
+            Mongo[(MongoDB)]
+            Memory[Memory Store]
+        end
     end
 
     Operator --> Port
@@ -920,7 +924,8 @@ export class Container {
 
     Adapter1 --> DB
     Adapter2 --> Mongo
-    Adapter3 --> Memory</code></pre>
+    Adapter3 --> Memory
+                            </div>
                         </div>
 
                         <h2>Complete Implementation Example</h2>
@@ -1359,28 +1364,31 @@ export class UserMapper {
 
                         <p>Use events to communicate state changes and trigger side effects, with two distinct event types: <strong>Core Events</strong> for internal communication and <strong>Boundary Events</strong> for external integration.</p>
 
-                        <div class="code-block">
-                            <pre><code class="language-mermaid">graph TD
-    subgraph "Internal System"
-        subgraph "Module A"
-            OpA[Operator A]
-            CoreEventA[Core Event A]
+                        <div class="mermaid-diagram">
+                            <div class="mermaid">
+graph LR
+    subgraph " "
+        subgraph "Internal System"
+            subgraph "Module A"
+                OpA[Operator A]
+                CoreEventA[Core Event A]
+            end
+
+            subgraph "Module B"
+                OpB[Operator B]
+                CoreEventB[Core Event B]
+            end
+
+            subgraph "Event Bus"
+                EventBus[Event Bus]
+            end
         end
 
-        subgraph "Module B"
-            OpB[Operator B]
-            CoreEventB[Core Event B]
+        subgraph "External Systems"
+            ExtSystem1[External System 1]
+            ExtSystem2[External System 2]
+            BoundaryEvent[Boundary Event]
         end
-
-        subgraph "Event Bus"
-            EventBus[Event Bus]
-        end
-    end
-
-    subgraph "External Systems"
-        ExtSystem1[External System 1]
-        ExtSystem2[External System 2]
-        BoundaryEvent[Boundary Event]
     end
 
     OpA --> CoreEventA
@@ -1391,7 +1399,8 @@ export class UserMapper {
 
     EventBus --> BoundaryEvent
     BoundaryEvent --> ExtSystem1
-    BoundaryEvent --> ExtSystem2</code></pre>
+    BoundaryEvent --> ExtSystem2
+                            </div>
                         </div>
 
                         <h2>Core Events (Internal Communication)</h2>

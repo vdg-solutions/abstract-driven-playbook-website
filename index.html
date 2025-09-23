@@ -511,6 +511,7 @@ export class Container {
                 <div class="example-content">
                     <div class="example-panel active" id="entity-example">
                         <div class="code-block">
+                            <button class="copy-button">Copy</button>
                             <pre><code class="language-typescript">// Core Abstractions - User Entity
 export class User {
   constructor(
@@ -568,6 +569,7 @@ export class User {
 
                     <div class="example-panel" id="port-example">
                         <div class="code-block">
+                            <button class="copy-button">Copy</button>
                             <pre><code class="language-typescript">// Core Abstractions - Repository Port
 export interface IUserRepository {
   save(user: User): Promise&lt;void&gt;;
@@ -609,6 +611,7 @@ export interface IEventBus {
 
                     <div class="example-panel" id="operator-example">
                         <div class="code-block">
+                            <button class="copy-button">Copy</button>
                             <pre><code class="language-typescript">// Operators - Business Logic Orchestration
 export class UserOperator {
   constructor(
@@ -685,6 +688,7 @@ export class UserOperator {
 
                     <div class="example-panel" id="implementation-example">
                         <div class="code-block">
+                            <button class="copy-button">Copy</button>
                             <pre><code class="language-typescript">// Implementations - Technical Implementation
 export class PostgresUserRepository implements IUserRepository {
   constructor(private readonly db: Pool) {}
@@ -777,7 +781,7 @@ export class PostgresUserRepository implements IUserRepository {
                         <span class="tech-tag">Jest</span>
                     </div>
                     <div class="example-links">
-                        <a href="examples/simple-crud/" class="btn btn-sm btn-primary">View Example</a>
+                        <a href="documentation.html#first-implementation" class="btn btn-sm btn-primary">View Guide</a>
                         <!-- GitHub source link temporarily disabled
                         <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/basic/simple-crud" class="btn btn-sm btn-secondary" target="_blank">
                             <i class="fab fa-github"></i> Source
@@ -799,7 +803,7 @@ export class PostgresUserRepository implements IUserRepository {
                         <span class="tech-tag">Docker</span>
                     </div>
                     <div class="example-links">
-                        <a href="examples/ecommerce/" class="btn btn-sm btn-primary">View Example</a>
+                        <a href="documentation.html#advanced-theory" class="btn btn-sm btn-primary">View Guide</a>
                         <!-- GitHub source link temporarily disabled
                         <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/extended/complex-ecommerce" class="btn btn-sm btn-secondary" target="_blank">
                             <i class="fab fa-github"></i> Source
@@ -820,7 +824,7 @@ export class PostgresUserRepository implements IUserRepository {
                         <span class="tech-tag">From MVC</span>
                     </div>
                     <div class="example-links">
-                        <a href="examples/migrations/" class="btn btn-sm btn-primary">View Examples</a>
+                        <a href="documentation.html#setup" class="btn btn-sm btn-primary">Setup Guide</a>
                         <!-- GitHub source link temporarily disabled
                         <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/migration" class="btn btn-sm btn-secondary" target="_blank">
                             <i class="fab fa-github"></i> Source
@@ -850,8 +854,8 @@ export class PostgresUserRepository implements IUserRepository {
                     <ol>
                         <li>Learn the <a href="principles/">core principles</a></li>
                         <li>Understand <a href="documentation.html#layer-separation">layer separation</a></li>
-                        <li>Practice with <a href="examples/simple-crud/">simple CRUD example</a></li>
-                        <li>Apply <a href="patterns/">basic patterns</a></li>
+                        <li>Practice with <a href="documentation.html#first-implementation">step-by-step guide</a></li>
+                        <li>Apply <a href="documentation.html#port-adapter">basic patterns</a></li>
                     </ol>
                     <a href="documentation.html" class="btn btn-primary">Start Learning</a>
                 </div>
@@ -888,8 +892,8 @@ export class PostgresUserRepository implements IUserRepository {
                     <h3>Training Your Team?</h3>
                     <p>Use our comprehensive training materials and presentations</p>
                     <ol>
-                        <li>Review <a href="presentations/">training presentations</a></li>
-                        <li>Practice with <a href="examples/">hands-on examples</a></li>
+                        <li>Review <a href="documentation.html#advanced-theory">training materials</a></li>
+                        <li>Practice with <a href="documentation.html#examples">hands-on examples</a></li>
                         <li>Implement in <a href="documentation.html#quick-start">existing projects</a></li>
                         <li>Establish team <a href="principles/">coding standards</a></li>
                     </ol>
@@ -919,9 +923,9 @@ export class PostgresUserRepository implements IUserRepository {
                     <h5>Learn</h5>
                     <ul>
                         <li><a href="principles/">Principles</a></li>
-                        <li><a href="patterns/">Patterns</a></li>
-                        <li><a href="examples/">Examples</a></li>
-                        <li><a href="presentations/">Training</a></li>
+                        <li><a href="documentation.html#port-adapter">Patterns</a></li>
+                        <li><a href="documentation.html#examples">Examples</a></li>
+                        <li><a href="documentation.html#advanced-theory">Training</a></li>
                     </ul>
                 </div>
 

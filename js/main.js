@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Show corresponding panel by data attribute or index
                     if (dataAttribute) {
-                        const targetPanel = container.parentElement.querySelector(`[id="${dataAttribute}-example"], [data-example="${dataAttribute}"], [data-tab="${dataAttribute}"]`);
+                        const targetPanel = container.parentElement.querySelector(`#${dataAttribute}-example, [data-example="${dataAttribute}"], [data-tab="${dataAttribute}"]`);
                         if (targetPanel) {
                             targetPanel.classList.add('active');
                         }
@@ -77,6 +77,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize layer tabs (Architecture section)
     initializeLayerTabs();
+
+    // Example tab functionality for "See ADD in Action" section
+    function initializeExampleTabs() {
+        const exampleTabs = document.querySelectorAll('.example-tab');
+        const examplePanels = document.querySelectorAll('.example-panel');
+
+        exampleTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetExample = this.getAttribute('data-example');
+
+                // Remove active class from all tabs and panels
+                exampleTabs.forEach(t => t.classList.remove('active'));
+                examplePanels.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                // Show corresponding panel
+                const targetPanel = document.querySelector(`#${targetExample}-example`);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+            });
+        });
+    }
+
+    // Initialize example tabs (See ADD in Action section)
+    initializeExampleTabs();
 
     // Copy to clipboard functionality for code blocks
     function initializeCopyButtons() {
@@ -216,6 +244,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize keyboard navigation
     initializeKeyboardNavigation();
 
+    // Enhanced documentation progress bar
+    function initializeProgressBar() {
+        const progressBar = document.getElementById('docs-progress');
+        if (!progressBar) return;
+
+        function updateProgress() {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (window.pageYOffset / docHeight) * 100;
+            progressBar.style.width = Math.min(progress, 100) + '%';
+        }
+
+        window.addEventListener('scroll', throttle(updateProgress, 16));
+        updateProgress();
+    }
+
+
+    // Animation on scroll
+    function initializeScrollAnimations() {
+        const animatedElements = document.querySelectorAll('.docs-section, .sidebar-section');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+
+        animatedElements.forEach(element => {
+            observer.observe(element);
+        });
+    }
+
     // Documentation page specific functionality
     function initializeDocumentationFeatures() {
         // Sidebar navigation active state management
@@ -269,20 +333,110 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Search functionality placeholder
-        const searchInput = document.getElementById('docs-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', debounce(function() {
-                const searchTerm = this.value.toLowerCase();
-                // Placeholder for search functionality
-                console.log('Searching for:', searchTerm);
-            }, 300));
+        // Search functionality removed for now
+    }
+
+    // Initialize Mermaid diagrams
+    function initializeMermaid() {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'base',
+                flowchart: {
+                    useMaxWidth: false,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                themeVariables: {
+                    primaryColor: '#667eea',
+                    primaryTextColor: '#1a202c',
+                    primaryBorderColor: '#667eea',
+                    lineColor: '#667eea',
+                    secondaryColor: '#f7fafc',
+                    tertiaryColor: '#edf2f7',
+                    background: '#ffffff',
+                    mainBkg: '#f8fafc',
+                    secondBkg: '#edf2f7',
+                    tertiaryBkg: '#e2e8f0'
+                }
+            });
+
+            // Manually render each diagram
+            renderMermaidDiagrams();
         }
+    }
+
+    // Render Mermaid diagrams manually
+    function renderMermaidDiagrams() {
+        const diagrams = document.querySelectorAll('.mermaid');
+
+        diagrams.forEach((element, index) => {
+            const graphDefinition = element.textContent.trim();
+            const id = `mermaid-${index}`;
+
+            mermaid.render(id, graphDefinition).then(result => {
+                element.innerHTML = result.svg;
+
+                // Add click to zoom
+                element.style.cursor = 'pointer';
+                element.addEventListener('click', function() {
+                    openDiagramModal(this);
+                });
+            }).catch(error => {
+                console.error('Mermaid render error:', error);
+            });
+        });
+    }
+
+    // Remove old zoom function as it's handled in renderMermaidDiagrams now
+
+    function openDiagramModal(diagramElement) {
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('diagram-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'diagram-modal';
+            modal.className = 'diagram-modal';
+            modal.innerHTML = '<div class="diagram-modal-content"></div>';
+            document.body.appendChild(modal);
+
+            // Close modal on click
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        }
+
+        // Get the SVG directly and clone it
+        const svg = diagramElement.querySelector('svg');
+        if (svg) {
+            const modalContent = modal.querySelector('.diagram-modal-content');
+            modalContent.innerHTML = '';
+
+            const clonedSvg = svg.cloneNode(true);
+
+            // Reset styles for modal display
+            clonedSvg.style.width = 'auto';
+            clonedSvg.style.height = 'auto';
+            clonedSvg.style.maxWidth = '90vw';
+            clonedSvg.style.maxHeight = '90vh';
+            clonedSvg.removeAttribute('width');
+            clonedSvg.removeAttribute('height');
+
+            modalContent.appendChild(clonedSvg);
+        }
+
+        // Show modal
+        modal.classList.add('active');
     }
 
     // Initialize documentation features if on documentation page
     if (window.location.pathname.includes('documentation.html')) {
         initializeDocumentationFeatures();
+        initializeProgressBar();
+        initializeScrollAnimations();
+        initializeMermaid();
     }
 
     console.log('Abstract Driven Development website initialized successfully');
