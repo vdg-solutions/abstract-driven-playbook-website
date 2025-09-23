@@ -5,20 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abstract Driven Development - Documentation</title>
     <meta name="description" content="Complete documentation for Abstract Driven Development (ADD) - a proven architecture pattern with AI assistance">
-    <meta name="keywords" content="software architecture, clean architecture, dependency inversion, abstract driven development, ADD, design patterns, AI development, VIBE code, AI-assisted coding">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="Abstract Driven Development - Documentation">
-    <meta property="og:description" content="Complete documentation for ADD - the first AI-centric architecture pattern">
-    <meta property="og:type" content="website">
-
-    <!-- Fonts - EXACT same as index.html -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Styles - EXACT same CSS files as index.html -->
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
-    <link rel="stylesheet" href="styles/syntax-highlight.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,10 +15,154 @@
     <!-- Mermaid -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.3.0/dist/mermaid.min.js"></script>
 
-    <!-- Additional documentation-specific styles -->
     <style>
-        /* Documentation specific layout using existing design system */
-        .docs-container {
+        :root {
+            /* Colors - EXACT match with index.html */
+            --primary-color: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #0ea5e9;
+            --secondary-color: #7c3aed;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+
+            /* Neutrals */
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --space-3xl: 4rem;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--gray-800);
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation - exact match with index.html */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand a {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            text-decoration: none;
+            color: var(--gray-900);
+            font-weight: 600;
+            font-size: 1.25rem;
+            transition: var(--transition-normal);
+        }
+
+        .nav-brand a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-brand i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .nav-menu {
+            display: flex;
+        }
+
+        .nav-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: var(--space-xl);
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 6px;
+            transition: var(--transition-normal);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .bar {
+            width: 24px;
+            height: 3px;
+            background: var(--gray-600);
+            border-radius: 2px;
+            transition: var(--transition-normal);
+        }
+
+        /* Main Layout */
+        .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: var(--space-3xl) var(--space-lg);
@@ -41,7 +174,8 @@
             gap: var(--space-3xl);
         }
 
-        .docs-sidebar {
+        /* Sidebar */
+        .sidebar {
             position: sticky;
             top: 90px;
             height: fit-content;
@@ -52,39 +186,40 @@
             box-shadow: var(--shadow-md);
         }
 
-        .docs-sidebar h3 {
+        .sidebar h3 {
             margin: 0 0 var(--space-lg) 0;
             color: var(--gray-800);
             font-size: 1.1rem;
         }
 
-        .docs-nav {
+        .sidebar-nav {
             list-style: none;
             margin: 0;
             padding: 0;
         }
 
-        .docs-nav li {
+        .sidebar-nav li {
             margin-bottom: 0.5rem;
         }
 
-        .docs-nav a {
+        .sidebar-nav a {
             display: block;
             padding: 0.5rem 0.75rem;
             color: var(--gray-600);
             text-decoration: none;
             border-radius: 6px;
-            transition: var(--transition-normal);
+            transition: all 0.2s;
             font-size: 0.9rem;
         }
 
-        .docs-nav a:hover,
-        .docs-nav a.active {
-            background: rgba(2, 132, 199, 0.1);
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(102, 126, 234, 0.1);
             color: var(--primary-color);
         }
 
-        .docs-content {
+        /* Content */
+        .content {
             background: white;
             border-radius: 12px;
             border: 1px solid var(--gray-200);
@@ -92,75 +227,70 @@
             overflow: hidden;
         }
 
-        .docs-section {
+        .section {
             padding: var(--space-2xl);
             border-bottom: 1px solid var(--gray-200);
         }
 
-        .docs-section:last-child {
+        .section:last-child {
             border-bottom: none;
         }
 
-        .docs-section h1 {
+        .section h1 {
             margin: 0 0 var(--space-lg) 0;
-            color: var(--gray-900);
-            font-size: 2.5rem;
+            color: var(--gray-800);
+            font-size: 2rem;
             font-weight: 700;
         }
 
-        .docs-section h2 {
+        .section h2 {
             margin: var(--space-2xl) 0 var(--space-lg) 0;
             color: var(--gray-800);
-            font-size: 2rem;
-            font-weight: 600;
-        }
-
-        .docs-section h3 {
-            margin: var(--space-xl) 0 var(--space-lg) 0;
-            color: var(--gray-700);
             font-size: 1.5rem;
             font-weight: 600;
         }
 
-        .docs-section p {
-            margin-bottom: var(--space-lg);
-            color: var(--gray-600);
-            line-height: 1.7;
+        .section h3 {
+            margin: var(--space-xl) 0 var(--space-lg) 0;
+            color: var(--gray-700);
+            font-size: 1.25rem;
+            font-weight: 600;
         }
 
-        .docs-section ul,
-        .docs-section ol {
+        .section p {
             margin-bottom: var(--space-lg);
             color: var(--gray-600);
-            padding-left: var(--space-lg);
         }
 
-        .docs-section li {
+        .section ul, .section ol {
+            margin-bottom: var(--space-lg);
+            color: var(--gray-600);
+        }
+
+        .section li {
             margin-bottom: 0.5rem;
-            line-height: 1.6;
         }
 
-        /* Alerts using existing design system */
+        /* Alerts */
         .alert {
             padding: var(--space-lg);
             border-radius: 8px;
             margin: var(--space-lg) 0;
-            border-left: 4px solid;
         }
 
         .alert-info {
             background: #eff6ff;
-            border-left-color: var(--primary-color);
+            border: 1px solid #93c5fd;
             color: #1e40af;
         }
 
         .alert-warning {
             background: #fffbeb;
-            border-left-color: var(--warning-color);
+            border: 1px solid #fbbf24;
             color: #92400e;
         }
 
-        /* Working Mermaid styles - minimal and clean */
+        /* Mermaid Diagrams - EXACT copy from working test */
         .mermaid-diagram {
             margin: var(--space-xl) 0;
             background: white;
@@ -190,7 +320,7 @@
             margin: 0 auto;
         }
 
-        /* Code blocks using existing system */
+        /* Code blocks */
         .code-block {
             background: var(--gray-800);
             color: var(--gray-100);
@@ -202,51 +332,44 @@
 
         .code-block pre {
             margin: 0;
-            font-family: var(--font-mono);
+            font-family: 'Courier New', monospace;
             font-size: 0.9rem;
             line-height: 1.5;
         }
 
-        /* Benefits using existing benefit-card style */
-        .docs-benefits {
+        /* Benefits grid */
+        .benefits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: var(--space-lg);
             margin: var(--space-xl) 0;
         }
 
-        .docs-benefit {
+        .benefit-item {
             background: var(--gray-50);
             padding: var(--space-lg);
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid var(--gray-200);
-            transition: var(--transition-normal);
         }
 
-        .docs-benefit:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .docs-benefit i {
+        .benefit-item i {
             color: var(--primary-color);
             font-size: 2rem;
             margin-bottom: var(--space-lg);
         }
 
-        .docs-benefit h4 {
+        .benefit-item h4 {
             margin: 0 0 0.5rem 0;
             color: var(--gray-800);
-            font-weight: 600;
         }
 
-        .docs-benefit p {
+        .benefit-item p {
             margin: 0;
             color: var(--gray-600);
             font-size: 0.9rem;
         }
 
-        /* Modal using existing design system */
+        /* Modal for diagram zoom */
         .diagram-modal {
             display: none;
             position: fixed;
@@ -273,7 +396,6 @@
             max-height: 90vh;
             overflow: auto;
             position: relative;
-            box-shadow: var(--shadow-xl);
         }
 
         .diagram-close-btn {
@@ -291,7 +413,6 @@
             justify-content: center;
             font-size: 1rem;
             color: var(--gray-600);
-            transition: var(--transition-normal);
         }
 
         .diagram-close-btn:hover {
@@ -299,45 +420,55 @@
         }
 
         /* Responsive */
-        @media (max-width: 1024px) {
+        @media (max-width: 768px) {
             .docs-layout {
                 grid-template-columns: 1fr;
                 gap: var(--space-xl);
             }
 
-            .docs-sidebar {
+            .sidebar {
                 position: static;
                 order: 2;
             }
-        }
 
-        @media (max-width: 768px) {
-            .docs-container {
+            .container {
                 padding: var(--space-xl) var(--space-md);
             }
 
-            .docs-section {
-                padding: var(--space-xl);
+            .nav-menu {
+                display: none;
             }
 
-            .docs-section h1 {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .section h1 {
                 font-size: 2rem;
             }
 
-            .docs-section h2 {
+            .section h2 {
                 font-size: 1.5rem;
             }
         }
 
         @media (max-width: 640px) {
-            .docs-container {
+            .nav-container {
+                padding: 0 var(--space-md);
+            }
+
+            .container {
                 padding: var(--space-lg) var(--space-sm);
+            }
+
+            .section {
+                padding: var(--space-xl);
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation - EXACT same as index.html -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
@@ -353,7 +484,7 @@
                     <li><a href="/#principles" class="nav-link">Principles</a></li>
                     <li><a href="/#patterns" class="nav-link">Patterns</a></li>
                     <li><a href="/#examples" class="nav-link">Examples</a></li>
-                    <li><a href="/documentation.html" class="nav-link">Docs</a></li>
+                    <li><a href="/documentation-new.html" class="nav-link">Docs</a></li>
                 </ul>
             </div>
 
@@ -365,13 +496,13 @@
         </div>
     </nav>
 
-    <!-- Main Documentation Content -->
-    <div class="docs-container">
+    <!-- Main Content -->
+    <div class="container">
         <div class="docs-layout">
             <!-- Sidebar -->
-            <aside class="docs-sidebar">
+            <aside class="sidebar">
                 <h3>Documentation</h3>
-                <ul class="docs-nav">
+                <ul class="sidebar-nav">
                     <li><a href="#overview" class="active">Overview</a></li>
                     <li><a href="#architecture">5-Layer Architecture</a></li>
                     <li><a href="#reference-rules">Reference Rules</a></li>
@@ -382,16 +513,16 @@
             </aside>
 
             <!-- Content -->
-            <main class="docs-content">
+            <main class="content">
                 <!-- Overview Section -->
-                <section id="overview" class="docs-section">
+                <section id="overview" class="section">
                     <h1>Abstract Driven Development (ADD)</h1>
 
                     <div class="alert alert-info">
                         <p><strong>The First AI-Centric Architecture:</strong> ADD enables AI to write complete software from start to finish, with human-in-the-loop control, solving the uncontrollable VIBE code problem while maintaining enterprise-grade quality.</p>
                     </div>
 
-                    <p>Abstract Driven Development (ADD) is a software architecture pattern that emphasizes the separation of concerns through well-defined abstractions. It provides a systematic approach to building maintainable, testable, and scalable applications with AI assistance.</p>
+                    <p>Abstract Driven Development (ADD) is a software architecture pattern that emphasizes the separation of concerns through well-defined abstractions. It provides a systematic approach to building maintainable, testable, and scalable applications.</p>
 
                     <h2>Core Principles</h2>
                     <ul>
@@ -404,37 +535,37 @@
                 </section>
 
                 <!-- Architecture Section -->
-                <section id="architecture" class="docs-section">
+                <section id="architecture" class="section">
                     <h1>5-Layer Architecture</h1>
 
                     <p>ADD organizes code into five distinct layers, each with specific responsibilities:</p>
 
-                    <div class="docs-benefits">
-                        <div class="docs-benefit">
+                    <div class="benefits-grid">
+                        <div class="benefit-item">
                             <i class="fas fa-globe"></i>
                             <h4>Boundary Layer</h4>
                             <p>Handles external communication - DTOs, controllers, APIs, and system edges.</p>
                         </div>
 
-                        <div class="docs-benefit">
+                        <div class="benefit-item">
                             <i class="fas fa-heart"></i>
                             <h4>Core Abstractions</h4>
                             <p>Defines entities, ports, and events - the heart of your domain model.</p>
                         </div>
 
-                        <div class="docs-benefit">
+                        <div class="benefit-item">
                             <i class="fas fa-cogs"></i>
                             <h4>Operators Layer</h4>
                             <p>Contains business logic and use cases that orchestrate the domain.</p>
                         </div>
 
-                        <div class="docs-benefit">
+                        <div class="benefit-item">
                             <i class="fas fa-plug"></i>
                             <h4>Implementations</h4>
                             <p>Concrete implementations of ports - adapters, repositories, external services.</p>
                         </div>
 
-                        <div class="docs-benefit">
+                        <div class="benefit-item">
                             <i class="fas fa-rocket"></i>
                             <h4>Bootstrap Layer</h4>
                             <p>Application startup, dependency injection, and configuration wiring.</p>
@@ -443,7 +574,7 @@
                 </section>
 
                 <!-- Reference Rules Section -->
-                <section id="reference-rules" class="docs-section">
+                <section id="reference-rules" class="section">
                     <h1>Reference Rules Between Layers</h1>
 
                     <div class="mermaid-diagram">
@@ -497,7 +628,7 @@ sequenceDiagram
                 </section>
 
                 <!-- Port & Adapter Section -->
-                <section id="port-adapter" class="docs-section">
+                <section id="port-adapter" class="section">
                     <h1>Port & Adapter Pattern</h1>
 
                     <div class="alert alert-info">
@@ -537,7 +668,7 @@ flowchart LR
                 </section>
 
                 <!-- Event-Driven Section -->
-                <section id="event-driven" class="docs-section">
+                <section id="event-driven" class="section">
                     <h1>Event-Driven Communication</h1>
 
                     <h2>Problem</h2>
@@ -569,7 +700,7 @@ flowchart LR
                 </section>
 
                 <!-- Examples Section -->
-                <section id="examples" class="docs-section">
+                <section id="examples" class="section">
                     <h1>Implementation Examples</h1>
 
                     <h2>Port Definition (Core Abstractions)</h2>
@@ -631,9 +762,6 @@ export class CreateUserOperator {
         </div>
     </div>
 
-    <!-- Include main.js for navbar functionality -->
-    <script src="js/main.js"></script>
-
     <script>
         // Simple, clean Mermaid initialization
         mermaid.initialize({
@@ -646,20 +774,20 @@ export class CreateUserOperator {
                 htmlLabels: true
             },
             themeVariables: {
-                primaryColor: '#0284c7',
-                primaryTextColor: '#1e293b',
-                primaryBorderColor: '#0284c7',
-                lineColor: '#0284c7',
-                secondaryColor: '#f8fafc',
-                tertiaryColor: '#f1f5f9',
+                primaryColor: '#667eea',
+                primaryTextColor: '#1a202c',
+                primaryBorderColor: '#667eea',
+                lineColor: '#667eea',
+                secondaryColor: '#f7fafc',
+                tertiaryColor: '#edf2f7',
                 background: '#ffffff',
                 mainBkg: '#f8fafc',
-                secondBkg: '#f1f5f9',
+                secondBkg: '#edf2f7',
                 tertiaryBkg: '#e2e8f0'
             }
         });
 
-        // Post-processing exactly like working test
+        // Post-processing like test file
         window.addEventListener('load', function() {
             setTimeout(() => {
                 document.querySelectorAll('.mermaid svg').forEach(svg => {
@@ -719,10 +847,10 @@ export class CreateUserOperator {
             modal.classList.add('active');
         }
 
-        // Documentation navigation
+        // Simple sidebar navigation
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebarLinks = document.querySelectorAll('.docs-nav a');
-            const sections = document.querySelectorAll('.docs-section');
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+            const sections = document.querySelectorAll('.section');
 
             // Update active link on scroll
             function updateActiveLink() {
@@ -752,7 +880,7 @@ export class CreateUserOperator {
                     const targetElement = document.getElementById(targetId);
 
                     if (targetElement) {
-                        const headerOffset = 100;
+                        const headerOffset = 80;
                         const elementPosition = targetElement.getBoundingClientRect().top;
                         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
