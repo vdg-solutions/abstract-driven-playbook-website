@@ -1,5 +1,15 @@
 // Main JavaScript for Abstract Driven Development website
 
+// DEBUG flag - set to false for production builds
+const DEBUG = true;
+
+// Debug logging utility
+function debugLog(...args) {
+    if (DEBUG) {
+        console.log(...args);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu functionality
     const mobileMenuButton = document.querySelector('.nav-toggle');
@@ -338,173 +348,43 @@ document.addEventListener('DOMContentLoaded', function() {
         // Search functionality removed for now
     }
 
-    // Initialize Mermaid diagrams - copied from working test file
+    // Working viewBox fix from debug
     function initializeMermaid() {
         if (typeof mermaid !== 'undefined') {
-            // Minimal, clean initialization like the test file
             mermaid.initialize({
-                startOnLoad: true,
-                fontSize: 16,
-                securityLevel: 'loose',
-                theme: 'base',
-                flowchart: {
-                    useMaxWidth: false,
-                    htmlLabels: true
-                },
-                themeVariables: {
-                    primaryColor: '#667eea',
-                    primaryTextColor: '#1a202c',
-                    primaryBorderColor: '#667eea',
-                    lineColor: '#667eea',
-                    secondaryColor: '#f7fafc',
-                    tertiaryColor: '#edf2f7',
-                    background: '#ffffff',
-                    mainBkg: '#f8fafc',
-                    secondBkg: '#edf2f7',
-                    tertiaryBkg: '#e2e8f0'
-                }
+                startOnLoad: true
             });
 
-            console.log('Mermaid initialized with clean config');
-
-            // EXACT same approach as working test file
+            // Fix viewBox after Mermaid renders
             setTimeout(() => {
                 document.querySelectorAll('.mermaid svg').forEach(svg => {
-                    // Minimal cleanup like test file
-                    svg.removeAttribute('width');
-                    svg.removeAttribute('height');
-                    svg.style.width = '100%';
-                    svg.style.height = 'auto';
-                    svg.style.maxWidth = '100%';
-                    if (!svg.getAttribute('preserveAspectRatio')) {
-                        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-                    }
+                    try {
+                        // Try different selectors for content
+                        let content = svg.querySelector('g.root g.nodes');
 
-                    // Add click handlers for modal
-                    const diagram = svg.closest('.mermaid');
-                    if (diagram) {
-                        diagram.style.cursor = 'pointer';
-                        diagram.title = 'Click to enlarge diagram';
-                        diagram.addEventListener('click', function() {
-                            openDiagramModal(this);
-                        });
+                        if (!content) {
+                            content = svg.querySelector('g.nodes');
+                        }
+
+                        if (!content) {
+                            content = svg.querySelector('g.root');
+                        }
+
+                        if (content) {
+                            const bbox = content.getBBox();
+                            if (bbox && bbox.width > 0) {
+                                const newViewBox = `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`;
+                                svg.setAttribute('viewBox', newViewBox);
+                            }
+                        }
+                    } catch (e) {
+                        debugLog('ViewBox fix error:', e);
                     }
                 });
-            }, 300);  // Back to 300ms like test file
+            }, 2000);
         }
     }
 
-    function normalizeMermaidSvgs() {
-        const svgs = document.querySelectorAll('.mermaid svg');
-        svgs.forEach(svg => {
-            try {
-                // Remove fixed dimensions so CSS can size it responsively
-                svg.removeAttribute('width');
-                svg.removeAttribute('height');
-                svg.style.width = '100%';
-                svg.style.height = 'auto';
-                svg.style.maxWidth = '100%';
-
-                // Ensure viewBox exists for proper scaling
-                if (!svg.getAttribute('viewBox')) {
-                    const bbox = svg.getBBox();
-                    if (bbox && isFinite(bbox.width) && isFinite(bbox.height) && bbox.width > 0 && bbox.height > 0) {
-                        svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
-                    }
-                }
-
-                // Keep aspect ratio while scaling to width
-                svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            } catch (e) {
-                // ignore
-            }
-        });
-    }
-
-    function retryNormalizeMermaid(times, delayMs) {
-        let attempts = 0;
-        const timer = setInterval(() => {
-            attempts++;
-            normalizeMermaidSvgs();
-            const ok = Array.from(document.querySelectorAll('.mermaid svg')).some(svg => svg.clientWidth > 300);
-            if (ok || attempts >= times) {
-                clearInterval(timer);
-            }
-        }, delayMs);
-    }
-
-    // Mermaid will auto-render with startOnLoad: true
-
-    function openDiagramModal(diagramElement) {
-        console.log('Opening diagram modal', diagramElement);
-
-        // Create modal if it doesn't exist
-        let modal = document.getElementById('diagram-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'diagram-modal';
-            modal.className = 'diagram-modal';
-            modal.innerHTML = `
-                <div class="diagram-modal-content">
-                    <button class="diagram-close-btn" style="position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 10001;">✕</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-
-            // Close modal on click outside or close button
-            modal.addEventListener('click', function(e) {
-                if (e.target === this || e.target.classList.contains('diagram-close-btn')) {
-                    this.classList.remove('active');
-                }
-            });
-
-            // ESC key to close
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    modal.classList.remove('active');
-                }
-            });
-        }
-
-        // Find the SVG - could be direct child or nested
-        const svg = diagramElement.querySelector('svg');
-        console.log('Found SVG:', svg);
-
-        if (svg) {
-            const modalContent = modal.querySelector('.diagram-modal-content');
-
-            // Clear previous content (except close button)
-            const closeBtn = modalContent.querySelector('.diagram-close-btn');
-            modalContent.innerHTML = '';
-            if (closeBtn) {
-                modalContent.appendChild(closeBtn);
-            }
-
-            // Clone the entire SVG with all its content
-            const clonedSvg = svg.cloneNode(true);
-            console.log('Cloned SVG:', clonedSvg);
-
-            // Reset styles for modal display
-            clonedSvg.style.cssText = '';
-            clonedSvg.style.width = 'auto';
-            clonedSvg.style.height = 'auto';
-            clonedSvg.style.maxWidth = '90vw';
-            clonedSvg.style.maxHeight = '90vh';
-            clonedSvg.style.minWidth = '400px';
-            clonedSvg.style.minHeight = '200px';
-            clonedSvg.removeAttribute('width');
-            clonedSvg.removeAttribute('height');
-
-            modalContent.appendChild(clonedSvg);
-
-            // Show modal
-            modal.classList.add('active');
-            console.log('Modal should be visible now');
-        } else {
-            console.error('No SVG found in diagram element', diagramElement);
-            alert('Unable to find diagram to display');
-        }
-    }
 
     // Initialize documentation features if on documentation page
     if (window.location.pathname.includes('documentation.html')) {
@@ -520,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    console.log('Abstract Driven Development website initialized successfully');
+    debugLog('Abstract Driven Development website initialized successfully');
 });
 
 // Utility functions
