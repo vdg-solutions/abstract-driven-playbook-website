@@ -1,0 +1,6 @@
+# Block Cloudflare Analytics
+<Files "*.js">
+    Header always set Content-Security-Policy "script-src 'self' 'unsafe-inline'"
+</Files>
+
+# Or just ignore - it's harmless external analytics
