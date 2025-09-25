@@ -355,9 +355,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 startOnLoad: true
             });
 
-            // Fix viewBox after Mermaid renders - keep original working version
+            // Fix viewBox after Mermaid renders - debug version
             setTimeout(() => {
+                console.log('Running Mermaid fix...');
                 document.querySelectorAll('.mermaid svg').forEach(svg => {
+                    console.log('Processing SVG:', svg);
                     try {
                         // Try different selectors for content
                         let content = svg.querySelector('g.root g.nodes');
@@ -370,18 +372,29 @@ document.addEventListener('DOMContentLoaded', function() {
                             content = svg.querySelector('g.root');
                         }
 
+                        console.log('Found content:', content);
+
                         if (content) {
                             const bbox = content.getBBox();
+                            console.log('BBox:', bbox);
                             if (bbox && bbox.width > 0) {
                                 const newViewBox = `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`;
+                                console.log('Setting viewBox:', newViewBox);
                                 svg.setAttribute('viewBox', newViewBox);
                             }
+                        } else {
+                            console.log('No content found, trying fallback');
+                            // Force viewBox reset
+                            svg.removeAttribute('width');
+                            svg.removeAttribute('height');
+                            svg.style.width = '100%';
+                            svg.style.height = 'auto';
                         }
                     } catch (e) {
-                        debugLog('ViewBox fix error:', e);
+                        console.error('ViewBox fix error:', e);
                     }
                 });
-            }, 1500); // Slightly longer for production
+            }, 3000); // Longer for production debugging
         }
     }
 
