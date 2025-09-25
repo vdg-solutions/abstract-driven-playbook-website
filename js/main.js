@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 startOnLoad: true
             });
 
-            // Fix viewBox after Mermaid renders
+            // Fix viewBox after Mermaid renders - keep original working version
             setTimeout(() => {
                 document.querySelectorAll('.mermaid svg').forEach(svg => {
                     try {
@@ -381,10 +381,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         debugLog('ViewBox fix error:', e);
                     }
                 });
-            }, 2000);
+            }, 1500); // Slightly longer for production
         }
     }
-
 
     // Initialize documentation features if on documentation page
     if (window.location.pathname.includes('documentation.html')) {
