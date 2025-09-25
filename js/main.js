@@ -398,8 +398,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Debug path detection
+    console.log('Current path:', window.location.pathname);
+    console.log('Current href:', window.location.href);
+
     // Initialize documentation features if on documentation page
-    if (window.location.pathname.includes('documentation.html')) {
+    if (window.location.pathname.includes('documentation') || window.location.href.includes('documentation')) {
+        console.log('Documentation page detected');
         initializeDocumentationFeatures();
         initializeProgressBar();
         initializeScrollAnimations();
@@ -410,6 +415,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             window.addEventListener('load', initializeMermaid);
         }
+    } else {
+        console.log('Not documentation page');
     }
 
     debugLog('Abstract Driven Development website initialized successfully');
