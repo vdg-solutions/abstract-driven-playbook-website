@@ -10,7 +10,10 @@ function debugLog(...args) {
     }
 }
 
+console.log('main.js loading...');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded fired');
     // Mobile menu functionality
     const mobileMenuButton = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');

@@ -1,0 +1,626 @@
+# Abstract Driven Development (A.D.D) V3 - Theory & Principles
+
+A.D.D is a software architecture methodology built on Dependency Inversion Principle (DIP), emphasizing simplicity, consistency, and technology replaceability through strict layered structure.
+
+## Core Philosophy
+
+### Goals
+- **Simplicity/KISS**: Consistent structure, easy to apply across projects
+- **DIP-first**: Every concrete class depends on abstractions; abstractions never depend on concretes
+- **Easy replacement**: Technology changes don't affect business logic; swap implementations freely
+
+### Fundamental Rule
+**Operators never call Implementations directly.** All communication goes through interfaces (Ports) declared in Core Abstractions, wired via Dependency Injection.
+
+## The 5-Layer Architecture
+
+### 1. Boundary
+**Role**: System ingress/egress
+**Contains**:
+- DTOs (Data Transfer Objects) - external data contracts
+- Boundary Events - events crossing system boundary
+- Public service contracts (API endpoints, CLI commands, webhooks)
+- Input validation
+
+**Dependencies**: None (or minimal framework dependencies)
+**Purpose**: Define what the system exposes to the outside world
+
+### 2. Core Abstractions
+**Role**: Internal contracts and domain models
+**Contains**:
+- Entities - thin data structures with validation only
+- Ports (Interfaces) - contracts for repositories, services, gateways
+- Core Events - internal events for Operators↔Implementations communication
+- Domain models - business concepts
+
+**Dependencies**: None
+**Purpose**: Abstract away all implementation details; define "what" not "how"
+
+### 3. Operators
+**Role**: Business orchestration
+**Contains**:
+- Business workflows and coordination logic
+- DTO↔Entity mapping
+- Business rule execution (via RuleSets in Extended)
+- Calls to Ports only (never concrete implementations)
+- Core Event publishing/handling
+
+**Dependencies**: Boundary + Core Abstractions only
+**Purpose**: Implement business flows without knowing technical details
+
+### 4. Implementations
+**Role**: Technology adapters and providers
+**Contains**:
+- Concrete implementations of Ports (adapters)
+- Database clients and repositories
+- Message queue publishers/consumers
+- HTTP/gRPC clients for external APIs
+- 3rd-party SDK wrappers
+- Anti-Corruption Layer (ACL) for external systems
+- Mappers, serializers, drivers
+
+**Dependencies**: Core Abstractions only
+**Purpose**: Handle all technology-specific concerns; can have multiple variants
+
+### 5. Bootstrap
+**Role**: Composition root
+**Contains**:
+- Dependency Injection container configuration
+- Service registration and wiring
+- Application configuration loading
+- Host/server startup logic
+
+**Dependencies**: All layers (wires them together)
+**Purpose**: Choose which concrete implementations to use; no business logic
+
+## Layer Dependency Rules
+
+```
+Valid references (compile-time):
+  Bootstrap → Operators + Implementations
+  Operators → Boundary + Core Abstractions
+  Implementations → Core Abstractions
+
+Forbidden:
+  Operators → Implementations (direct)
+  Implementations → Operators
+  Implementations → Boundary
+  Core Abstractions → Any other layer
+  Boundary → Any other layer
+```
+
+**Key insight**: Operators and Implementations never reference each other directly. They communicate only through Ports (interfaces in Core Abstractions) resolved at runtime via DI.
+
+## Data Flow (Standard Request)
+
+1. External system → **Boundary** (receives DTO or Boundary Event)
+2. **Boundary** → **Operators** (passes DTO)
+3. **Operators** maps DTO → Entity
+4. **Operators** calls Port (interface from Core Abstractions)
+5. DI resolves Port → concrete adapter in **Implementations**
+6. **Implementations** executes technology-specific work (DB, API, etc.)
+7. **Implementations** returns result via Port contract
+8. **Operators** maps result → DTO
+9. **Operators** → **Boundary** (returns DTO)
+10. **Boundary** → External system (response)
+
+## Events in A.D.D
+
+A.D.D uses two distinct event types with clear boundaries and responsibilities.
+
+### Boundary Events
+**Location**: Defined in **Boundary** layer
+**Purpose**: External communication across system boundary
+**Characteristics**:
+- Published when system state changes (for external consumers)
+- Received from external systems (webhooks, message queues, event streams)
+- Versioned for backward compatibility
+- Part of public API contract
+
+**When to use**:
+- System needs to notify external consumers of state changes
+- Receiving events from external systems (after ACL translation)
+- Publishing domain events to event bus for other microservices
+
+### Core Events
+**Location**: Defined in **Core Abstractions** layer
+**Purpose**: Internal coordination between Operators and Implementations
+**Characteristics**:
+- Never exposed directly outside the system
+- Used for decoupling Operators from Implementations
+- Enable cross-module communication
+- Support both strong and eventual consistency patterns
+
+**Two sub-types**:
+1. **BusinessSignal**: Meaningful business state changes
+   - Versioned and stable over time
+   - Examples: `Order.Approved`, `Payment.Completed`, `User.Registered`
+   - Used in business workflows and Coordinator patterns
+   - Long-term semantic meaning
+
+2. **TechnicalSignal**: Operational/infrastructure signals
+   - Retry triggers, telemetry, housekeeping tasks
+   - Examples: `Job.RetryRequested`, `Cache.Invalidated`, `Metrics.Collected`
+   - Short-term operational purpose
+   - Can change frequently without business impact
+
+### Core Event Structure (Envelope)
+
+All Core Events must follow this standard envelope:
+
+```json
+{
+  "eventName": "Domain.EventName",
+  "version": 1,
+  "correlationId": "00000000-0000-0000-0000-000000000000",
+  "causationId": "00000000-0000-0000-0000-000000000000",
+  "occurredAt": "2025-01-01T00:00:00Z",
+  "payload": {
+    // Event-specific data
+  },
+  "metadata": {
+    "tenantId": "tenant-123",
+    "source": "operators.OrderOperator",
+    "consistency": "tgo"
+  }
+}
+```
+
+**Field explanations**:
+- `eventName`: Domain.Action format (e.g., `Order.Created`, `Payment.Failed`)
+- `version`: Integer for breaking changes; increment when payload schema changes incompatibly
+- `correlationId`: Trace entire workflow across services (same for related events)
+- `causationId`: ID of event that caused this event (direct parent)
+- `occurredAt`: ISO 8601 timestamp when event occurred
+- `payload`: Event-specific data (Entity or DTO)
+- `metadata.source`: Which Operator published this event
+- `metadata.consistency`: `tgo` (strong) or `coordinator` (eventual)
+- `metadata.tenantId`: Multi-tenant context (if applicable)
+
+### Event Naming Conventions
+
+**Pattern**: `Domain.PastTenseAction`
+
+**Good examples**:
+- `Order.Created` (not Order.Create)
+- `Payment.Completed` (not Payment.Complete)
+- `User.PasswordResetRequested` (not User.RequestPasswordReset)
+- `Invoice.Approved` (not Invoice.Approve)
+
+**Naming rules**:
+- Use PascalCase
+- Past tense (event already happened)
+- Describe state change, not imperative command
+- Keep stable; avoid renaming (version instead)
+
+### Event Versioning
+
+**When to increment version**:
+- Breaking payload changes (removed fields, renamed fields, type changes)
+- Changed semantics (same field name but different meaning)
+
+**Non-breaking changes** (no version bump):
+- Adding new optional fields
+- Adding new metadata
+- Internal implementation changes
+
+**Version handling**:
+- Publishers emit current version
+- Subscribers handle multiple versions (backward compatibility)
+- ACL in Implementations translates between versions
+- Document version changes in shared-terms.md
+
+### Event Flow Patterns
+
+#### Pattern 1: Operator → Implementations (via Core Event)
+```
+Operator publishes Core Event via IEventBus Port
+  ↓
+DI resolves to RabbitMQBus (Implementations)
+  ↓
+Implementations publishes to message queue
+  ↓
+Implementations subscriber receives message
+  ↓
+Subscriber emits Core Event back to Operator via handler
+```
+
+#### Pattern 2: External System → Internal (via ACL)
+```
+External webhook/message → ACL Adapter (Implementations)
+  ↓
+ACL translates external format to Core Event
+  ↓
+Core Event emitted to Operator
+  ↓
+Operator handles business logic
+```
+
+#### Pattern 3: Internal → External (via ACL)
+```
+Operator publishes Core Event
+  ↓
+Implementations subscriber receives Core Event
+  ↓
+ACL translates to Boundary Event format
+  ↓
+Published to external event bus/webhook
+```
+
+### Publishing & Subscribing
+
+**Publishers** (Operators):
+```typescript
+// Operators/OrderOperator.ts
+class OrderOperator {
+  constructor(private eventBus: IEventBus) {} // Port from Core Abstractions
+
+  async approveOrder(orderId: string): Promise<void> {
+    // Business logic
+    const order = await this.orderRepo.findById(orderId);
+    order.approve();
+
+    // Publish Core Event
+    await this.eventBus.publish({
+      eventName: "Order.Approved",
+      version: 1,
+      correlationId: this.context.correlationId,
+      causationId: this.context.requestId,
+      occurredAt: new Date().toISOString(),
+      payload: { orderId, approvedBy: order.approvedBy },
+      metadata: {
+        source: "operators.OrderOperator",
+        consistency: "tgo"
+      }
+    });
+  }
+}
+```
+
+**Subscribers** (Implementations):
+```typescript
+// Implementations/messaging/OrderEventSubscriber.ts
+class OrderEventSubscriber {
+  constructor(private messageBus: RabbitMQClient) {}
+
+  async handleOrderApproved(event: CoreEvent<OrderApprovedPayload>): Promise<void> {
+    // Technology-specific work (send email, update cache, etc.)
+    await this.emailService.sendOrderConfirmation(event.payload.orderId);
+  }
+}
+```
+
+### Idempotency & Ordering
+
+**Idempotency requirements**:
+- Subscribers MUST be idempotent (handle duplicate events safely)
+- Use `correlationId` and `causationId` to detect duplicates
+- Store processed event IDs in Implementations (deduplication table)
+- Return success if event already processed
+
+**Ordering guarantees**:
+- No global ordering guarantee across all events
+- Partition by aggregate/entity ID for ordering within single entity
+- Use event version/sequence for ordering within same aggregate
+- Coordinator patterns handle ordering via explicit dependencies
+
+**Implementation strategy**:
+```typescript
+// Implementations/EventDeduplicator.ts
+class EventDeduplicator {
+  async isProcessed(eventId: string): Promise<boolean> {
+    return await this.db.exists('processed_events', eventId);
+  }
+
+  async markProcessed(eventId: string): Promise<void> {
+    await this.db.insert('processed_events', {
+      id: eventId,
+      processedAt: new Date()
+    });
+  }
+}
+```
+
+### Directory Structure
+
+**Boundary Events**:
+```
+boundary/
+  events/
+    OrderCreated.event.ts
+    PaymentCompleted.event.ts
+```
+
+**Core Events**:
+```
+core-abstractions/
+  events/
+    business/         # BusinessSignals
+      OrderApproved.signal.ts
+      UserRegistered.signal.ts
+    technical/        # TechnicalSignals
+      OrderRetry.signal.ts
+      CacheInvalidated.signal.ts
+  ports/
+    IEventBus.ts      # Event publishing interface
+```
+
+**Implementations**:
+```
+implementations/
+  messaging/
+    RabbitMQBus.ts           # IEventBus implementation
+    subscribers/
+      OrderEventSubscriber.ts
+  acl/
+    ExternalEventTranslator.ts  # External ↔ Core Event translation
+```
+
+### Event Decision Tree
+
+**When to use which event type?**
+
+1. Is this crossing system boundary?
+   - Yes → **Boundary Event**
+   - No → Continue to 2
+
+2. Is this for business workflow coordination?
+   - Yes → **Core Event: BusinessSignal**
+   - No → Continue to 3
+
+3. Is this for operational/technical coordination?
+   - Yes → **Core Event: TechnicalSignal**
+   - No → Consider if event is needed at all
+
+### Common Event Mistakes
+
+❌ **Publishing Boundary Events internally**
+- Use Core Events for internal coordination
+
+❌ **Exposing Core Events to external systems**
+- Translate to Boundary Events via ACL
+
+❌ **Events with imperative names** (Order.Create)
+- Use past tense (Order.Created)
+
+❌ **Events carrying implementation details** (SQL queries, HTTP codes)
+- Carry only business data in payload
+
+❌ **Non-idempotent subscribers**
+- Always implement duplicate detection
+
+❌ **Events without correlation/causation IDs**
+- Required for tracing and debugging
+
+❌ **Breaking changes without version increment**
+- Version when payload schema changes incompatibly
+
+## Dependency Inversion in Practice
+
+### Interface Placement
+- All interfaces (Ports) declared in **Core Abstractions**
+- Examples: IUserRepository, IPaymentGateway, IEmailService, IMessageBus
+
+### Implementation Placement
+- Concrete classes in **Implementations**
+- Examples: PostgresUserRepository, StripePaymentGateway, SendGridEmailService, RabbitMQBus
+
+### Operator Usage
+```typescript
+// Operators/UserOperator.ts
+class UserOperator {
+  constructor(private userRepo: IUserRepository) {} // Depends on interface
+
+  async createUser(dto: CreateUserDto): Promise<UserDto> {
+    const entity = this.mapDtoToEntity(dto);
+    await this.userRepo.save(entity); // Calls interface method
+    return this.mapEntityToDto(entity);
+  }
+}
+```
+
+### Bootstrap Wiring
+```typescript
+// Bootstrap/di/container.ts
+container.register<IUserRepository>(
+  'IUserRepository',
+  PostgresUserRepository // Choose concrete implementation
+);
+```
+
+**Result**: Operators work with interfaces; swap PostgreSQL → MongoDB by changing only Bootstrap; Operators unchanged.
+
+## Anti-Corruption Layer (ACL)
+
+### Purpose
+Protect internal domain from external system complexities and changes
+
+### Location
+Always in **Implementations** layer
+
+### Responsibilities
+- Translate external data formats to internal DTOs/Entities
+- Handle external protocol details (REST, SOAP, gRPC)
+- Manage idempotency, versioning, outbox patterns
+- Emit Core Events when receiving external events
+
+### Pattern
+```
+External System → ACL Adapter (Implementations) → Core Event → Operators
+Operators → Port Interface → ACL Adapter (Implementations) → External System
+```
+
+## A.D.D-Extended: For Complex Domains
+
+A.D.D V3 is sufficient for most applications. For complex domains with intricate business rules and cross-module coordination, A.D.D-Extended adds:
+
+### Scope Modules
+- Self-contained modules with full 5-layer structure
+- Clear boundaries and responsibilities
+- Communication only via Ports and Core Events
+- Each module has `shared-terms.md` for ubiquitous language
+
+### RuleSet & Checkpoint
+- **RuleSet**: Pure function validating business rules; returns RuleReport (pass/fail + reasons)
+- **Checkpoint**: Pipeline combining multiple RuleSets
+- Declared in **Core Abstractions**
+- Executed in **Operators** before persisting changes
+- No exceptions for normal flow; structured results
+
+### Transaction Group Operator (TGO)
+- Operator managing transaction boundary for related data group
+- Ensures strong consistency
+- Runs Checkpoint before changes
+- Operates repository Ports constrained to group "root"
+- Controls commit/rollback
+
+### Coordinator Operator
+- Orchestrates multi-step flows for eventual consistency
+- Coordinates via Core Events (BusinessSignals)
+- Uses Compensators for rollback on failure
+- Each step is independent, idempotent
+
+### Compensator
+- Describes inverse action for eventual consistency flows
+- Signature declared as Port in Core Abstractions
+- Pure function, infrastructure-agnostic
+- Returns success/failure with reasons
+
+### Consistency Modes
+- **Strong**: Single TGO transaction; ACID guarantees
+- **Eventual**: Coordinator + Core Events; eventual consistency with compensation
+
+## Testing Strategy
+
+### Unit Tests
+- Entities (validation logic)
+- Adapters in Implementations (repository, API clients)
+- Mappers and serializers
+- RuleSets (pure functions)
+
+### Integration Tests
+- Operator flows via Ports
+- Swap real implementations with test doubles via DI
+- Verify Checkpoint execution
+- Test both strong and eventual consistency flows
+
+### Contract Tests
+- Verify adapters conform to Port signatures
+- Translator bidirectional mapping correctness
+- Compensator inverse action verification
+
+## Migration Strategies
+
+### New Project (from BRD)
+1. Build **Boundary**: Real DTOs, service contracts, Boundary Events
+2. Build **Core Abstractions**: Entities, Ports, Core Events
+3. Build **Operators**: Business logic, mapping, orchestration
+4. Build **Implementations**: Concrete adapters for Ports
+5. Build **Bootstrap**: DI configuration, wiring
+
+### Small Project (from zero)
+1. Write minimal working program (monolith)
+2. Write unit tests
+3. Refactor to split into 5 layers following dependency rules
+
+### Existing Project
+1. Classify code: abstract vs concrete
+2. Move to corresponding layers
+3. Extract interfaces to Core Abstractions
+4. Replace direct calls with Port invocations
+5. Configure DI in Bootstrap
+
+## Key Principles Summary
+
+1. **DIP-first**: Abstractions in Core Abstractions; concretes depend on them
+2. **Layer isolation**: Each layer has single responsibility; strict dependency rules
+3. **Interface-driven**: Operators call only Ports, never implementations
+4. **Event-based**: Core Events for internal coordination; Boundary Events for external
+5. **Technology independence**: Business logic (Operators) unaware of tech details
+6. **Easy replacement**: Swap DB/MQ/SDK by changing only Implementations + Bootstrap
+7. **Thin entities**: Data + validation only; no business logic in entities
+8. **Pure rules**: Business rules as pure functions (RuleSets); testable in isolation
+9. **Clear boundaries**: ACL protects domain from external complexity
+10. **Composition root**: All DI wiring in Bootstrap; nowhere else
+
+## Common Mistakes to Avoid
+
+❌ **Operators referencing concrete Implementations**
+- Always use Ports from Core Abstractions
+
+❌ **Business logic in Implementations**
+- Implementations execute technical work only; orchestration in Operators
+
+❌ **Technology details leaking to Operators**
+- No SQL, HTTP status codes, queue names in Operators
+
+❌ **Heavy business logic in Entities**
+- Entities are thin; validation only
+
+❌ **Circular dependencies**
+- Follow strict layer dependency rules
+
+❌ **Multiple transaction boundaries in single Operator**
+- Use TGO for strong consistency or Coordinator for eventual
+
+❌ **Direct module-to-module calls**
+- Use Ports and Core Events for cross-module communication
+
+## When to Use A.D.D
+
+### Use Standard A.D.D V3 when:
+- Need technology replaceability (cloud agnostic, database agnostic)
+- Multiple teams working on same codebase
+- Long-term maintainability priority
+- Frequent dependency updates
+- AI-assisted development (clear structure)
+
+### Use A.D.D-Extended when:
+- Complex business rules requiring validation pipelines
+- Multiple bounded contexts/modules
+- Need explicit consistency control (strong vs eventual)
+- Cross-module coordination with compensation
+- Large-scale enterprise applications
+
+### Consider alternatives when:
+- Simple CRUD with no business logic
+- Prototype/proof-of-concept (speed over structure)
+- Single-developer, short-term projects
+- Framework heavily prescribes architecture (may conflict)
+
+## Relationship to Other Architectures
+
+### vs Clean Architecture
+- Similar: Layering, DIP, separation of concerns
+- Different: A.D.D has 5 explicit layers; stricter dependency rules; emphasis on replaceability
+
+### vs Hexagonal Architecture
+- Similar: Ports & Adapters concept
+- Different: A.D.D separates business (Operators) from abstractions (Core); explicit Bootstrap layer
+
+### vs DDD (Domain-Driven Design)
+- A.D.D-Extended can replace DDD tactical patterns
+- Scope Module = Bounded Context
+- TGO = Aggregate transaction boundary
+- Coordinator = Process Manager/Saga
+- RuleSet = Domain invariants
+- Interaction Map = Context Map/ACL
+- Keep DDD strategic thinking (ubiquitous language via shared-terms.md)
+
+## Quick Reference: Layer Checklist
+
+When adding code, ask:
+
+- **Is this a DTO or external contract?** → Boundary
+- **Is this an interface/port or domain entity?** → Core Abstractions
+- **Is this business orchestration or workflow?** → Operators
+- **Is this technology-specific (DB, API, MQ)?** → Implementations
+- **Is this DI wiring or configuration?** → Bootstrap
+
+When in doubt: If it's abstract (interface, model), it's Core Abstractions or Boundary. If it's concrete (implementation), it's Operators or Implementations.
+
+---
+
+**A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), allowing easy replacement without changing business logic.
+
+**Core insight**: By forcing all communication through abstractions and enforcing strict layer dependencies, A.D.D makes architecture evolvable, testable, and technology-independent by design.
