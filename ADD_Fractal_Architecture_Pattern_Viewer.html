@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.D.D V3 - Fractal Architecture Pattern Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            gap: 10px;
+            overflow-x: auto;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            border: none;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .control-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .zoom-level {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .diagram-container {
+            padding: 40px;
+            min-height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: #ffffff;
+            overflow: auto;
+        }
+
+        .diagram-wrapper {
+            display: none;
+            width: 100%;
+            transition: transform 0.3s ease;
+            transform-origin: center top;
+        }
+
+        .diagram-wrapper.active {
+            display: flex;
+            justify-content: center;
+        }
+
+        .diagram-content {
+            display: inline-block;
+            min-height: 500px;
+            padding: 20px;
+        }
+
+        .diagram-content svg {
+            max-width: none !important;
+            height: auto;
+        }
+
+        /* D3 Tree Styles */
+        #tree-container {
+            width: 100%;
+            height: 700px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .node rect {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node rect:hover {
+            filter: brightness(1.1);
+            stroke-width: 4px;
+        }
+
+        .node text {
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+        }
+
+        .link {
+            fill: none;
+            stroke: #555;
+            stroke-width: 3px;
+            stroke-opacity: 0.6;
+        }
+
+        .event-arrow {
+            fill: none;
+            stroke: #f57c00;
+            stroke-width: 2.5px;
+            stroke-dasharray: 6,4;
+        }
+
+        .collapse-icon {
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Modal for 5 Layers */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .close {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .layer-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .layer-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .layer-item h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.2em;
+        }
+
+        .layer-item p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .layer-bootstrap { border-left-color: #01579b; }
+        .layer-operators { border-left-color: #e65100; }
+        .layer-core { border-left-color: #c2410c; }
+        .layer-implementations { border-left-color: #4a148c; }
+        .layer-boundary { border-left-color: #1b5e20; }
+
+        .description {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+        }
+
+        .description h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .description p {
+            color: #495057;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #343a40;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .tree-hint {
+            text-align: center;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #01579b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ A.D.D V3 - Fractal Architecture Pattern</h1>
+            <p>Interactive Visualization: Architecture & Context Reading</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showDiagram(0)">📊 Basic Architecture</button>
+            <button class="tab-button" onclick="showDiagram(1)">🔧 Module Internal</button>
+            <button class="tab-button" onclick="showDiagram(2)">🌳 Infinite F.A.P Tree</button>
+            <button class="tab-button" onclick="showDiagram(3)">📡 F.A.P with Events</button>
+            <button class="tab-button" onclick="showDiagram(4)">📚 LLM Context Reading</button>
+        </div>
+
+        <div class="controls">
+            <button class="control-button" onclick="zoomOut()">🔍 Zoom Out</button>
+            <span class="zoom-level" id="zoom-level">100%</span>
+            <button class="control-button" onclick="zoomIn()">🔍 Zoom In</button>
+            <button class="control-button" onclick="resetZoom()">↺ Reset</button>
+        </div>
+
+        <div class="diagram-container" id="diagram-container">
+            <div class="diagram-wrapper active" data-diagram="0">
+                <div class="diagram-content" id="diagram-0"></div>
+            </div>
+            <div class="diagram-wrapper" data-diagram="1">
+                <div class="diagram-content" id="diagram-1"></div>
+            </div>
+            <div class="diagram-wrapper" data-diagram="2">
+                <div id="tree-container"></div>
+            </div>
+            <div class="diagram-wrapper" data-diagram="3">
+                <div class="diagram-content" id="diagram-3"></div>
+            </div>
+            <div class="diagram-wrapper" data-diagram="4">
+                <div class="diagram-content" id="diagram-4"></div>
+            </div>
+        </div>
+
+        <div class="description">
+            <h3 id="desc-title">📊 Basic A.D.D V3 Architecture</h3>
+            <p id="desc-text">The foundation: 5 layers with clear dependencies.</p>
+        </div>
+
+        <div class="footer">
+            <p>🏛️ Abstract Driven Development V3 - Fractal Architecture Pattern</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Press 1-5 for diagrams • +/- to zoom • 0 to reset</p>
+        </div>
+    </div>
+
+    <!-- Modal for 5 Layers -->
+    <div id="layersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Module Layers</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="layer-item layer-bootstrap">
+                    <h3>🏗️ Bootstrap</h3>
+                    <p>Composition Root & DI Container - wires all dependencies</p>
+                </div>
+                <div class="layer-item layer-operators">
+                    <h3>🎯 Operators</h3>
+                    <p>Business Orchestration - TGO, Coordinator, business flows</p>
+                </div>
+                <div class="layer-item layer-core">
+                    <h3>🎨 Core Abstractions</h3>
+                    <p>Entities, Ports, Events, RuleSets - contracts & domain</p>
+                </div>
+                <div class="layer-item layer-implementations">
+                    <h3>⚙️ Implementations</h3>
+                    <p>Technology Adapters - DB, MQ, HTTP, ACL, Providers</p>
+                </div>
+                <div class="layer-item layer-boundary">
+                    <h3>🌐 Boundary</h3>
+                    <p>DTOs & Boundary Events - external contracts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        const diagrams = [
+            // Diagram 0: Basic A.D.D V3 Architecture (5 Layers)
+            `flowchart TD
+    Bootstrap["🏗️ BOOTSTRAP<br/>Composition Root & DI Container"]
+    Operators["🎯 OPERATORS<br/>Business Orchestration"]
+    CoreAbs["🎨 CORE ABSTRACTIONS<br/>Entities, Ports, Events"]
+    Implementations["⚙️ IMPLEMENTATIONS<br/>Technology Adapters"]
+    Boundary["🌐 BOUNDARY<br/>DTOs & External Contracts"]
+
+    Bootstrap --> Operators
+    Bootstrap --> Implementations
+    Operators --> Boundary
+    Operators --> CoreAbs
+    Implementations --> CoreAbs
+
+    style Bootstrap fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style Operators fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style CoreAbs fill:#fff7ed,stroke:#c2410c,stroke-width:3px
+    style Implementations fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style Boundary fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px`,
+
+            // Diagram 1: Module Internal Structure
+            `flowchart TD
+    subgraph Module["📦 ONE MODULE (Scope Module)"]
+        direction TB
+
+        subgraph Bootstrap_Layer["🏗️ BOOTSTRAP"]
+            DI["DI Container<br/>Wiring"]
+        end
+
+        subgraph Operators_Layer["🎯 OPERATORS"]
+            TGO["Transaction Group<br/>Operators"]
+            Coordinator["Coordinator<br/>Operators"]
+        end
+
+        subgraph Core_Layer["🎨 CORE ABSTRACTIONS"]
+            Entities["Entities"]
+            Ports["Ports<br/>(Interfaces)"]
+            Events["Core Events"]
+            RuleSets["RuleSets &<br/>Checkpoints"]
+        end
+
+        subgraph Impl_Layer["⚙️ IMPLEMENTATIONS"]
+            Adapters["Adapters"]
+            Providers["Providers"]
+            ACL["Anti-Corruption<br/>Layer"]
+        end
+
+        subgraph Boundary_Layer["🌐 BOUNDARY"]
+            DTOs["DTOs"]
+            BoundaryEvents["Boundary Events"]
+        end
+
+        Bootstrap_Layer --> Operators_Layer
+        Bootstrap_Layer --> Impl_Layer
+        Operators_Layer --> Core_Layer
+        Operators_Layer --> Boundary_Layer
+        Impl_Layer --> Core_Layer
+    end
+
+    style Module fill:#f0f0f0,stroke:#333,stroke-width:4px
+    style Bootstrap_Layer fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style Operators_Layer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Core_Layer fill:#fff7ed,stroke:#c2410c,stroke-width:2px
+    style Impl_Layer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style Boundary_Layer fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px`,
+
+            null, // Diagram 2 will be D3.js tree
+
+            // Diagram 3: F.A.P with Event Communication (Pure Fractal)
+            `flowchart TD
+    Root["🌍 System Root<br/>(Module with 5 layers)"]
+
+    ModA["📦 Module A<br/>(5 layers)"]
+    ModB["📦 Module B<br/>(5 layers)"]
+    ModC["📦 Module C<br/>(5 layers)"]
+
+    ModB1["📄 Module B1<br/>(5 layers)"]
+    ModB2["📄 Module B2<br/>(5 layers)"]
+
+    Root -->|contains in<br/>Implementations| ModA
+    Root -->|contains in<br/>Implementations| ModB
+    Root -->|contains in<br/>Implementations| ModC
+
+    ModB -->|contains in<br/>Implementations| ModB1
+    ModB -->|contains in<br/>Implementations| ModB2
+
+    %% Core Events (horizontal communication)
+    ModA -.->|Core Event| ModB
+    ModB1 -.->|Core Event| ModB2
+    ModB -.->|Core Event| ModC
+
+    style Root fill:#e1f5ff,stroke:#01579b,stroke-width:4px
+    style ModA fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style ModB fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style ModC fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    style ModB1 fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style ModB2 fill:#ffe0f5,stroke:#c2185b,stroke-width:2px`,
+
+            // Diagram 4: LLM Context Reading (Pure Fractal)
+            `flowchart TD
+    subgraph L0["📚 LEVEL 0: GLOBAL ARCHITECTURE"]
+        L0Info["A.D.D V3 Fractal (F.A.P)<br/>Self-similar: Every module has 5 layers<br/>Infinite nesting via Implementations"]
+    end
+
+    subgraph L1["🏛️ LEVEL 1: ROOT MODULE"]
+        L1Info["Module: System Root<br/>5 Layers: Bootstrap → Operators → Core → Impl → Boundary<br/>Path: /"]
+    end
+
+    subgraph L2["⚙️ LEVEL 2: IMPLEMENTATIONS LAYER"]
+        L2Info["Layer: Implementations (of System Root)<br/>Contains: Sub-modules A, B, C...<br/>Path: /Implementations"]
+    end
+
+    subgraph L3["📦 LEVEL 3: SUB-MODULE"]
+        L3Info["Module: A (inside Implementations)<br/>5 Layers: Bootstrap → Operators → Core → Impl → Boundary<br/>Path: /Implementations/A"]
+    end
+
+    subgraph L4["⚙️ LEVEL 4: SUB-IMPLEMENTATIONS LAYER"]
+        L4Info["Layer: Implementations (of Module A)<br/>Contains: Components & deeper modules<br/>Path: /Implementations/A/Implementations"]
+    end
+
+    subgraph L5["💻 LEVEL 5: CODE"]
+        L5Code["class UserRepository implements IUserRepo {<br/>  async save(user: User) { ... }<br/>}<br/>Path: /Implementations/A/Implementations/UserRepo.ts"]
+    end
+
+    L0 --> L1
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+    L4 --> L5
+
+    style L0 fill:#e1f5ff,stroke:#01579b,stroke-width:4px
+    style L1 fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style L2 fill:#fff7ed,stroke:#d84315,stroke-width:3px
+    style L3 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style L4 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style L5 fill:#fafafa,stroke:#616161,stroke-width:1px`
+        ];
+
+        const descriptions = [
+            {
+                title: "📊 Basic A.D.D V3 Architecture",
+                text: "The foundation of A.D.D V3: 5 layers with clear separation. Bootstrap at top wires dependencies. Operators orchestrate business logic. Core Abstractions define contracts. Implementations provide technology adapters. Boundary defines external contracts. This is the atomic unit that repeats in Fractal Architecture Pattern."
+            },
+            {
+                title: "🔧 Module Internal Structure",
+                text: "Zooming into ONE module (Scope Module) to see the 5 layers in detail. Each module is self-contained with full A.D.D structure: Bootstrap (DI), Operators (TGO + Coordinator), Core Abstractions (Entities, Ports, Events, RuleSets), Implementations (Adapters, Providers, ACL), and Boundary (DTOs, Boundary Events)."
+            },
+            {
+                title: "🌳 Fractal Architecture Pattern - Infinite Tree (Lazy Loading)",
+                text: "Infinite Fractal with 6 node types: Module + 5 Layers. Rule: Only Implementations can contain children. Click ▼ on Implementations → lazy creates random 1-5 sub-modules (Module A, B, C...). Each sub-module has same 5-layer structure (fractal repeats). Keep expanding Implementations infinitely to explore the tree! Orange arrow = Event from root Implementations → Boundary. Click node name to view 5 layers modal."
+            },
+            {
+                title: "📡 F.A.P with Event Communication (Pure Fractal)",
+                text: "Pure Fractal with event communication. Every module has full 5-layer structure (shown as simplified notation). Vertical arrows labeled 'contains in Implementations' = fractal containment (sub-modules live inside parent's Implementations layer). Dotted horizontal arrows = Core Events for cross-module communication. Example: Module A sends event to Module B. Module B1 sends event to B2. Modules communicate ONLY via Core Events and Ports (defined in Core Abstractions), never direct calls. Each module is self-contained and can be tested independently."
+            },
+            {
+                title: "📚 LLM Context Reading - Pure Fractal Navigation",
+                text: "Shows how LLMs navigate F.A.P tree vertically to read context at ANY depth. Level 0: Understands global pattern (F.A.P = self-similar). Level 1: Root Module with 5 layers. Level 2: Zoom into Implementations layer → sees sub-modules. Level 3: Sub-Module A (also has 5 layers! - fractal repeats). Level 4: Zoom into A's Implementations → sees components. Level 5: Actual code. Path notation shows location in tree: /Implementations/A/Implementations/... LLM can read context at each level to understand 'where am I in the fractal?'"
+            }
+        ];
+
+        // Infinite Fractal with Lazy Loading
+        // Rule: Only Module and Implementations can contain children
+        // Children are created dynamically when user expands
+
+        let moduleCounter = 0;
+
+        function createModule(name, depth = 0, isRoot = false) {
+            const module = {
+                name: name,
+                type: "module",
+                color: "#e1f5fe",
+                stroke: "#0288d1",
+                depth: depth,
+                id: `module-${moduleCounter++}`,
+                children: [
+                    // Bootstrap - leaf node
+                    {
+                        name: "Bootstrap",
+                        type: "bootstrap",
+                        color: "#e3f2fd",
+                        stroke: "#1976d2",
+                        id: `bootstrap-${moduleCounter++}`
+                    },
+                    // Operators - leaf node
+                    {
+                        name: "Operators",
+                        type: "operators",
+                        color: "#e8f5e9",
+                        stroke: "#388e3c",
+                        id: `operators-${moduleCounter++}`
+                    },
+                    // Core Abstractions - leaf node
+                    {
+                        name: "Core Abstractions",
+                        type: "core",
+                        color: "#fff7ed",
+                        stroke: "#d84315",
+                        id: `core-${moduleCounter++}`
+                    },
+                    // Implementations - can contain sub-modules (lazy loaded)
+                    {
+                        name: "Implementations",
+                        type: "implementations",
+                        color: "#fff3e0",
+                        stroke: "#f57c00",
+                        hasEvent: isRoot,  // Event at root level only
+                        eventTarget: 4,  // → Boundary
+                        canExpand: true,  // Mark as expandable
+                        depth: depth,
+                        id: `impl-${moduleCounter++}`
+                        // No children initially - will be created on expand
+                    },
+                    // Boundary - leaf node
+                    {
+                        name: "Boundary",
+                        type: "boundary",
+                        color: "#f3e5f5",
+                        stroke: "#7b1fa2",
+                        id: `boundary-${moduleCounter++}`
+                    }
+                ]
+            };
+
+            return module;
+        }
+
+        // Lazy create children for Implementations node
+        let subModuleCounter = 0;
+        const moduleLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+        function lazyCreateImplementationsChildren(implNode) {
+            if (implNode.children) return; // Already created
+
+            // Random 1-5 modules
+            const childrenCount = Math.floor(Math.random() * 5) + 1;
+            implNode.children = [];
+            for (let i = 0; i < childrenCount; i++) {
+                const label = moduleLabels[subModuleCounter % moduleLabels.length];
+                const name = `Module ${label}`;
+                subModuleCounter++;
+                implNode.children.push(createModule(name, implNode.depth + 1, false));
+            }
+        }
+
+        const treeData = createModule("System Root", 0, true);
+
+        // D3 Tree Rendering (Top-Down Layout)
+        let treeRendered = false;
+
+        function renderTree() {
+            if (treeRendered) return;
+            treeRendered = true;
+
+            const nodeWidth = 150;
+            const nodeHeight = 80;
+            const levelHeight = 150;
+            const minWidth = 1400;
+            const minHeight = 650;
+
+            const svg = d3.select("#tree-container")
+                .append("svg");
+
+            // Will be updated dynamically based on tree size
+
+            const g = svg.append("g")
+                .attr("transform", "translate(50,30)");
+
+            // Arrow marker definition (only once)
+            svg.append("defs").append("marker")
+                .attr("id", "arrowhead")
+                .attr("markerWidth", 10)
+                .attr("markerHeight", 10)
+                .attr("refX", 9)
+                .attr("refY", 3)
+                .attr("orient", "auto")
+                .append("polygon")
+                .attr("points", "0 0, 10 3, 0 6")
+                .attr("fill", "#f57c00");
+
+            let root = d3.hierarchy(treeData);
+
+            // Collapse all except root
+            root.descendants().forEach((d, i) => {
+                d._children = d.children;
+                if (d.depth > 0) d.children = null;
+            });
+
+            function rebuildTree() {
+                // Rebuild hierarchy from updated treeData
+                const newRoot = d3.hierarchy(treeData);
+
+                // Preserve expand/collapse state
+                function restoreState(oldNode, newNode) {
+                    if (!oldNode || !newNode) {
+                        // New node - collapse it if it's a module
+                        if (newNode && newNode.data.type === "module" && newNode.children) {
+                            newNode._children = newNode.children;
+                            newNode.children = null;
+                        }
+                        return;
+                    }
+
+                    // If old node was collapsed, collapse new node
+                    if (oldNode._children && !oldNode.children) {
+                        newNode._children = newNode.children;
+                        newNode.children = null;
+                    }
+
+                    // Recursively restore children state
+                    if (newNode.children) {
+                        newNode.children.forEach((newChild, i) => {
+                            const oldChild = oldNode.children ? oldNode.children[i] :
+                                            (oldNode._children ? oldNode._children[i] : null);
+                            restoreState(oldChild, newChild);
+                        });
+                    }
+                    if (newNode._children) {
+                        newNode._children.forEach((newChild, i) => {
+                            const oldChild = oldNode._children ? oldNode._children[i] : null;
+                            restoreState(oldChild, newChild);
+                        });
+                    }
+                }
+
+                restoreState(root, newRoot);
+                root = newRoot;
+            }
+
+            function update(source) {
+                // Clear all previous drawings
+                g.selectAll("*").remove();
+
+                const nodes = root.descendants().filter(d => {
+                    let node = d;
+                    while (node.parent) {
+                        if (!node.parent.children || !node.parent.children.includes(node)) {
+                            return false;
+                        }
+                        node = node.parent;
+                    }
+                    return true;
+                });
+
+                // Calculate positions (top-down)
+                const levels = {};
+                nodes.forEach(d => {
+                    if (!levels[d.depth]) levels[d.depth] = [];
+                    levels[d.depth].push(d);
+                });
+
+                // Calculate required dimensions
+                const maxDepth = Math.max(...Object.keys(levels).map(Number));
+                const maxNodesInLevel = Math.max(...Object.values(levels).map(arr => arr.length));
+                const requiredWidth = Math.max(minWidth, maxNodesInLevel * (nodeWidth + 50) + 100);
+                const requiredHeight = Math.max(minHeight, (maxDepth + 1) * levelHeight + 100);
+
+                // Update SVG size
+                svg.attr("width", requiredWidth)
+                   .attr("height", requiredHeight);
+
+                // Position nodes horizontally in each level
+                Object.keys(levels).forEach(depth => {
+                    const nodesInLevel = levels[depth];
+                    const totalWidth = nodesInLevel.length * (nodeWidth + 50);
+                    const startX = (requiredWidth - totalWidth) / 2;
+
+                    nodesInLevel.forEach((node, i) => {
+                        node.x = startX + i * (nodeWidth + 50) + nodeWidth / 2;
+                        node.y = depth * levelHeight + nodeHeight / 2;
+                    });
+                });
+
+                // Draw vertical links
+                const links = root.links().filter(d => nodes.includes(d.source) && nodes.includes(d.target));
+
+                links.forEach(link => {
+                    g.append("path")
+                        .attr("class", "link")
+                        .attr("d", `M${link.source.x},${link.source.y + nodeHeight/2}
+                                    V${(link.source.y + link.target.y) / 2}
+                                    H${link.target.x}
+                                    V${link.target.y - nodeHeight/2}`);
+                });
+
+                // Draw event arrows (horizontal) - only for nodes with hasEvent
+                // Group arrows by depth to calculate offset
+                const arrowsByDepth = {};
+                nodes.forEach(sourceNode => {
+                    if (sourceNode.data.hasEvent && sourceNode.data.eventTarget !== undefined) {
+                        const parentNode = sourceNode.parent;
+                        if (parentNode && parentNode.children) {
+                            const siblings = parentNode.children;
+                            const targetNode = siblings[sourceNode.data.eventTarget];
+                            if (targetNode && nodes.includes(targetNode)) {
+                                if (!arrowsByDepth[sourceNode.depth]) {
+                                    arrowsByDepth[sourceNode.depth] = [];
+                                }
+                                arrowsByDepth[sourceNode.depth].push({ sourceNode, targetNode });
+                            }
+                        }
+                    }
+                });
+
+                // Draw arrows with vertical offset to avoid overlapping
+                Object.entries(arrowsByDepth).forEach(([depth, arrows]) => {
+                    const totalArrows = arrows.length;
+                    arrows.forEach((arrow, index) => {
+                        const { sourceNode, targetNode } = arrow;
+                        // Offset range: -10 to +10 pixels
+                        const offsetRange = 20;
+                        const yOffset = totalArrows > 1
+                            ? (index / (totalArrows - 1)) * offsetRange - offsetRange / 2
+                            : 0;
+
+                        g.append("path")
+                            .attr("class", "event-arrow")
+                            .attr("d", `M${sourceNode.x + nodeWidth/2},${sourceNode.y + yOffset}
+                                        L${targetNode.x - nodeWidth/2},${targetNode.y + yOffset}`)
+                            .attr("marker-end", "url(#arrowhead)");
+                    });
+                });
+
+                // Draw nodes
+                nodes.forEach(d => {
+                    const nodeGroup = g.append("g")
+                        .attr("class", "node")
+                        .attr("transform", `translate(${d.x - nodeWidth/2},${d.y - nodeHeight/2})`);
+
+                    // Rectangle
+                    nodeGroup.append("rect")
+                        .attr("width", nodeWidth)
+                        .attr("height", nodeHeight)
+                        .attr("rx", 8)
+                        .style("fill", d.data.color)
+                        .style("stroke", d.data.stroke)
+                        .style("stroke-width", 3)
+                        .on("click", (event) => {
+                            // Lazy load children for Implementations
+                            if (d.data.type === "implementations" && d.data.canExpand && !d.data.children && !d._children) {
+                                lazyCreateImplementationsChildren(d.data);
+                                rebuildTree();
+                            }
+
+                            if (d._children) {
+                                d.children = d._children;
+                                d._children = null;
+                            } else if (d.children) {
+                                d._children = d.children;
+                                d.children = null;
+                            }
+                            update(d);
+                        });
+
+                    // Text
+                    nodeGroup.append("text")
+                        .attr("x", nodeWidth / 2)
+                        .attr("y", nodeHeight / 2)
+                        .attr("dy", "0.35em")
+                        .attr("text-anchor", "middle")
+                        .text(d.data.name)
+                        .style("fill", "#333")
+                        .on("click", (event) => {
+                            showLayersModal(d.data.name);
+                        });
+
+                    // Collapse icon - show for nodes that have children or can expand
+                    if (d._children || d.children || (d.data.type === "implementations" && d.data.canExpand)) {
+                        nodeGroup.append("text")
+                            .attr("class", "collapse-icon")
+                            .attr("x", nodeWidth / 2)
+                            .attr("y", nodeHeight + 15)
+                            .attr("text-anchor", "middle")
+                            .text(d.children ? "▲" : "▼")
+                            .style("fill", "#667eea")
+                            .on("click", (event) => {
+                                event.stopPropagation();
+
+                                // Lazy load children for Implementations
+                                if (d.data.type === "implementations" && d.data.canExpand && !d.data.children && !d._children) {
+                                    lazyCreateImplementationsChildren(d.data);
+                                    rebuildTree();
+                                }
+
+                                if (d._children) {
+                                    d.children = d._children;
+                                    d._children = null;
+                                } else if (d.children) {
+                                    d._children = d.children;
+                                    d.children = null;
+                                }
+                                update(d);
+                            });
+                    }
+                });
+            }
+
+            update(root);
+        }
+
+        // Modal functions
+        window.showLayersModal = function(moduleName) {
+            document.getElementById('modal-title').textContent = `${moduleName} - 5 Layers`;
+            document.getElementById('layersModal').style.display = 'block';
+        };
+
+        window.closeModal = function() {
+            document.getElementById('layersModal').style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('layersModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Render Mermaid diagrams
+        async function renderDiagrams() {
+            for (let i = 0; i < diagrams.length; i++) {
+                if (diagrams[i] === null) continue;
+                try {
+                    const { svg } = await mermaid.render(`diagram-${i}-svg`, diagrams[i]);
+                    document.getElementById(`diagram-${i}`).innerHTML = svg;
+                    console.log(`Diagram ${i} rendered successfully`);
+                } catch (error) {
+                    console.error(`Error rendering diagram ${i}:`, error);
+                    document.getElementById(`diagram-${i}`).innerHTML = `<div style="padding:20px;color:red;border:2px solid red;border-radius:8px;">
+                        <h3>❌ Error rendering diagram ${i}</h3>
+                        <pre style="margin-top:10px;font-size:12px;">${error.message}</pre>
+                    </div>`;
+                }
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderDiagrams);
+        } else {
+            renderDiagrams();
+        }
+
+        // Global functions
+        window.showDiagram = function(index) {
+            const wrappers = document.querySelectorAll('.diagram-wrapper');
+            wrappers.forEach(d => d.classList.remove('active'));
+
+            const selectedDiagram = document.querySelector(`[data-diagram="${index}"]`);
+            if (selectedDiagram) {
+                selectedDiagram.classList.add('active');
+            }
+
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach((t, i) => {
+                if (i === index) {
+                    t.classList.add('active');
+                } else {
+                    t.classList.remove('active');
+                }
+            });
+
+            document.getElementById('desc-title').textContent = descriptions[index].title;
+            document.getElementById('desc-text').textContent = descriptions[index].text;
+
+            // Render tree when showing diagram 2
+            if (index === 2) {
+                renderTree();
+            }
+
+            window.resetZoom();
+        };
+
+        let currentZoom = 1.0;
+        const zoomStep = 0.2;
+        const minZoom = 0.5;
+        const maxZoom = 3.0;
+
+        window.updateZoom = function() {
+            const activeWrapper = document.querySelector('.diagram-wrapper.active');
+            if (activeWrapper) {
+                activeWrapper.style.transform = `scale(${currentZoom})`;
+            }
+            document.getElementById('zoom-level').textContent = `${Math.round(currentZoom * 100)}%`;
+        };
+
+        window.zoomIn = function() {
+            if (currentZoom < maxZoom) {
+                currentZoom += zoomStep;
+                window.updateZoom();
+            }
+        };
+
+        window.zoomOut = function() {
+            if (currentZoom > minZoom) {
+                currentZoom -= zoomStep;
+                window.updateZoom();
+            }
+        };
+
+        window.resetZoom = function() {
+            currentZoom = 1.0;
+            window.updateZoom();
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === '+' || e.key === '=') {
+                window.zoomIn();
+            } else if (e.key === '-' || e.key === '_') {
+                window.zoomOut();
+            } else if (e.key === '0') {
+                window.resetZoom();
+            } else if (e.key >= '1' && e.key <= '5') {
+                window.showDiagram(parseInt(e.key) - 1);
+            } else if (e.key === 'Escape') {
+                window.closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

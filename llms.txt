@@ -1,5 +1,10 @@
 # Abstract Driven Development (A.D.D) V3 - Theory & Principles
 
+**Version**: 3.1.0
+**Last Updated**: October 21, 2025
+
+---
+
 A.D.D is a software architecture methodology built on Dependency Inversion Principle (DIP), emphasizing simplicity, consistency, and technology replaceability through strict layered structure.
 
 ## Core Philosophy
@@ -58,9 +63,10 @@ A.D.D is a software architecture methodology built on Dependency Inversion Princ
 - 3rd-party SDK wrappers
 - Anti-Corruption Layer (ACL) for external systems
 - Mappers, serializers, drivers
+- **Sub-modules** (each sub-module has full 5-layer structure - fractal pattern)
 
 **Dependencies**: Core Abstractions only
-**Purpose**: Handle all technology-specific concerns; can have multiple variants
+**Purpose**: Handle all technology-specific concerns; can have multiple variants; can contain nested modules
 
 ### 5. Bootstrap
 **Role**: Composition root
@@ -72,6 +78,75 @@ A.D.D is a software architecture methodology built on Dependency Inversion Princ
 
 **Dependencies**: All layers (wires them together)
 **Purpose**: Choose which concrete implementations to use; no business logic
+
+## Fractal Architecture Pattern (F.A.P)
+
+### What is F.A.P?
+
+A.D.D V3 uses a **fractal (self-similar) structure** where every module at any depth has the same 5 layers.
+
+**Pure Fractal Rules**:
+- Only **6 node types total**: Module + 5 Layers (Bootstrap, Operators, Core Abstractions, Implementations, Boundary)
+- Only **Implementations layer** can contain sub-modules
+- Each sub-module has the exact same 5-layer structure → infinite nesting
+- **No custom layer types** (no Core', Providers', etc.)
+
+### Fractal Tree Example
+
+```
+System Root (Module)
+├── Bootstrap
+├── Operators
+├── Core Abstractions
+├── Implementations
+│   ├── Module A (sub-module)
+│   │   ├── Bootstrap
+│   │   ├── Operators
+│   │   ├── Core Abstractions
+│   │   ├── Implementations
+│   │   │   └── Module D (sub-sub-module)
+│   │   │       └── (... same 5 layers ...)
+│   │   └── Boundary
+│   └── Module B
+│       └── (... same 5 layers ...)
+└── Boundary
+```
+
+### Path Notation
+
+Use path notation to track position in fractal tree:
+- `/` = System Root
+- `/Implementations/A` = Module A (inside root's Implementations)
+- `/Implementations/A/Implementations/D` = Module D (inside A's Implementations)
+
+### Why Fractal?
+
+1. **Self-similarity**: Same structure at all depths - learn once, apply everywhere
+2. **Infinite composition**: No arbitrary nesting limits
+3. **Clear boundaries**: Each module is self-contained
+4. **Easy navigation**: LLMs can zoom in/out to any level using path notation
+
+### LLM Thinking Framework
+
+When working with A.D.D V3 code, LLMs should:
+
+1. **Parse file path** → Determine position in fractal tree
+2. **Identify current layer** → Know responsibilities and constraints
+3. **Check dependency rules** → Ensure valid references only
+4. **Read parent context** → Understand module purpose (README, shared-terms.md)
+5. **Navigate vertically** → Move up to root, down to current level
+6. **Implement with fractal awareness** → Maintain self-similar structure
+
+### Common Fractal Mistakes
+
+❌ **Creating custom layer types for sub-modules** (Core', Providers')
+- Violates pure fractal - use same 5 layers
+
+❌ **Assuming flat structure**
+- Modules can be nested infinitely via Implementations
+
+❌ **Missing path context**
+- Always parse path to know: "Am I in root or sub-module?"
 
 ## Layer Dependency Rules
 
@@ -450,6 +525,112 @@ External System → ACL Adapter (Implementations) → Core Event → Operators
 Operators → Port Interface → ACL Adapter (Implementations) → External System
 ```
 
+## UI Layer Integration
+
+### Overview
+
+UI/Frontend follows the **same 5-layer fractal pattern**. Two approaches:
+
+1. **Separate Module** (SPA, Mobile App) - UI as independent root module
+2. **Sub-Module** (SSR, Monolith) - UI nested in `/Implementations/UI`
+
+Both maintain fractal consistency: **UI always has 5 layers**.
+
+### Approach 1: UI as Separate Module
+
+**Use when**: Frontend and Backend are separate deployments (SPA + REST API, Mobile + Backend)
+
+**Structure**:
+```
+Frontend Module (Root)
+├── Bootstrap (Router, DI, Theme, Global state)
+├── Operators (ViewModel Composers, Navigation logic, UI workflows)
+├── Core Abstractions (Ports: INavigationService, IDialogService, IApiClient; ViewModels; UI Events)
+├── Implementations (React/Vue components, State adapters, API client, Router adapter)
+└── Boundary (Screen DTOs, Analytics events, Accessibility contracts)
+```
+
+**Path examples**: `/Operators/profile-view-composer.ts`, `/Implementations/React/ProfileScreen.tsx`
+
+### Approach 2: UI as Sub-Module
+
+**Use when**: Frontend embedded in Backend (SSR, Blazor Server, Monolith)
+
+**Structure**:
+```
+System Root
+├── Implementations
+│   └── UI (sub-module with 5 layers)
+│       ├── Bootstrap
+│       ├── Operators
+│       ├── Core Abstractions
+│       ├── Implementations
+│       └── Boundary
+```
+
+**Path examples**: `/Implementations/UI/Operators/dashboard-composer.ts`, `/Implementations/UI/Implementations/React/Dashboard.tsx`
+
+### UI Layer Definitions
+
+**1. Bootstrap (UI)**: Router config, DI container, theme, global UI state setup
+
+**2. Operators (UI)**:
+- ViewModel Composers (Backend DTO → ViewModel mapping)
+- Presentation Orchestrators (multi-step forms, wizards)
+- Navigation Logic (route guards, breadcrumbs)
+
+**3. Core Abstractions (UI)**:
+- **Ports**: INavigationService, IDialogService, IToastService, IFormValidator, IApiClient, IStateStore
+- **ViewModels**: Rich display models with computed properties, formatting
+- **UI Events**: Screen.Viewed, Form.Submitted, Navigation.Completed
+
+**4. Implementations (UI)**:
+- React/Vue/Blazor components
+- State management adapters (Redux/MobX implementing IStateStore)
+- API client adapters (Axios/Fetch implementing IApiClient)
+- Navigation adapters (React Router implementing INavigationService)
+
+**5. Boundary (UI)**: Screen DTOs (props contracts), Display Events (analytics), Accessibility contracts
+
+### Communication Pattern
+
+**Frontend → Backend**:
+```
+UI/Implementations/API Client
+  → implements IApiClient (UI/Core Abstractions)
+    → called by UI/Operators (ViewModel Composers)
+      → fetch Backend/Boundary/DTOs
+        → map to UI/Core Abstractions/ViewModels
+```
+
+**Backend → Frontend** (SSR/embedded):
+```
+Backend/Operators emit Core Events
+  → consumed by UI/Operators
+    → update ViewModels
+      → trigger UI/Implementations re-render
+```
+
+### UI Layer Decision Tree
+
+- **Screen contract/props?** → Boundary (Screen DTOs)
+- **Navigation/Dialog/Toast abstraction?** → Core Abstractions (Ports)
+- **ViewModel with formatting?** → Core Abstractions (ViewModels) OR Operators (Composers)
+- **Multi-step flow, navigation logic?** → Operators (Presentation Orchestrators)
+- **DTO → ViewModel mapping?** → Operators (ViewModel Composers)
+- **React/Vue component?** → Implementations (Component Libraries)
+- **Redux/Router adapter?** → Implementations (State/Navigation Adapters)
+- **DI wiring?** → Bootstrap
+
+### Benefits
+
+✅ **Testability**: UI Operators testable in isolation (mock Ports)
+✅ **Swappable**: Replace React → Vue only changes Implementations
+✅ **Fractal Consistency**: Complex UI features also have 5 layers
+✅ **Dependency Inversion**: Components depend on Ports, not concrete Redux/Router
+
+---
+
 ## A.D.D-Extended: For Complex Domains
 
 A.D.D V3 is sufficient for most applications. For complex domains with intricate business rules and cross-module coordination, A.D.D-Extended adds:
@@ -566,6 +747,12 @@ A.D.D V3 is sufficient for most applications. For complex domains with intricate
 ❌ **Direct module-to-module calls**
 - Use Ports and Core Events for cross-module communication
 
+❌ **Creating custom layer types for sub-modules** (Core', Providers')
+- Violates pure fractal - every module must have exactly 5 layers
+
+❌ **Placing sub-modules outside Implementations layer**
+- Only Implementations can contain sub-modules
+
 ## When to Use A.D.D
 
 ### Use Standard A.D.D V3 when:
@@ -621,6 +808,8 @@ When in doubt: If it's abstract (interface, model), it's Core Abstractions or Bo
 
 ---
 
-**A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), allowing easy replacement without changing business logic.
+**A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), in a fractal self-similar structure that enables infinite composition and easy technology replacement.
 
-**Core insight**: By forcing all communication through abstractions and enforcing strict layer dependencies, A.D.D makes architecture evolvable, testable, and technology-independent by design.
+**UI Integration**: UI/Frontend also follows the same 5-layer fractal pattern, either as a separate module (SPA, Mobile) or sub-module (SSR, Monolith), ensuring consistency from backend to presentation layer.
+
+**Core insight**: By forcing all communication through abstractions, enforcing strict layer dependencies, and maintaining fractal self-similarity at all depths, A.D.D makes architecture evolvable, testable, technology-independent, and infinitely composable by design.

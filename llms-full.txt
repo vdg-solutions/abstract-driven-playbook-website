@@ -1,1063 +1,826 @@
 # Abstract Driven Development (A.D.D) V3 - Complete Reference
 
+**Version**: 3.1.0
+**Last Updated**: October 21, 2025
+
+---
+
 ## Table of Contents
-1. [Architecture Tree Structures](#architecture-tree-structures)
-2. [Goals & Mindset](#goals--mindset)
-3. [Component Types](#component-types)
-4. [Layer Reference Rules](#layer-reference-rules)
-5. [Events & Data Flow](#events--data-flow)
-6. [Dependency Inversion (DIP)](#dependency-inversion-dip)
-7. [Anti-Corruption Layer (ACL)](#anti-corruption-layer-acl)
-8. [Evolvable Structure](#evolvable-structure)
-9. [Testing](#testing)
-10. [Deployment Strategy](#deployment-strategy)
-11. [Practice Conventions](#practice-conventions)
-12. [A.D.D-Extended (Complex Domains)](#add-extended-complex-domains)
-13. [Full Glossary](#full-glossary)
+1. [Fractal Architecture Pattern (F.A.P)](#fractal-architecture-pattern-fap)
+2. [LLM Context Navigation in F.A.P Tree](#llm-context-navigation-in-fap-tree)
+3. [Goals & Core Principles](#goals--core-principles)
+4. [5-Layer Architecture](#5-layer-architecture)
+5. [Dependency Rules](#dependency-rules)
+6. [Events & Communication](#events--communication)
+7. [Component Types](#component-types)
+8. [UI Layer Integration](#ui-layer-integration)
+9. [A.D.D-Extended (Complex Domains)](#add-extended-complex-domains)
+10. [Quick Reference](#quick-reference)
 
 ---
 
-## Architecture Tree Structures
+## Fractal Architecture Pattern (F.A.P)
 
-### Basic A.D.D V3 Structure
+### What is F.A.P?
 
-```
-Project/
-├── Boundary/                    # System ingress/egress
-│   ├── DTOs/                   # Data Transfer Objects
-│   └── Events/                 # Boundary Events (external contracts)
-│
-├── CoreAbstractions/           # Internal abstractions (depends on nothing)
-│   ├── Entities/              # Domain entities (thin, validation only)
-│   ├── Events/                # Core Events (internal)
-│   └── Ports/                 # Interfaces (IRepository, IService, etc.)
-│
-├── Operators/                  # Business orchestration
-│   ├── Workflows/             # Business logic flows
-│   └── Mappers/               # DTO ↔ Entity mapping
-│
-├── Implementations/            # Concrete technical realizations
-│   ├── Database/              # DB adapters
-│   ├── Messaging/             # Message bus providers
-│   ├── ExternalAPIs/          # 3rd-party integrations (ACL)
-│   └── Providers/             # Infrastructure services
-│
-└── Bootstrap/                  # Composition root
-    ├── DI/                    # Dependency injection
-    └── Config/                # Configuration
-```
+**Fractal Architecture Pattern** is a self-similar, infinitely nestable structure where:
+- Every module at any depth has the **same 5 layers**: Bootstrap, Operators, Core Abstractions, Implementations, Boundary
+- Only **Implementations layer** can contain sub-modules
+- Each sub-module repeats the same 5-layer structure → infinite nesting
 
-### A.D.D Extended Structure (Complex Domains)
+### Pure Fractal Rules
+
+**6 Node Types Total**:
+1. Module (container)
+2. Bootstrap (layer)
+3. Operators (layer)
+4. Core Abstractions (layer)
+5. Implementations (layer) - **can contain sub-modules**
+6. Boundary (layer)
+
+**No additional types allowed** - Every module at every depth has exactly these 5 layers.
+
+### Fractal Tree Structure
 
 ```
-app/
-├── bootstrap/
-│   ├── di/
-│   │   ├── container.ts
-│   │   └── wiring.ts
-│   ├── config/
-│   │   └── app.json
-│   └── README.md
-│
-├── modules/                    # Scope Modules (self-contained)
-│   ├── orders/                # Example: Orders Module
-│   │   ├── README.md
-│   │   ├── shared-terms.md   # Ubiquitous language
-│   │   │
-│   │   ├── boundary/
-│   │   │   ├── dto/
-│   │   │   │   ├── create-order.dto.ts
-│   │   │   │   └── update-order.dto.ts
-│   │   │   └── events/
-│   │   │       ├── order-created.event.ts
-│   │   │       └── order-updated.event.ts
-│   │   │
-│   │   ├── core-abstractions/
-│   │   │   ├── ports/
-│   │   │   │   ├── repositories/
-│   │   │   │   │   └── iorder-group.repository.ts
-│   │   │   │   ├── translators/
-│   │   │   │   │   └── iorders-to-billing.translator.ts
-│   │   │   │   └── compensators/
-│   │   │   │       └── icancel-order.compensator.ts
-│   │   │   ├── rulesets/
-│   │   │   │   ├── stock-available.ruleset.ts
-│   │   │   │   └── credit-limit.ruleset.ts
-│   │   │   ├── checkpoints/
-│   │   │   │   └── create-order.checkpoint.ts
-│   │   │   └── events/
-│   │   │       ├── business/
-│   │   │       │   └── order-approved.signal.ts
-│   │   │       └── technical/
-│   │   │           └── order-retry.signal.ts
-│   │   │
-│   │   ├── operators/
-│   │   │   ├── tgo/                        # Transaction Group Operators
-│   │   │   │   ├── create-order.tgo.ts
-│   │   │   │   └── update-order.tgo.ts
-│   │   │   └── coordinator/                # Eventual consistency
-│   │   │       └── submit-order.flow.ts
-│   │   │
-│   │   └── implementations/
-│   │       ├── adapters/
-│   │       │   ├── repositories/
-│   │       │   │   └── order-group.pg.adapter.ts
-│   │       │   ├── translators/
-│   │       │   │   └── orders-to-billing.default.adapter.ts
-│   │       │   └── compensators/
-│   │       │       └── cancel-order.default.adapter.ts
-│   │       └── providers/
-│   │           ├── db/
-│   │           │   └── pg/
-│   │           │       ├── client.ts
-│   │           │       └── transaction-driver.ts
-│   │           ├── messaging/
-│   │           │   └── rabbit/
-│   │           │       └── bus.ts
-│   │           └── acl/
-│   │               └── billing-api.adapter.ts
-│   │
-│   └── billing/                # Example: Billing Module
-│       ├── README.md
-│       ├── shared-terms.md
-│       ├── boundary/
-│       │   └── dto/
-│       │       └── create-invoice.dto.ts
-│       ├── core-abstractions/
-│       │   ├── ports/
-│       │   │   └── repositories/
-│       │   │       └── iinvoice-group.repository.ts
-│       │   ├── rulesets/
-│       │   │   └── invoice-total.ruleset.ts
-│       │   ├── checkpoints/
-│       │   │   └── create-invoice.checkpoint.ts
-│       │   └── events/
-│       │       └── business/
-│       │           └── invoice-issued.signal.ts
-│       ├── operators/
-│       │   └── tgo/
-│       │       └── create-invoice.tgo.ts
-│       └── implementations/
-│           ├── adapters/
-│           │   └── repositories/
-│           │       └── invoice-group.pg.adapter.ts
-│           └── providers/
-│               └── db/
-│                   └── pg/
-│                       ├── client.ts
-│                       └── transaction-driver.ts
-│
-└── shared/                     # Shared utilities
-    ├── libraries/
-    │   ├── time/
-    │   └── ids/
-    ├── messaging/
-    │   └── outbox/
-    │       ├── store.ts
-    │       └── publisher.ts
-    └── guards/
-        └── architecture.lint.json
+System Root (Module)
+├── Bootstrap
+├── Operators
+├── Core Abstractions
+├── Implementations
+│   ├── Module A (sub-module)
+│   │   ├── Bootstrap
+│   │   ├── Operators
+│   │   ├── Core Abstractions
+│   │   ├── Implementations
+│   │   │   ├── Module D (sub-sub-module)
+│   │   │   │   ├── Bootstrap
+│   │   │   │   ├── Operators
+│   │   │   │   ├── Core Abstractions
+│   │   │   │   ├── Implementations
+│   │   │   │   └── Boundary
+│   │   │   └── Module E
+│   │   │       └── (... same 5 layers ...)
+│   │   └── Boundary
+│   ├── Module B
+│   │   └── (... same 5 layers ...)
+│   └── Module C
+│       └── (... same 5 layers ...)
+└── Boundary
 ```
 
-### Key Dependency Rules
+### Path Notation
+
+Use path notation to describe location in fractal tree:
+
+- `/` = System Root
+- `/Implementations` = Implementations layer of root
+- `/Implementations/A` = Module A (inside root's Implementations)
+- `/Implementations/A/Operators` = Operators layer of Module A
+- `/Implementations/A/Implementations` = Implementations layer of Module A
+- `/Implementations/A/Implementations/D` = Module D (inside A's Implementations)
+- `/Implementations/A/Implementations/D/Core Abstractions` = Core layer of Module D
+
+### Why Fractal?
+
+1. **Self-similarity**: Learn once, apply everywhere - same structure at all depths
+2. **Infinite composition**: No arbitrary nesting limits
+3. **Clear boundaries**: Each module is self-contained with all 5 layers
+4. **Context isolation**: LLM can zoom in/out to any level
+5. **Easy navigation**: Path notation shows exact location
+
+---
+
+## LLM Context Navigation in F.A.P Tree
+
+### Thinking Framework for LLMs
+
+When reading A.D.D V3 code, LLMs should ask these questions **in order**:
+
+#### 1. Where am I in the fractal tree?
+- Parse the file path to determine position
+- Example: `implementations/database/operators/migrate.ts`
+  - Path: `/Implementations/Database/Operators`
+  - Current module: Database (sub-module of root)
+  - Current layer: Operators
+
+#### 2. What is my current layer's responsibility?
+- Bootstrap → DI, configuration, composition root
+- Operators → Business orchestration, workflows, mapping
+- Core Abstractions → Interfaces (Ports), Entities, Events
+- Implementations → Technology adapters, concrete realizations
+- Boundary → External contracts (DTOs, Boundary Events)
+
+#### 3. What can I reference from this layer?
+- **Bootstrap** → Can reference ALL layers (wiring)
+- **Operators** → Can reference Boundary + Core Abstractions only
+- **Core Abstractions** → Cannot reference any other layer (pure abstractions)
+- **Implementations** → Can reference Core Abstractions only
+- **Boundary** → Cannot reference any other layer (pure contracts)
+
+#### 4. What context do I need to understand this code?
+- **Level 0 (Global)**: What is the overall system architecture? (F.A.P)
+- **Level 1 (Root Module)**: What are the root's 5 layers?
+- **Level 2 (Current Module Path)**: Navigate down tree to current module
+- **Level 3 (Current Layer)**: What layer am I in? What can it do?
+- **Level 4 (Sibling Context)**: What other components in this layer?
+- **Level 5 (Code)**: Read actual implementation
+
+### Vertical Navigation Strategy
+
+**To understand a piece of code**, LLMs should navigate vertically:
 
 ```
-Valid References:
-  Operators → Boundary + CoreAbstractions
-  Implementations → CoreAbstractions only
-  Bootstrap → Operators + Implementations
+1. Read current file path → determine position in tree
+2. Move UP to parent module → understand container context
+3. Move UP to root → understand global architecture
+4. Move DOWN step-by-step → understand how we got here
+5. Read HORIZONTALLY → understand siblings at same level
+6. Read current code WITH FULL CONTEXT
+```
 
-Forbidden:
-  Operators → Implementations (direct)
-  CoreAbstractions → Any other layer
-  Boundary → Any other layer
+### Example: Reading `/Implementations/A/Implementations/UserRepo.ts`
+
+**Step 1**: Where am I?
+- Path: `/Implementations/A/Implementations/UserRepo.ts`
+- Position: Inside Module A's Implementations layer
+- Module A is inside root's Implementations layer
+
+**Step 2**: Move up to understand Module A
+- Module A is a sub-module containing: Bootstrap, Operators, Core Abstractions, Implementations, Boundary
+- Module A's purpose: (read Module A's README or shared-terms.md)
+
+**Step 3**: Move up to understand root
+- Root module structure: 5 layers
+- Root's Implementations contains: Module A, B, C...
+
+**Step 4**: Understand current layer (Implementations)
+- Implementations = technology adapters
+- Can only reference Core Abstractions (interfaces/ports)
+- Must implement ports defined in `/Implementations/A/Core Abstractions/Ports`
+
+**Step 5**: Read siblings
+- What other files in `/Implementations/A/Implementations/`?
+- Are there other adapters, providers, modules?
+
+**Step 6**: Read code with context
+- Now I understand: This is a concrete adapter inside Module A
+- It should implement a Port from Module A's Core Abstractions
+- It can use providers/drivers from deeper modules
+
+### Common LLM Navigation Mistakes
+
+❌ **Reading code without determining position** → "I don't know if this is root or sub-module"
+
+✅ **Parse path first** → "/Implementations/X means X is a sub-module"
+
+❌ **Assuming flat structure** → "All modules are at same level"
+
+✅ **Understand tree depth** → "Modules can be nested infinitely via Implementations"
+
+❌ **Ignoring layer constraints** → "Operators can call Implementations directly"
+
+✅ **Check dependency rules** → "Operators → Core Abstractions only, never Implementations"
+
+❌ **Missing parent context** → "What is this module's purpose?"
+
+✅ **Read up the tree** → "Check parent module's README, shared-terms.md"
+
+### Practical LLM Workflow
+
+When given a task: "Implement feature X in Module Y"
+
+```
+1. Locate Module Y in tree
+   - Is Y at root level? Or inside another module's Implementations?
+   - Path: /Implementations/.../Y
+
+2. Read Module Y's context
+   - README.md → purpose, scope
+   - shared-terms.md → ubiquitous language
+   - Boundary/DTOs → external contracts
+
+3. Understand Module Y's 5 layers
+   - Core Abstractions → what interfaces (Ports) exist?
+   - Operators → what business flows exist?
+   - Implementations → what adapters exist? Any sub-modules?
+
+4. Determine which layer to add code
+   - External contract? → Boundary
+   - Interface/Port? → Core Abstractions
+   - Business flow? → Operators
+   - Technology adapter? → Implementations
+   - DI wiring? → Bootstrap
+
+5. Check dependencies
+   - What can this layer reference?
+   - Follow strict dependency rules
+
+6. Implement with fractal awareness
+   - If adding sub-module → place in Implementations
+   - New sub-module must have all 5 layers
 ```
 
 ---
 
-## Goals & Mindset
+## Goals & Core Principles
 
-### Core Goals
-- **Simplicity/KISS**: Consistent structure, easy to apply across projects
-- **DIP-first**: Every concrete class depends on abstractions; abstractions never depend on concretes
-- **Easy replacement**: Separate technology from business; swapping Implementations does not affect Operators
+### Goals
+1. **DIP-first**: Abstractions never depend on concretes
+2. **Easy replacement**: Swap technology without changing business logic
+3. **Simplicity**: Same structure everywhere (fractal)
+4. **Testability**: Pure rules, clear boundaries
 
-### In V3, roles are standardized:
-- **Boundary**: System ingress/egress (DTO, Boundary Events, public service contracts)
-- **Core Abstractions**: Internal abstractions (thin Entities, Core Events, internal interfaces)
-- **Operators**: Business orchestrators, mapping DTO ↔ Entity, define business entry points
-- **Implementations**: Concrete technical realizations (DB/MQ/HTTP client/3rd-party adapters), can have multiple variants
-- **Bootstrap**: Composition root (DI, host/logging config), no business logic
+### Core Principles
+
+1. **Dependency Inversion**: All concrete classes depend on abstractions (Ports in Core Abstractions)
+2. **Layer Isolation**: Each layer has single responsibility
+3. **Interface-driven**: Operators call Ports, never concrete implementations
+4. **Event-based**: Core Events for internal coordination; Boundary Events for external
+5. **Fractal structure**: Self-similar modules at all depths
+
+---
+
+## 5-Layer Architecture
+
+Every module (root or nested) has exactly 5 layers:
+
+### 1. Bootstrap
+**Responsibility**: Composition root, DI configuration
+**Contains**: DI container, service registration, app configuration
+**Depends on**: ALL layers (wires them together)
+**Never contains**: Business logic
+
+### 2. Operators
+**Responsibility**: Business orchestration, workflows
+**Contains**: TGO (Transaction Group Operators), Coordinators, DTO↔Entity mapping
+**Depends on**: Boundary + Core Abstractions only
+**Never depends on**: Implementations (calls via Ports)
+
+### 3. Core Abstractions
+**Responsibility**: Internal abstractions, domain models
+**Contains**: Entities, Ports (interfaces), Core Events, RuleSets
+**Depends on**: Nothing (pure abstractions)
+
+### 4. Implementations
+**Responsibility**: Technology adapters, concrete implementations
+**Contains**: Adapters (implement Ports), Providers, ACL, **sub-modules**
+**Depends on**: Core Abstractions only
+
+### 5. Boundary
+**Responsibility**: System ingress/egress, external contracts
+**Contains**: DTOs, Boundary Events, input validation
+**Depends on**: Nothing (pure contracts)
+
+---
+
+## Dependency Rules
+
+### Valid References
+
+```
+Bootstrap → Operators + Implementations (wiring only)
+Operators → Boundary + Core Abstractions
+Implementations → Core Abstractions
+Core Abstractions → nothing
+Boundary → nothing
+```
+
+### Forbidden
+
+```
+❌ Operators → Implementations (direct)
+❌ Implementations → Operators
+❌ Core Abstractions → any layer
+❌ Boundary → any layer
+```
+
+### Cross-Module Communication
+
+**Modules communicate via**:
+- Ports (interfaces) defined in Core Abstractions
+- Core Events (internal events)
+
+**Direct calls forbidden**:
+- Module A's Operators cannot directly call Module B's Operators
+- Must go through Ports or emit Core Events
+
+---
+
+## Events & Communication
+
+### Event Types
+
+#### Boundary Events
+- **Location**: Boundary layer
+- **Purpose**: Events crossing system boundary (webhooks, external MQ)
+- **Versioned**: Yes (public contract)
+
+#### Core Events
+- **Location**: Core Abstractions layer
+- **Purpose**: Internal coordination between Operators ↔ Implementations
+- **Two types**:
+  - **BusinessSignal**: Reflects business state (Order.Created, Payment.Completed)
+  - **TechnicalSignal**: Operational signals (Job.Retry, Cache.Invalidated)
+
+### Event Structure (Envelope)
+
+```typescript
+{
+  eventName: "Domain.PastTenseAction",  // e.g., "Order.Created"
+  version: 1,
+  correlationId: "uuid",
+  causationId: "uuid",
+  occurredAt: "ISO8601",
+  payload: { /* event-specific data */ },
+  metadata: {
+    source: "path/to/emitter",
+    consistency: "strong | eventual"
+  }
+}
+```
+
+### Event Naming Rules
+
+✅ **Good**: Order.Created, Payment.Completed, User.Registered
+❌ **Bad**: Order.Create (imperative), CreateOrder (command-style)
+
+**Pattern**: `Domain.PastTenseAction` - Use past tense (event already happened)
 
 ---
 
 ## Component Types
 
 ### Data Components
-- **DTOs**: Data Transfer Objects - external contracts
-- **Entities**: Domain models with validation only (no business logic)
+
+**DTO (Data Transfer Object)**:
+- Location: Boundary
+- Purpose: External contracts
+- Rules: No logic, pure data
+
+**Entity**:
+- Location: Core Abstractions
+- Purpose: Domain models
+- Rules: Thin structure, validation only, no business logic
 
 ### Action Components
-- **Services**: Stateless operations
-- **Handlers**: Event/command processors
-- **Operators**: Business orchestrators
+
+**Port (Interface)**:
+- Location: Core Abstractions
+- Purpose: Abstract contracts
+- Examples: IUserRepository, IPaymentGateway, ITranslator
+
+**Adapter**:
+- Location: Implementations
+- Purpose: Concrete implementation of Port
+- Examples: PostgresUserRepository implements IUserRepository
+
+**Operator**:
+- Location: Operators layer
+- Purpose: Business orchestration
+- Types:
+  - **TGO (Transaction Group Operator)**: Strong consistency, transaction boundary
+  - **Coordinator**: Eventual consistency, multi-step flows via events
+
+### Rule Components
+
+**RuleSet**:
+- Location: Core Abstractions
+- Purpose: Pure function validating business rules
+- Returns: RuleReport (passed: bool, reasons: string[])
+
+**Checkpoint**:
+- Location: Core Abstractions
+- Purpose: Pipeline combining multiple RuleSets
+- Executed: Before state changes in Operators
 
 ---
 
-## Layer Reference Rules
+## UI Layer Integration
 
-### Reference Rules Between Layers
+### Overview
 
-```mermaid
-graph BT
-  Boundary[Boundary]
-  CoreAbstractions[Core Abstractions]
-  Operators[Operators]
-  Implementations[Implementations]
-  Bootstrap[Bootstrap]
+UI/Frontend/Presentation layer **follows the same 5-layer fractal pattern**. Depending on deployment architecture, UI can be:
+1. **Separate Module** (SPA, Mobile App) - Independent deployment unit
+2. **Sub-Module** (Monolith, SSR) - Nested inside root's Implementations
 
-  style CoreAbstractions fill:#fff7ed,stroke:#c2410c,stroke-width:2px
-  style Boundary fill:#eff6ff,stroke:#1d4ed8,stroke-width:2px
+Both approaches maintain fractal consistency: **UI always has 5 layers**.
 
-  CoreAbstractions --- Boundary
-  linkStyle 0 stroke-width:0,opacity:0
+---
 
-  Operators --> Boundary
-  Operators --> CoreAbstractions
+### Approach 1: UI as Separate Module
 
-  Implementations --> CoreAbstractions
-  Bootstrap --> Operators
-  Bootstrap --> Implementations
+**Use when**: Frontend and Backend are separate deployment units (SPA + REST API, Mobile App + Backend).
+
+**Structure**:
+```
+Frontend Module (Root)
+├── Bootstrap
+│   ├── Router configuration
+│   ├── DI container for UI components
+│   ├── Theme/styling initialization
+│   └── Global UI state setup
+├── Operators
+│   ├── Presentation Orchestrators (navigation flows, multi-step forms)
+│   ├── ViewModel Composers (Backend DTOs → ViewModels)
+│   ├── Navigation Logic (route guards, breadcrumbs)
+│   └── UI Workflows (wizards, modal sequences)
+├── Core Abstractions
+│   ├── Ports
+│   │   ├── INavigationService (navigate between screens)
+│   │   ├── IDialogService (modals, confirmations)
+│   │   ├── IToastService (notifications)
+│   │   ├── IFormValidator (client-side validation)
+│   │   └── IApiClient (backend communication contract)
+│   ├── ViewModels (internal display models with computed properties)
+│   └── UI Events (Screen.Viewed, Form.Submitted, Navigation.Completed)
+├── Implementations
+│   ├── Component Libraries (React/Vue/Blazor components)
+│   ├── State Management Adapters (Redux/MobX/Zustand implementing IStateStore port)
+│   ├── API Client Adapters (Axios/Fetch implementing IApiClient port)
+│   ├── Navigation Adapters (React Router/Vue Router implementing INavigationService)
+│   └── Sub-modules (Chart Library, Rich Text Editor with their own 5 layers)
+└── Boundary
+    ├── Screen DTOs (props contracts for pages/screens)
+    ├── Display Events (analytics, external tracking)
+    └── Accessibility Contracts (ARIA labels, screen reader contracts)
 ```
 
-### Communication Rules
-- Operators only see Boundary and Core Abstractions
-- Implementations only see Core Abstractions
-- Bootstrap references Operators and Implementations
-- **No direct calls between Operators ↔ Implementations**
-- Communication via:
-  - Interfaces declared in Core Abstractions (DI injects Implementation)
-  - Internal events (Core Events)
+**Communication Pattern**:
+```
+Backend Module                          Frontend Module
+└── Boundary (API DTOs) ←────HTTP────→ Implementations/API Client Adapter
+                                       └── Maps to Core Abstractions (ViewModels)
+                                           └── Used by Operators (ViewModel Composers)
+                                               └── Passed to Implementations (Components)
+```
+
+**Path Examples**:
+- `/Bootstrap/app-init.ts` - Frontend app initialization
+- `/Operators/profile-view-composer.ts` - Compose profile ViewModel
+- `/Core Abstractions/Ports/INavigationService.ts` - Navigation abstraction
+- `/Implementations/React/ProfileScreen.tsx` - React component
+- `/Boundary/ScreenDTOs/ProfileScreenProps.ts` - Screen contract
 
 ---
 
-## Events & Data Flow
+### Approach 2: UI as Sub-Module
 
-### Event Types
+**Use when**: Frontend embedded in Backend (SSR, Blazor Server, Monolith with embedded UI).
 
-#### Boundary Events
-- **Location**: Boundary layer
-- **Purpose**: Events at the system edge (in/out)
-- **Use case**: External communication, webhooks, message queues
+**Structure**:
+```
+System Root
+├── Bootstrap
+├── Operators (Backend business logic)
+├── Core Abstractions (Domain)
+├── Implementations
+│   ├── Database (sub-module with 5 layers)
+│   ├── PaymentGateway (sub-module with 5 layers)
+│   └── UI (sub-module with 5 layers)
+│       ├── Bootstrap (UI-specific setup: router, theme)
+│       ├── Operators (Presentation logic, ViewModel mapping)
+│       ├── Core Abstractions (INavigationService, IDialogService, ViewModels)
+│       ├── Implementations (React components, state adapters)
+│       └── Boundary (Screen props, analytics events)
+└── Boundary (API DTOs - may also serve UI)
+```
 
-#### Core Events
-- **Location**: Core Abstractions layer
-- **Purpose**: Internal events between Operators ↔ Implementations
-- **Two sub-types**:
-  - **BusinessSignal**: Reflects business state (stable, versioned, long-term meaning)
-    - Examples: `Order.Approved`, `Payment.Completed`, `User.Registered`
-  - **TechnicalSignal**: Operational signals (retry, telemetry, housekeeping)
-    - Examples: `Job.RetryRequested`, `Cache.Invalidated`
+**Path Examples**:
+- `/Implementations/UI/Bootstrap/theme-config.ts` - UI theme setup
+- `/Implementations/UI/Operators/dashboard-composer.ts` - Dashboard ViewModel composer
+- `/Implementations/UI/Core Abstractions/Ports/IDialogService.ts` - Dialog abstraction
+- `/Implementations/UI/Implementations/React/Dashboard.tsx` - React component
+- `/Implementations/UI/Boundary/DashboardScreenProps.ts` - Screen contract
 
-### Core Event Structure (Envelope)
+---
 
-```json
-{
-  "eventName": "Domain.EventName",
-  "version": 1,
-  "correlationId": "00000000-0000-0000-0000-000000000000",
-  "causationId": "00000000-0000-0000-0000-000000000000",
-  "occurredAt": "2025-01-01T00:00:00Z",
-  "payload": {
-    // Event-specific data
-  },
-  "metadata": {
-    "tenantId": "tenant-123",
-    "source": "operators.OrderOperator",
-    "consistency": "tgo"
+### UI Layer Definitions
+
+#### 1. Bootstrap (UI)
+**Responsibility**: UI application composition root, initialization
+**Contains**:
+- Router configuration (React Router, Vue Router)
+- DI container for UI components
+- Theme/styling initialization
+- Global UI state setup (Redux store, Context providers)
+
+**Depends on**: All UI layers (wiring)
+
+#### 2. Operators (UI)
+**Responsibility**: Presentation orchestration, ViewModel mapping
+**Contains**:
+- **Presentation Orchestrators**: Multi-step navigation flows, form wizards
+- **ViewModel Composers**: Map backend DTOs → ViewModels for display
+- **Navigation Logic**: Route guards, breadcrumb generation, deep linking
+- **UI Workflows**: Modal sequences, progressive disclosure
+
+**Depends on**: UI Boundary + UI Core Abstractions
+**Never depends on**: UI Implementations (calls via Ports like INavigationService)
+
+**Example**:
+```typescript
+// UI/Operators/ProfileViewModelComposer.ts
+class ProfileViewModelComposer {
+  constructor(
+    private apiClient: IApiClient, // Port from Core Abstractions
+    private translator: ITranslator // Port from Core Abstractions
+  ) {}
+
+  async compose(userId: string): Promise<ProfileViewModel> {
+    const dto = await this.apiClient.get<UserProfileDTO>(`/users/${userId}`);
+
+    return {
+      id: dto.id,
+      email: dto.email,
+      displayCreatedAt: this.formatDate(dto.createdAt),
+      isEmailVerified: this.checkVerification(dto),
+      avatarUrl: dto.avatarUrl || '/default-avatar.png'
+    };
   }
 }
 ```
 
-### Flow Rules
-- Business flows are initiated in Operators
-- Technology/specialized logic lives in Implementations; may emit Core Events for Operators
-- DTO ↔ Entity mapping occurs in Operators
+#### 3. Core Abstractions (UI)
+**Responsibility**: UI abstractions, ViewModels, UI events
+**Contains**:
+- **Ports (Interfaces)**:
+  - `INavigationService`: Navigate between screens, history management
+  - `IDialogService`: Show modals, confirmations, alerts
+  - `IToastService`: Notifications, snackbars
+  - `IFormValidator`: Client-side validation rules
+  - `IApiClient`: Backend communication contract
+  - `IStateStore`: State management abstraction
+- **ViewModels** (internal): Rich display models with computed properties, formatting
+- **UI Events**: `Screen.Viewed`, `Form.Submitted`, `Navigation.Completed`
 
-### Processing Flow Illustration
+**Depends on**: Nothing (pure abstractions)
 
-```mermaid
-sequenceDiagram
-  participant Ext as External
-  participant Boundary
-  participant Operators
-  participant Core as Core Abstractions
-  participant Impl as Implementations
-
-  Ext->>Boundary: Request DTO / Boundary Event
-  Boundary->>Operators: DTO
-  Operators->>Impl: Call via interface (from Core)
-  Impl-->>Operators: Entity/Result
-  Operators-->>Boundary: Response DTO / Boundary Event
-```
-
----
-
-## Dependency Inversion (DIP)
-
-### DIP in A.D.D
-
-- Interfaces are declared in Core Abstractions
-- Implementations implement those interfaces
-- Operators depend on interfaces, unaware of concrete classes
-
-```mermaid
-classDiagram
-  direction LR
-  class CoreAbstractions~IUserRepository~
-  class Operators~UserOperator~
-  class Implementations~PostgresUserRepository~
-
-  CoreAbstractions <|.. Implementations : implements
-  Operators --> CoreAbstractions : depends on
-```
-
-### Example Code
-
-**Core Abstractions** (Interface):
+**Example**:
 ```typescript
-// core-abstractions/ports/IUserRepository.ts
-export interface IUserRepository {
-  save(user: User): Promise<void>;
-  findById(id: string): Promise<User | null>;
+// UI/Core Abstractions/Ports/INavigationService.ts
+interface INavigationService {
+  navigateTo(route: string, params?: Record<string, any>): void;
+  goBack(): void;
+  getCurrentRoute(): string;
+}
+
+// UI/Core Abstractions/ViewModels/ProfileViewModel.ts
+interface ProfileViewModel {
+  id: string;
+  email: string;
+  displayCreatedAt: string; // Formatted: "January 1, 2025"
+  isEmailVerified: boolean; // Computed
+  avatarUrl: string; // With default fallback
 }
 ```
 
-**Implementations** (Concrete):
+#### 4. Implementations (UI)
+**Responsibility**: Concrete UI components, state adapters, API clients
+**Contains**:
+- **Component Libraries**: React/Vue/Blazor components implementing UI abstractions
+- **State Management Adapters**: Redux, MobX, Zustand adapters implementing `IStateStore` port
+- **API Client Adapters**: Axios, Fetch implementing `IApiClient` port (consume backend Boundary DTOs)
+- **Navigation Adapters**: React Router, Vue Router implementing `INavigationService`
+- **Sub-modules**: Complex UI features (Chart Library, Rich Text Editor, Form Builder) with their own 5 layers
+
+**Depends on**: UI Core Abstractions only
+
+**Example**:
 ```typescript
-// implementations/database/PostgresUserRepository.ts
-export class PostgresUserRepository implements IUserRepository {
-  async save(user: User): Promise<void> {
-    // PostgreSQL-specific implementation
-  }
-  async findById(id: string): Promise<User | null> {
-    // PostgreSQL-specific implementation
-  }
+// UI/Implementations/React/ProfileScreen.tsx
+function ProfileScreen({ userId }: ProfileScreenProps) {
+  const composer = useInjection<ProfileViewModelComposer>('ProfileComposer');
+  const [vm, setVm] = useState<ProfileViewModel | null>(null);
+
+  useEffect(() => {
+    composer.compose(userId).then(setVm);
+  }, [userId]);
+
+  if (!vm) return <Loading />;
+
+  return (
+    <div>
+      <Avatar src={vm.avatarUrl} />
+      <Email value={vm.email} verified={vm.isEmailVerified} />
+      <CreatedAt value={vm.displayCreatedAt} />
+    </div>
+  );
 }
 ```
 
-**Operators** (Usage):
-```typescript
-// operators/UserOperator.ts
-export class UserOperator {
-  constructor(private userRepo: IUserRepository) {} // Depends on interface only
+#### 5. Boundary (UI)
+**Responsibility**: External UI contracts, screen interfaces
+**Contains**:
+- **Screen DTOs**: Props contracts for pages/screens (external interface of UI module)
+- **Display Events**: Analytics events, external tracking payloads
+- **Accessibility Contracts**: ARIA labels, screen reader contracts
 
-  async createUser(dto: CreateUserDto): Promise<UserDto> {
-    const entity = this.mapDtoToEntity(dto);
-    await this.userRepo.save(entity); // Calls interface method
-    return this.mapEntityToDto(entity);
-  }
+**Depends on**: Nothing (pure contracts)
+
+**Example**:
+```typescript
+// UI/Boundary/ScreenDTOs/ProfileScreenProps.ts
+interface ProfileScreenProps {
+  userId: string;
+  onNavigateBack?: () => void;
+}
+
+// UI/Boundary/DisplayEvents/ScreenViewedEvent.ts
+interface ScreenViewedEvent {
+  eventName: 'Screen.Viewed';
+  screenName: string;
+  timestamp: string;
+  metadata: {
+    userId?: string;
+    referrer?: string;
+  };
 }
 ```
 
-**Bootstrap** (Wiring):
-```typescript
-// bootstrap/di/container.ts
-container.register<IUserRepository>(
-  'IUserRepository',
-  PostgresUserRepository // Choose concrete implementation
-);
+---
+
+### UI Communication Patterns
+
+#### Frontend → Backend
+```
+UI/Implementations/API Client (Axios adapter)
+  → implements UI/Core Abstractions/Ports/IApiClient
+    → called by UI/Operators (ViewModel Composers)
+      → fetch Backend/Boundary/DTOs
+        → map to UI/Core Abstractions/ViewModels
+```
+
+#### Backend → Frontend (SSR or embedded)
+```
+Backend/Operators
+  → emit Backend/Core Abstractions/Events
+    → consumed by /Implementations/UI/Operators
+      → update UI/Core Abstractions/ViewModels
+        → trigger re-render in /Implementations/UI/React Components
 ```
 
 ---
 
-## Anti-Corruption Layer (ACL)
+### Benefits of UI Module with 5 Layers
 
-### Purpose
-Protect internal domain from external system complexities and changes
+✅ **Testability**: UI Operators testable in isolation (mock INavigationService, IApiClient)
+✅ **Swappable Technology**: Replace React → Vue only changes Implementations, keeps Operators
+✅ **Clear Boundaries**: ViewModel mapping logic separated from components
+✅ **Fractal Consistency**: Complex UI features (Chart Library) also have 5 layers
+✅ **Dependency Inversion**: Components depend on UI Ports, not concrete Redux/Router
+✅ **Technology Independence**: Business presentation logic (Operators) not tied to framework
 
-### Location
-- Placed in Implementations
-- Outbound/inbound interfaces are described in Core Abstractions
+---
 
-### Responsibilities
-- **Inbound**: Adapter receives external protocol/payload, translates into clean DTO/Core Events for Operators
-- **Outbound**: Adapter/translator calls 3rd-party via interface (e.g., `IPaymentGateway`)
+### Example: User Profile Feature (Full Stack)
 
-### Outbound ACL Example
-
-```mermaid
-graph LR
-  Operators -->|IPaymentGateway| Adapter[PaymentGatewayAdapter]
-  Adapter --> External[External Payment API]
+**Backend Side**:
+```
+/Boundary/UserProfileDTO.ts
+  ↓
+Backend API exposes: GET /users/{id} → UserProfileDTO
 ```
 
-### Inbound Webhook/Queue Example
+**Frontend Side (Approach 1 - Separate Module)**:
+```
+/Implementations/API/AxiosClient.ts (implements IApiClient)
+  ↓ fetch UserProfileDTO
+/Operators/ProfileViewModelComposer.ts
+  ↓ map DTO → ProfileViewModel (formatted dates, computed fields)
+/Implementations/React/ProfileScreen.tsx
+  ↓ render ProfileViewModel
+```
 
-```mermaid
-graph LR
-  External[3rd-party Webhook] --> Adapter[WebhookAdapter]
-  Adapter -->|Core Event| Operators
+**Frontend Side (Approach 2 - Sub-Module)**:
+```
+/Implementations/UI/Implementations/API/AxiosClient.ts (implements IApiClient)
+  ↓ fetch UserProfileDTO
+/Implementations/UI/Operators/ProfileViewModelComposer.ts
+  ↓ map DTO → ProfileViewModel
+/Implementations/UI/Implementations/React/ProfileScreen.tsx
+  ↓ render ProfileViewModel
 ```
 
 ---
 
-## Evolvable Structure
+### Common UI Patterns in A.D.D V3
 
-### Core Statement
-As long as `Operators` (business flows) stay unchanged, you can upgrade/swap technology routinely by replacing `Implementations` and DI configuration in `Bootstrap`.
-
-### How to Achieve
-- Clearly separate Abstraction (`Core Abstractions`) and Implementation (`Implementations`)
-- `Operators` depend only on interfaces in `Core Abstractions`
-- `Bootstrap` selects the concrete variant (Postgres/Mongo/Mock, Rabbit/Kafka/Memory...)
-
-### Practical Consequences
-- Upgrading DB/MQ/SDK or adding new systems touches only `Implementations`/`Bootstrap`, not `Operators`/`Core Abstractions`
-- Tests remain stable: integration tests for `Operators` stay green if abstraction contracts remain intact
-- Small change scope, easy rollback
-- Allows side-by-side deployment of multiple variants for safe migration
-
-### Swapping Implementations Example
-
-```mermaid
-classDiagram
-  direction LR
-  class Core~IUserRepository~
-  class Operators~UserOperator~
-  class ImplA~PostgresUserRepository~
-  class ImplB~MongoUserRepository~
-
-  Core <|.. ImplA
-  Core <|.. ImplB
-  Operators --> Core : depends on
+#### Pattern 1: Form Submission Flow
+```
+Component (Implementations)
+  → call Operator.submitForm(formData)
+    → Operator validates via IFormValidator port
+      → Operator maps to DTO (Boundary)
+        → Operator calls IApiClient.post(dto)
+          → API Client (Implementations) sends to Backend/Boundary
 ```
 
-### Internal Module Idea
-Inside each technical module within `Implementations` (Database, Messaging, Payments…), apply a scaled-down structure:
-- **Boundary'** (if needed)
-- **Core'** (internal abstractions)
-- **Operators'** (internal orchestration)
-- **Providers'** (concrete technical implementations)
-
-Everything is encapsulated within the main system's `Implementations`.
-
-### Example: Database Module (inside Implementations)
-
-```mermaid
-graph TB
-  subgraph Implementations
-    subgraph DBModule["DB Module"]
-      subgraph DB_Boundary["Boundary'"]
-        DB_BDTO["DB DTO (internal, optional)"]
-      end
-      subgraph DB_Core["Core'"]
-        IRepo["IUserRepository (top-level interface)"]
-        DBMap["Entity <-> DB Model Mapper"]
-      end
-      subgraph DB_Operators["Operators'"]
-        Migrate["Migration Orchestrator"]
-        Health["HealthCheck Orchestrator"]
-      end
-      subgraph DB_Providers["Providers'"]
-        PgRepo["PostgresUserRepository"]
-        MgRepo["MongoUserRepository"]
-        Driver["DB Driver/Client"]
-      end
-    end
-  end
-
-  PgRepo --> Driver
-  MgRepo --> Driver
-  PgRepo -- uses --> DBMap
-  MgRepo -- uses --> DBMap
-  DB_Operators --> DB_Providers
+#### Pattern 2: Navigation with Side Effects
+```
+Component triggers navigation
+  → call INavigationService.navigateTo('/dashboard')
+    → Navigation Adapter (Implementations) handles routing
+      → Operator listens to Navigation.Completed event
+        → Operator emits Screen.Viewed event (analytics)
 ```
 
-**Wiring with the main system** (only expose the adapter that implements the top-level interface):
-
-```mermaid
-classDiagram
-  direction LR
-  class CoreAbstractions~IUserRepository~
-  class Operators~UserOperator~
-  class Implementations~PostgresUserRepository~
-  class Implementations_Private~DbDriver~
-  class Implementations_Private~DbMapper~
-
-  CoreAbstractions <|.. Implementations : implements
-  Operators --> CoreAbstractions : depends on
-  Implementations --> Implementations_Private : uses
-  Implementations --> Implementations_Private : uses
+#### Pattern 3: Multi-Step Wizard
 ```
-
-**Notes**:
-- `IUserRepository` belongs to system-level `Core Abstractions`, not inside the DB module
-- `PostgresUserRepository` is the only adapter exported via DI; the rest (driver, mapper) are internal details of the DB module
-
-### Example: Messaging (internal Publisher/Consumer)
-
-```mermaid
-graph LR
-  subgraph Implementations
-    subgraph Messaging
-      subgraph Msg_Core["Core'"]
-        IBus["IMessageBus"]
-      end
-      subgraph Msg_Providers["Providers'"]
-        Rabbit["RabbitMQBus"]
-        Kafka["KafkaBus"]
-        Serializer["Serializer"]
-      end
-    end
-  end
-
-  Operators -- via IBus --> Rabbit
-  Operators -- via IBus --> Kafka
-  Msg_Providers --> Serializer
+Wizard Operator (Operators)
+  → manages step state via IStateStore port
+    → validates each step via IFormValidator port
+      → final step: compose full ViewModel
+        → submit via IApiClient port
 ```
-
-**Event consumption flow (Consumer) with Core Events**:
-
-```mermaid
-sequenceDiagram
-  participant Impl as Implementations.Messaging.Consumer
-  participant Ops as Operators
-  participant Core as Core Abstractions
-  Impl->>Impl: Receive raw message
-  Impl->>Impl: Deserialize/Translate (ACL if from external system)
-  Impl-->>Ops: Emit Core Event / Call interface in Core
-  Note over Ops,Core: Ops handles business, unaware of MQ details
-```
-
-### Example: 3rd-party Integration (internal ACL module)
-
-```mermaid
-graph LR
-  subgraph Implementations
-    subgraph Payments
-      CorePort["Core' : IPaymentGateway"]
-      Adapter["Providers' : PaymentGatewayAdapter"]
-      Map["Translator/Mapper"]
-    end
-  end
-  External[External Payment API]
-
-  Operators -->|IPaymentGateway| Adapter
-  Adapter --> Map
-  Adapter --> External
-```
-
-### Packaging & Exposure Rules
-- Only export adapters that implement top-level interfaces defined in `Core Abstractions` (e.g., `IUserRepository`, `IMessageBus`, `IPaymentGateway`)
-- All internal module details (drivers, mappers, operators') are private to `Implementations`
-- `Bootstrap` chooses the variant (Postgres/Mongo/Mock), wiring via DI without code changes in `Operators`
-
-### Suggested Folder Structure (illustration)
-
-```mermaid
-graph TD
-  A[implementations/] --> B[database/]
-  A --> C[messaging/]
-  A --> D[integrations/payments/]
-
-  B --> B1[providers/]
-  B --> B2[mapper/]
-  B --> B3["operators'/"]
-
-  C --> C1[providers/]
-  C --> C2[serializer/]
-
-  D --> D1[adapter/]
-  D --> D2[translator/]
-```
-
-**Naming principle**: Keep roles clear (providers, adapter, mapper, serializer, operators'), avoid confusion with system-level `Operators`.
 
 ---
 
-## Testing
+### UI Layer Decision Tree
 
-### Unit Tests
-- For Implementations (adapters, mappers, repositories)
-- Entity validation
-- RuleSets (pure functions)
+**Question**: Where should I add this code in UI module?
 
-### Integration Tests
-- For Operators following business flows (coordinated via interfaces/events)
-- Checkpoint execution
-- Both strong and eventual consistency flows
-
-### Contract Tests
-- Verify adapters conform to Port signatures
-- Translator bidirectional mapping correctness
-- Compensator inverse action verification
-
----
-
-## Deployment Strategy
-
-### Large Projects (from BRD)
-1. Build **Boundary**: Real DTOs, service contracts, Boundary Events
-2. Build **Core Abstractions**: Entities, Core Events, internal interfaces
-3. Build **Operators**: Implement business logic, mapping DTO ↔ Entity, listeners for Boundary Events, endpoints
-4. Build **Implementations**: Implement interfaces, adapters/publishers/subscribers, ACL when integrating external systems
-5. Build **Bootstrap/DI**: Configure everything
-
-### Small Projects (from zero)
-1. Write a runnable program (minimal monolith)
-2. Write unit tests
-3. Refactor to split layers following V3
-
-### Existing Projects
-1. Classify using the question: abstract (Boundary/Core Abstractions) or concrete (Operators/Implementations)?
-2. Move to the corresponding layer
-3. Replace direct calls with interfaces/events where necessary
-
----
-
-## Practice Conventions
-
-### Entities
-- Contain no behavior beyond validation
-- Avoid heavy business logic
-- Thin data structures
-
-### Operators
-- Name by flow (e.g., `OrderOperator`, `InvoiceOperator`)
-- Orchestrate and map
-- Coordinate via Ports and Core Events
-
-### Interfaces
-- Placed in Core Abstractions
-- Implementations implement them
-- Boundary only publishes external contracts when needed
-
-### Events
-- Name states clearly before/after
-- Use past tense (e.g., `Order.Created` not `Order.Create`)
-- Payload is DTO/Entity appropriate to the consuming layer
-
-### Event Naming Conventions
-
-**Pattern**: `Domain.PastTenseAction`
-
-**Good examples**:
-- `Order.Created`
-- `Payment.Completed`
-- `User.PasswordResetRequested`
-- `Invoice.Approved`
-
-**Naming rules**:
-- Use PascalCase
-- Past tense (event already happened)
-- Describe state change, not imperative command
-- Keep stable; avoid renaming (version instead)
+- **External screen contract?** → Boundary (Screen DTOs)
+- **Navigation/Dialog/Toast abstraction?** → Core Abstractions (Ports)
+- **ViewModel with formatting logic?** → Core Abstractions (ViewModels) OR Operators (Composers)
+- **Multi-step flow, navigation logic?** → Operators (Presentation Orchestrators)
+- **DTO → ViewModel mapping?** → Operators (ViewModel Composers)
+- **React/Vue component?** → Implementations (Component Libraries)
+- **Redux/Router adapter?** → Implementations (State/Navigation Adapters)
+- **DI wiring for components?** → Bootstrap
 
 ---
 
 ## A.D.D-Extended (Complex Domains)
 
-### Goal
-Keep the A.D.D skeleton, add guardrails to handle complex rules
+### Scope Modules
 
-### 12.1 Modularization by "Scope Module"
+**Definition**: Self-contained module with full 5-layer structure
 
-- Split system into modules with clear scope (Scope Module)
-- Each self-contained: `Boundary/Core Abstractions/Operators/Implementations/Bootstrap`
-- Cross-module communication only via interfaces published in `Core Abstractions` and via Core Events
-- Direct cross access is forbidden
+**Communication**:
+- Via Ports (interfaces in Core Abstractions)
+- Via Core Events
+- Direct cross-access forbidden
 
-```mermaid
-graph LR
-  subgraph ModuleA[Scope Module A]
-    A1[Boundary]
-    A2[Core Abstractions]
-    A3[Operators]
-    A4[Implementations]
-  end
-  subgraph ModuleB[Scope Module B]
-    B1[Boundary]
-    B2[Core Abstractions]
-    B3[Operators]
-    B4[Implementations]
-  end
-  A3 -- Core Events --> B3
-  A3 -- Interfaces (A2) --> B4
-  B3 -- Interfaces (B2) --> A4
-```
+### Transaction Group Operator (TGO)
 
-### 12.2 RuleSet & Checkpoint (pure, testable rules)
+**Purpose**: Transaction boundary for related data group
 
-- Declare `RuleSet` in `Core Abstractions` as pure functions that validate state and inputs
-- `Checkpoint` is a combinator to compose multiple `RuleSet` into a pipeline
-- `Operators` run `Checkpoint` before persisting changes
-- Result returns a `RuleReport` (pass/fail, reasons, location), no exceptions for the normal flow
+**Characteristics**:
+- Runs Checkpoint (RuleSets) before persisting
+- Loads/saves via Repository Port (operations through group root)
+- Decides commit/rollback
+- **Consistency**: Strong (within single transaction)
 
-```mermaid
-classDiagram
-  direction LR
-  class RuleSet{
-    +evaluate(input): RuleReport
-  }
-  class Checkpoint{
-    +add(rule: RuleSet)
-    +run(input): RuleReport
-  }
-  class RuleReport{
-    +passed: bool
-    +reasons: string[]
-  }
-  class Operator{
-    +handle(dto): Result
-  }
-  Operator --> Checkpoint : uses
-  Checkpoint o--> RuleSet : aggregates
-```
+### Coordinator Operator
 
-### 12.3 Transaction Group Operator (TGO)
+**Purpose**: Multi-step flows with eventual consistency
 
-- Define `TGO` (a kind of `Operator`) as the transaction boundary for a related data group
-- Repositories published by `Core Abstractions` only allow operations through the group's "root" to ensure integrity
-- `TGO` decides commit/rollback, hides the transaction driver details in `Implementations`
+**Characteristics**:
+- Orchestrates via Core Events (BusinessSignals)
+- Uses Compensators for rollback on failure
+- **Consistency**: Eventual
 
-```mermaid
-sequenceDiagram
-  participant Op as TGO
-  participant Repo as IGroupRepository
-  Op->>Op: Run Checkpoint
-  Op->>Repo: Load group by rootId
-  Op->>Repo: Apply changes (methods constrained by contract)
-  Op->>Repo: Commit or Rollback
-```
+### Compensator
 
-### 12.4 Signal types: BusinessSignal vs TechnicalSignal
+**Purpose**: Describes inverse action for eventual consistency rollback
 
-- Still use `Core Events`, but tag them:
-  - `BusinessSignal`: Reflects business state (stable over time, versioned)
-  - `TechnicalSignal`: Technical signals (retry, telemetry, housekeeping)
-- Idempotency, versioning and outbox mapping are placed in `Implementations` (ACL), no infrastructure details leak
+**Characteristics**:
+- Pure function (no side effects)
+- Returns: CompensationResult (success: bool, reasons: string[])
+- Defined as Port in Core Abstractions
 
-### 12.5 Interaction Map (non-invasive cross-module translation)
+### Ports (Interface Types)
 
-- Put translators in a module's `Core Abstractions` as clear contracts to convert DTOs between modules
-- Adapters implement translators and invoke infrastructure in `Implementations` (ACL), keeping `Operators` clean
+**Repository Port**:
+- Read/write data group via root
+- Used by TGO
 
-```mermaid
-graph LR
-  A[Module A - Operators] -->|Translator Port| TA[Core A]
-  TA -->|Adapter| IA[Impl A]
-  IA -->|Call| IB[Impl B]
-  IB --> TB[Core B]
-  TB --> B[Module B - Operators]
-```
+**Translator Port**:
+- Translate DTOs between modules
+- Pure, bidirectional
+- Part of Interaction Map
 
-### 12.6 Consistency modes
+**Compensator Port**:
+- Inverse action for eventual consistency
+- Pure, returns success/reasons
 
-- `consistency = strong | eventual` declared in `Operators` per use-case
-- **Strong**: Runs within a single `TGO`
-- **Eventual**: Coordinated by a `Coordinator Operator` using `Core Events`, with a `Compensator` (pure function describing inverse action) declared in `Core Abstractions`
+### Anti-Corruption Layer (ACL)
 
-```mermaid
-sequenceDiagram
-  participant C as Coordinator Operator
-  participant S1 as Step1 Operator
-  participant S2 as Step2 Operator
-  C->>S1: Emit Start-1 (BusinessSignal)
-  S1-->>C: Done-1 | Emit Fail-1
-  C->>S2: Emit Start-2 (on Done-1)
-  S2-->>C: Done-2 | Emit Fail-2
-  C->>S1: Run Compensator (on Fail-2)
-```
+**Location**: Implementations
 
-### 12.7 Shared Terms (deployment-level ubiquitous language)
+**Purpose**: Protect domain from external system complexity
 
-- Each Scope Module has `shared-terms.md` describing vocabulary and sample data
-- CI checks naming drift between docs and source code (type/DTO/interface names)
-
-### 12.8 Contracts & testing
-
-- `RuleSet` tests (pure functions) in `Core Abstractions`
-- `Operator` flow tests per `Checkpoint` and consistency mode
-- Adapter conformance tests for `Implementations` based on translator and repository contracts
-
-### 12.9 Architectural guardrails
-
-- Lint dependency rules: `Operators` only see `Boundary` and `Core Abstractions`; `Implementations` only see `Core Abstractions`
-- DI wires only through published interfaces; wiring across another module's internals is forbidden
-
-### 12.10 Suggested directory skeleton (per Scope Module)
-
-```mermaid
-graph TD
-  M[module/]
-  M --> B[boundary/]
-  M --> C[core-abstractions/]
-  M --> O[operators/]
-  M --> I[implementations/]
-  M --> S[shared-terms.md]
-
-  C --> C1[rulesets/]
-  C --> C2[checkpoints/]
-  C --> C3[events/]
-  C --> C4[ports_repositories_translators]
-  O --> O1[coordinator/]
-  O --> O2[tgo/]
-  I --> I1[adapters/]
-  I --> I2[providers/]
-```
-
-### 12.11 Summary of new concepts by layer
-
-#### Boundary
-- Use-case contracts (DTO, Boundary Events)
-- Stable, clearly emphasize input/output
-
-#### Core Abstractions
-- **RuleSet**: Pure function for rule checks, returns `RuleReport`
-- **Checkpoint**: Combine multiple RuleSet into a pipeline
-- **RuleReport**: Pass/fail result, reasons
-- **Core Events** with tags: BusinessSignal, TechnicalSignal
-- **Ports**: Repository, translator (Interaction Map), compensator signature
-
-#### Operators
-- **Transaction Group Operator (TGO)**: Transaction boundary for a related data group
-- **Coordinator Operator**: Orchestrates multi-step flows via Core Events (eventual consistency)
-- **Consistency hint**: strong | eventual per use-case
-- Execute Checkpoint before persisting changes
-
-#### Implementations
-- Adapters/Providers implement Ports; translators; transaction driver
-- Outbox mapping, idempotency, versioning for signals
-- ACL with external systems, serializer, messaging bus provider
-
-#### Bootstrap
-- DI wiring per published Ports; select adapter/provider variants
-- Enable dependency guardrails (config/lint) to keep boundaries and modules correct
-
-### 12.12 Defining Ports
-
-#### General notion
-- A Port is an interface published in `Core Abstractions` for other layers to use without knowing technical details
-- Implementations implement Ports; `Operators` call Ports via DI
-- Place under `core-abstractions/ports/` of each Scope Module
-
-#### Repository port
-- **Purpose**: Read/write a data group that `TGO` orchestrates, preserving group integrity
-- **Characteristics**: Operations go through the group's "root", commit/rollback controlled by `TGO`
-
-#### Translator port (Interaction Map)
-- **Purpose**: Translate DTOs between two modules, keep semantics stable, avoid leaking internals
-- **Characteristics**: Pure (no side-effects), may be bidirectional
-
-#### Compensator signature
-- **Purpose**: Describe inverse actions for steps in eventual consistency flows
-- **Characteristics**: Pure/independent of infrastructure; result indicates success and reasons
-
-```mermaid
-classDiagram
-  direction LR
-  class IGroupRepository {
-    +loadByRootId(rootId: string): Group
-    +save(group: Group): void
-  }
-  class IAToBTranslator {
-    +toB(input: ADto): BDto
-    +toA(input: BDto): ADto
-  }
-  class ICompensator {
-    +run(input: any): CompensationResult
-  }
-  class CompensationResult {
-    +success: bool
-    +reasons: string[]
-  }
-```
-
-### 12.13 Glossary (ADD-Extended)
-
-- **Scope Module**: A module with clear scope, self-contained with layers `Boundary/Core Abstractions/Operators/Implementations/Bootstrap`; communicates with others via Ports and Core Events
-
-- **RuleSet**: Pure function that checks one or several rules on inputs and current state, returns `RuleReport`
-
-- **Checkpoint**: Combines multiple RuleSet into a pipeline; runs before applying changes
-
-- **RuleReport**: Rule check result (passed, reasons[]), no exceptions for the normal flow
-
-- **Transaction Group Operator (TGO)**: Operator serving as the transaction boundary for a related data group; runs Checkpoint, operates repository ports, decides commit/rollback
-
-- **Coordinator Operator**: Operator orchestrating multi-step flows via Core Events for eventual consistency; may trigger a Compensator for rollback
-
-- **BusinessSignal**: Core Event reflecting business state with long-term meaning; versioned for evolutionary compatibility
-
-- **TechnicalSignal**: Operational signals (retry, telemetry, housekeeping) without long-term business semantics
-
-- **Ports**: Interfaces published in `Core Abstractions` to be used via DI without knowing technical details
-  - **Repository Port**: Contract to read/write the data group orchestrated by TGO through the root
-  - **Translator Port**: Contract to translate DTOs between modules (Interaction Map), pure and semantically stable
-  - **Compensator Port**: Contract describing inverse actions for eventual consistency flows
-
-- **Interaction Map**: Set of translators between two modules, clearly describing translation directions and corresponding DTO structures
-
-- **Consistency (strong | eventual)**: Consistency hint per use-case; strong within one TGO; eventual via Coordinator and Core Events
-
-- **Compensator**: Executes inverse action when a later step fails in a multi-step flow; pure, returns success/reasons
-
-- **Outbox mapping**: Mechanism mapping internal changes to event records for safe/ordered publishing; implemented in Implementations
-
-- **Idempotency**: Ensure repeated processing causes no side-effects; place recognition and guarding logic in Implementations
-
-- **Versioning (signals/contracts)**: Version signals/contracts for evolutionary compatibility; decode/encode in Implementations
-
-- **ACL (Anti-corruption Layer)**: Protective layer when integrating external systems (webhook, API); translate/normalize payload into clean DTO/Core Events before reaching Operators; isolate mapping, outbox, idempotency/versioning in Implementations
-
-- **Transaction Driver**: Technical component executing transactions (DB/client) hidden within Implementations; TGO does not operate the driver directly
-
-- **Guardrails**: Set of rules/checks (lint/build/CI) constraining dependencies across layer and module boundaries; DI only wires through published Ports
-
-### 12.14 Replacing DDD in implementation
-
-#### Scope of replacement
-- A.D.D-Extended can replace DDD at the implementation (tactical) layer and most operational strategy aspects: module boundaries, events, contracts, transactions, integrations
-- Keep organization-level strategic thinking (proper module scoping, ubiquitous language) via `Scope Module`, `shared-terms.md`, and dependency guardrails
-
-#### Key principles
-- **DIP-first**: Interfaces/Ports live in `Core Abstractions`; DI only wires through published Ports
-- **Orchestration in `Operators`**: Use `TGO` (strong/transactional) or `Coordinator` (eventual consistency) with a `Compensator`
-- **Pure rules**: Model invariants using `RuleSet` + `Checkpoint` returning a `RuleReport` (no exceptions for the normal flow)
-- **Clear events**: `Core Events` tagged `BusinessSignal`/`TechnicalSignal`, versioned; outbox/idempotency/codec reside in `Implementations`
-- **Anti-corruption**: External integrations via ACL in `Implementations`; translators are Ports
-
-#### Quick mapping DDD → A.D.D-Extended
-- Bounded Context → `Scope Module` + dependency guardrails + DI through Ports
-- Context Map/Anti-corruption → `Interaction Map` (translator ports) + ACL adapters
-- Aggregate invariants → `RuleSet` + `Checkpoint`; group transaction → `TGO` + repository port "via root"
-- Process Manager/Saga → `Coordinator Operator` + `consistency = strong | eventual` + `Compensator`
-- Domain Events → `Core Events` (Business/Technical) + versioning + outbox
-
-#### DDD → A.D.D migration checklist (concise)
-1. Finalize `Scope Modules` following existing Bounded Context boundaries
-2. Extract `Ports` (repositories/translators/compensators) into each module's `Core Abstractions`
-3. Move business orchestration into `Operators` (choose `TGO` or `Coordinator`)
-4. Represent invariants with `RuleSet` + `Checkpoint`; make Entities thinner (validation-centric)
-5. Move infrastructure into `Implementations` (ACL, outbox, idempotency, versioning, providers)
-6. Enable guardrails (dependency lint, DI rules) and add conformance tests for adapters/providers
-
-#### Decision criteria
-- Heavy integrations/frequent tech swaps, automation/AI prioritized → Use A.D.D as the primary implementation skeleton
-- Domains with complex rules → Keep ubiquitous language via `shared-terms.md` and model rules with `RuleSet/Checkpoint`
-- Release safety → Rely on outbox, idempotency, versioning in `Implementations`; keep `Operators` stable by contract
+**Responsibilities**:
+- **Inbound**: Translate external payload → clean DTO/Core Events
+- **Outbound**: Translate internal calls → external API format
+- Isolate mapping, versioning, idempotency logic
 
 ---
 
-## Full Glossary
+## Quick Reference
 
-### Layer Definitions
-
-**Boundary**: System ingress/egress layer containing DTOs, Boundary Events, public service contracts, and input validation. Depends on nothing.
-
-**Core Abstractions**: Internal abstractions layer containing Entities, Ports (interfaces), Core Events, and domain models. Depends on nothing.
-
-**Operators**: Business orchestration layer containing workflows, DTO↔Entity mapping, business rule execution, and Core Event publishing/handling. Depends on Boundary + Core Abstractions only.
-
-**Implementations**: Technology adapters layer containing concrete implementations of Ports, database clients, message queue adapters, HTTP/gRPC clients, 3rd-party SDK wrappers, ACL. Depends on Core Abstractions only.
-
-**Bootstrap**: Composition root containing DI container configuration, service registration, application configuration, and host startup logic. Depends on all layers (wires them together). No business logic.
-
-### Component Types
-
-**DTO (Data Transfer Object)**: External data contract for system boundary crossing
-
-**Entity**: Domain model with thin structure, validation only, no business logic
-
-**Port**: Interface declared in Core Abstractions, implemented in Implementations
-
-**Adapter**: Concrete implementation of a Port in Implementations layer
-
-**Operator**: Business orchestrator coordinating workflows and mapping data
-
-**RuleSet**: Pure function validating business rules, returns RuleReport
-
-**Checkpoint**: Pipeline combining multiple RuleSets, executed before state changes
-
-**TGO (Transaction Group Operator)**: Operator managing transaction boundary for related data group, ensures strong consistency
-
-**Coordinator Operator**: Operator orchestrating multi-step flows for eventual consistency using Core Events and Compensators
-
-**Compensator**: Pure function describing inverse action for eventual consistency rollback
-
-### Event Types
-
-**Boundary Event**: Event crossing system boundary, versioned, public contract
-
-**Core Event**: Internal event for Operators↔Implementations communication
-
-**BusinessSignal**: Core Event reflecting business state, stable, versioned, long-term meaning
-
-**TechnicalSignal**: Core Event for operational signals (retry, telemetry, housekeeping)
-
-### Pattern Definitions
-
-**ACL (Anti-Corruption Layer)**: Protective layer translating external formats to internal clean contracts, placed in Implementations
-
-**Interaction Map**: Set of translator ports between modules for cross-module DTO translation
-
-**Scope Module**: Self-contained module with full 5-layer structure, communicates via Ports and Core Events
-
-**Outbox Pattern**: Mechanism ensuring reliable event publishing by storing events alongside state changes
-
-**Idempotency**: Ensuring repeated event processing causes no duplicate side-effects
-
----
-
-## Summary
-
-**A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), allowing easy replacement without changing business logic.
-
-**Core insight**: By forcing all communication through abstractions and enforcing strict layer dependencies, A.D.D makes architecture evolvable, testable, and technology-independent by design.
-
-### Key Principles Summary
-
-1. **DIP-first**: Abstractions in Core Abstractions; concretes depend on them
-2. **Layer isolation**: Each layer has single responsibility; strict dependency rules
-3. **Interface-driven**: Operators call only Ports, never implementations
-4. **Event-based**: Core Events for internal coordination; Boundary Events for external
-5. **Technology independence**: Business logic (Operators) unaware of tech details
-6. **Easy replacement**: Swap DB/MQ/SDK by changing only Implementations + Bootstrap
-7. **Thin entities**: Data + validation only; no business logic in entities
-8. **Pure rules**: Business rules as pure functions (RuleSets); testable in isolation
-9. **Clear boundaries**: ACL protects domain from external complexity
-10. **Composition root**: All DI wiring in Bootstrap; nowhere else
-
-### Common Mistakes to Avoid
-
-❌ **Operators referencing concrete Implementations** - Always use Ports from Core Abstractions
-
-❌ **Business logic in Implementations** - Implementations execute technical work only; orchestration in Operators
-
-❌ **Technology details leaking to Operators** - No SQL, HTTP status codes, queue names in Operators
-
-❌ **Heavy business logic in Entities** - Entities are thin; validation only
-
-❌ **Circular dependencies** - Follow strict layer dependency rules
-
-❌ **Multiple transaction boundaries in single Operator** - Use TGO for strong consistency or Coordinator for eventual
-
-❌ **Direct module-to-module calls** - Use Ports and Core Events for cross-module communication
-
-❌ **Publishing Boundary Events internally** - Use Core Events for internal coordination
-
-❌ **Exposing Core Events to external systems** - Translate to Boundary Events via ACL
-
-❌ **Events with imperative names** (Order.Create) - Use past tense (Order.Created)
-
-❌ **Non-idempotent subscribers** - Always implement duplicate detection
-
----
-
-## Quick Reference: Layer Checklist
-
-When adding code, ask:
+### When adding code, ask:
 
 - **Is this a DTO or external contract?** → Boundary
 - **Is this an interface/port or domain entity?** → Core Abstractions
@@ -1065,4 +828,51 @@ When adding code, ask:
 - **Is this technology-specific (DB, API, MQ)?** → Implementations
 - **Is this DI wiring or configuration?** → Bootstrap
 
-When in doubt: If it's abstract (interface, model), it's Core Abstractions or Boundary. If it's concrete (implementation), it's Operators or Implementations.
+### Dependency Checklist
+
+✅ Can Operators reference Boundary? → **Yes**
+✅ Can Operators reference Core Abstractions? → **Yes**
+❌ Can Operators reference Implementations? → **No** (use Ports)
+✅ Can Implementations reference Core Abstractions? → **Yes**
+❌ Can Implementations reference Operators? → **No**
+✅ Can Bootstrap reference all layers? → **Yes** (wiring only)
+
+### Common Mistakes
+
+❌ Business logic in Implementations → Move to Operators
+❌ Operators calling concrete classes → Use Ports from Core Abstractions
+❌ Technology details (SQL, HTTP) in Operators → Hide in Implementations behind Ports
+❌ Heavy business logic in Entities → Keep thin, validation only
+❌ Creating new layer types for sub-modules → Use same 5 layers (fractal)
+
+### Fractal Checklist
+
+When creating sub-module:
+1. ✅ Place in parent's Implementations layer
+2. ✅ Create all 5 layers (Bootstrap, Operators, Core Abstractions, Implementations, Boundary)
+3. ✅ Sub-module's Implementations can contain deeper sub-modules
+4. ✅ Use path notation to track position: `/Implementations/A/Implementations/B`
+5. ❌ Do NOT create custom layer types (Core', Providers') - violates fractal
+
+### LLM Workflow Summary
+
+```
+1. Parse file path → determine position in fractal tree
+2. Identify current layer → know responsibilities and constraints
+3. Check dependency rules → ensure valid references
+4. Read parent context → understand module purpose
+5. Read sibling context → understand related components
+6. Implement with fractal awareness → maintain self-similar structure
+```
+
+---
+
+## Summary
+
+**A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), in a fractal self-similar structure that enables infinite composition.
+
+**Fractal Pattern**: Every module at any depth has the same 5 layers. Only Implementations can contain sub-modules. This creates an infinitely nestable tree where LLMs can navigate vertically to understand context at any level.
+
+**UI Integration**: UI/Frontend also follows the same 5-layer fractal pattern, either as a separate module (SPA, Mobile) or sub-module (SSR, Monolith), ensuring consistency from backend to presentation layer.
+
+**Core insight**: By enforcing strict layer dependencies and fractal self-similarity, A.D.D makes architecture evolvable, testable, and technology-independent by design.
