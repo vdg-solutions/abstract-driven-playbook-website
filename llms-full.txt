@@ -1,6 +1,6 @@
 # Abstract Driven Development (A.D.D) V3 - Complete Reference
 
-**Version**: 3.1.0
+**Version**: 3.2.0
 **Last Updated**: October 21, 2025
 
 ---
@@ -14,8 +14,9 @@
 6. [Events & Communication](#events--communication)
 7. [Component Types](#component-types)
 8. [UI Layer Integration](#ui-layer-integration)
-9. [A.D.D-Extended (Complex Domains)](#add-extended-complex-domains)
-10. [Quick Reference](#quick-reference)
+9. [Web/REST API Integration](#webrest-api-integration)
+10. [A.D.D-Extended (Complex Domains)](#add-extended-complex-domains)
+11. [Quick Reference](#quick-reference)
 
 ---
 
@@ -751,6 +752,560 @@ Wizard Operator (Operators)
 
 ---
 
+## Web/REST API Integration
+
+### Overview
+
+Web/REST API framework code (ASP.NET Controllers, Minimal API, Express routes, FastAPI routes) is **technology-specific** and belongs in **Implementations layer** as **Web Adapters**.
+
+**Key principle**: Operators are framework-agnostic. They receive DTOs and return DTOs. Web Adapters translate between HTTP and Operators.
+
+---
+
+### Layer Responsibilities
+
+#### Boundary Layer
+- **DTOs**: Request/response contracts (input validation, JSON serialization attributes)
+- **Endpoint path constants** (optional): Documented API surface
+
+**Example**:
+```csharp
+// Boundary/DTOs/CreateUserDto.cs
+public class CreateUserDto
+{
+    [JsonPropertyName("email")]
+    [Required]
+    public string Email { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+}
+
+// Boundary/Web/ApiEndpoints.cs (optional)
+public static class ApiEndpoints
+{
+    public const string CreateUser = "/api/users";
+    public const string GetUser = "/api/users/{id}";
+}
+```
+
+#### Operators Layer
+- **Business orchestration** (framework-agnostic)
+- Input: DTO (from Boundary)
+- Output: DTO (to Boundary)
+- **NEVER return framework types** (`IResult`, `IActionResult`, `Response`, etc.)
+- **NEVER depend on HTTP context** (`HttpContext`, `Request`, `Response`)
+
+**Example**:
+```csharp
+// Operators/UserOperator.cs
+public class UserOperator
+{
+    private readonly IUserRepository _repo; // Port from Core Abstractions
+
+    // Framework-agnostic: DTO in, DTO out
+    public async Task<UserDto> CreateUser(CreateUserDto dto)
+    {
+        var entity = MapDtoToEntity(dto);
+        await _repo.Save(entity);
+        return MapEntityToDto(entity);
+    }
+
+    public async Task<UserDto> GetUser(string id)
+    {
+        var entity = await _repo.FindById(id);
+        if (entity == null) throw new UserNotFoundException(id);
+        return MapEntityToDto(entity);
+    }
+}
+```
+
+#### Implementations/Web/
+- **Web Adapters**: Translate HTTP requests ↔ Operator calls ↔ HTTP responses
+- Framework-specific code (ASP.NET, Express, FastAPI, etc.)
+- Handle HTTP concerns: status codes, headers, content negotiation
+- Error handling: catch exceptions → HTTP error responses
+
+**Responsibilities**:
+- Receive HTTP request → extract DTO from body/query/route
+- Call Operator (via Port interface)
+- Map Operator result → HTTP response (status code, body)
+- Handle exceptions → appropriate HTTP error responses
+
+---
+
+### Common Mistake: Framework Code in Operators
+
+❌ **WRONG: Returning framework types from Operators**
+```csharp
+// Operators/UserOperator.cs - WRONG!
+public class UserOperator
+{
+    // ❌ Returns IResult (ASP.NET Core type)
+    public async Task<IResult> GetUser(string id)
+    {
+        var entity = await _repo.FindById(id);
+        if (entity == null)
+            return Results.NotFound(); // ❌ Framework-specific
+
+        return Results.Ok(MapEntityToDto(entity)); // ❌ Framework-specific
+    }
+}
+```
+
+**Why WRONG?**
+- `IResult` is ASP.NET Core type → Operators now depend on framework
+- Violates dependency rule: **Operators → Boundary + Core Abstractions ONLY**
+- Cannot swap framework (locked to ASP.NET Core)
+- Cannot test Operators without framework
+
+✅ **CORRECT: Operators return DTOs, Web Adapters handle HTTP**
+```csharp
+// Operators/UserOperator.cs - CORRECT
+public class UserOperator
+{
+    // ✅ Returns DTO (framework-agnostic)
+    public async Task<UserDto> GetUser(string id)
+    {
+        var entity = await _repo.FindById(id);
+        if (entity == null) throw new UserNotFoundException(id);
+        return MapEntityToDto(entity);
+    }
+}
+
+// Implementations/Web/UserWebAdapter.cs - CORRECT
+public class UserWebAdapter
+{
+    private readonly IUserOperator _userOp; // Port from Core Abstractions
+
+    // ✅ Framework-specific code isolated here
+    public async Task<IResult> GetUser(string id)
+    {
+        try
+        {
+            var dto = await _userOp.GetUser(id);
+            return Results.Ok(dto);
+        }
+        catch (UserNotFoundException)
+        {
+            return Results.NotFound();
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    }
+}
+```
+
+---
+
+### Patterns for Different Frameworks
+
+#### Pattern 1: ASP.NET Core Minimal API
+
+**Approach A: Inline in Bootstrap (simple cases)**
+```csharp
+// Bootstrap/WebApplicationExtensions.cs
+public static void MapUserEndpoints(this WebApplication app)
+{
+    app.MapPost("/api/users",
+        async (CreateUserDto dto, IUserOperator userOp) =>
+        {
+            try
+            {
+                var result = await userOp.CreateUser(dto);
+                return Results.Created($"/api/users/{result.Id}", result);
+            }
+            catch (ValidationException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+        });
+
+    app.MapGet("/api/users/{id}",
+        async (string id, IUserOperator userOp) =>
+        {
+            try
+            {
+                var result = await userOp.GetUser(id);
+                return Results.Ok(result);
+            }
+            catch (UserNotFoundException)
+            {
+                return Results.NotFound();
+            }
+        });
+}
+```
+
+**Approach B: Web Adapter class (complex cases)**
+```csharp
+// Implementations/Web/UserWebAdapter.cs
+public class UserWebAdapter
+{
+    private readonly IUserOperator _userOp;
+
+    public UserWebAdapter(IUserOperator userOp)
+    {
+        _userOp = userOp;
+    }
+
+    public async Task<IResult> CreateUser(CreateUserDto dto)
+    {
+        try
+        {
+            var result = await _userOp.CreateUser(dto);
+            return Results.Created($"/api/users/{result.Id}", result);
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(ex.Message);
+        }
+    }
+
+    public async Task<IResult> GetUser(string id)
+    {
+        try
+        {
+            var result = await _userOp.GetUser(id);
+            return Results.Ok(result);
+        }
+        catch (UserNotFoundException)
+        {
+            return Results.NotFound();
+        }
+    }
+}
+
+// Bootstrap/WebApplicationExtensions.cs
+public static void MapUserEndpoints(this WebApplication app)
+{
+    var adapter = app.Services.GetRequiredService<UserWebAdapter>();
+    app.MapPost("/api/users", adapter.CreateUser);
+    app.MapGet("/api/users/{id}", adapter.GetUser);
+}
+
+// Bootstrap/DI/ServiceRegistration.cs
+services.AddScoped<UserWebAdapter>();
+```
+
+#### Pattern 2: ASP.NET Core Controller-based
+
+```csharp
+// Implementations/Web/Controllers/UsersController.cs
+[ApiController]
+[Route("api/users")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserOperator _userOp;
+
+    public UsersController(IUserOperator userOp)
+    {
+        _userOp = userOp;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
+    {
+        try
+        {
+            var result = await _userOp.CreateUser(dto);
+            return CreatedAtAction(nameof(GetUser), new { id = result.Id }, result);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUser(string id)
+    {
+        try
+        {
+            var result = await _userOp.GetUser(id);
+            return Ok(result);
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+}
+```
+
+#### Pattern 3: Express.js (Node.js)
+
+```typescript
+// implementations/web/user-routes.ts
+import express from 'express';
+import { IUserOperator } from '../../core-abstractions/ports/IUserOperator';
+
+export function createUserRoutes(userOp: IUserOperator): express.Router {
+    const router = express.Router();
+
+    router.post('/api/users', async (req, res) => {
+        try {
+            const dto = req.body as CreateUserDto;
+            const result = await userOp.createUser(dto);
+            res.status(201).json(result);
+        } catch (error) {
+            if (error instanceof ValidationException) {
+                res.status(400).json({ message: error.message });
+            } else {
+                res.status(500).json({ message: 'Internal server error' });
+            }
+        }
+    });
+
+    router.get('/api/users/:id', async (req, res) => {
+        try {
+            const result = await userOp.getUser(req.params.id);
+            res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UserNotFoundException) {
+                res.status(404).end();
+            } else {
+                res.status(500).json({ message: 'Internal server error' });
+            }
+        }
+    });
+
+    return router;
+}
+
+// bootstrap/app.ts
+import { createUserRoutes } from '../implementations/web/user-routes';
+
+const userOp = container.resolve<IUserOperator>('IUserOperator');
+app.use(createUserRoutes(userOp));
+```
+
+#### Pattern 4: FastAPI (Python)
+
+```python
+# implementations/web/user_routes.py
+from fastapi import APIRouter, HTTPException, Depends
+from boundary.dtos import CreateUserDto, UserDto
+from core_abstractions.ports import IUserOperator
+from core_abstractions.exceptions import UserNotFoundException, ValidationException
+
+router = APIRouter(prefix="/api/users")
+
+def get_user_operator() -> IUserOperator:
+    # DI resolution from Bootstrap
+    from bootstrap.container import container
+    return container.resolve(IUserOperator)
+
+@router.post("/", status_code=201, response_model=UserDto)
+async def create_user(
+    dto: CreateUserDto,
+    user_op: IUserOperator = Depends(get_user_operator)
+):
+    try:
+        result = await user_op.create_user(dto)
+        return result
+    except ValidationException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{id}", response_model=UserDto)
+async def get_user(
+    id: str,
+    user_op: IUserOperator = Depends(get_user_operator)
+):
+    try:
+        result = await user_op.get_user(id)
+        return result
+    except UserNotFoundException:
+        raise HTTPException(status_code=404, detail="User not found")
+
+# bootstrap/app.py
+from implementations.web.user_routes import router as user_router
+app.include_router(user_router)
+```
+
+---
+
+### Error Handling Pattern
+
+**Operators throw domain exceptions**:
+```csharp
+// Core Abstractions/Exceptions/UserNotFoundException.cs
+public class UserNotFoundException : Exception
+{
+    public UserNotFoundException(string id)
+        : base($"User with ID {id} not found") { }
+}
+
+// Operators/UserOperator.cs
+public async Task<UserDto> GetUser(string id)
+{
+    var entity = await _repo.FindById(id);
+    if (entity == null) throw new UserNotFoundException(id); // Domain exception
+    return MapEntityToDto(entity);
+}
+```
+
+**Web Adapters map exceptions to HTTP status codes**:
+```csharp
+// Implementations/Web/UserWebAdapter.cs
+public async Task<IResult> GetUser(string id)
+{
+    try
+    {
+        var dto = await _userOp.GetUser(id);
+        return Results.Ok(dto);
+    }
+    catch (UserNotFoundException)
+    {
+        return Results.NotFound(); // 404
+    }
+    catch (ValidationException ex)
+    {
+        return Results.BadRequest(ex.Message); // 400
+    }
+    catch (UnauthorizedException)
+    {
+        return Results.Unauthorized(); // 401
+    }
+    catch (Exception ex)
+    {
+        // Log error
+        return Results.Problem(ex.Message); // 500
+    }
+}
+```
+
+**Alternative: Global exception middleware (in Bootstrap)**:
+```csharp
+// Bootstrap/Middleware/ExceptionHandlerMiddleware.cs
+public class ExceptionHandlerMiddleware
+{
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    {
+        try
+        {
+            await next(context);
+        }
+        catch (UserNotFoundException ex)
+        {
+            context.Response.StatusCode = 404;
+            await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+        }
+        // ... other exceptions
+    }
+}
+
+// Bootstrap/Program.cs
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+```
+
+---
+
+### When to Use Each Approach
+
+#### Inline in Bootstrap (Minimal API)
+**Use when**:
+- Simple mapping (DTO → Operator → response)
+- No complex error handling
+- Thin HTTP layer
+
+**Pros**: Less code, direct wiring
+**Cons**: Hard to test HTTP layer separately
+
+#### Web Adapter Class (Implementations)
+**Use when**:
+- Complex error handling (multiple exception types)
+- Request/response transformation logic
+- Want to test HTTP layer separately
+- Reusable across multiple endpoints
+
+**Pros**: Testable, encapsulated, clear separation
+**Cons**: More files, more indirection
+
+#### Controller-based (ASP.NET MVC)
+**Use when**:
+- Team familiar with MVC pattern
+- Need controller features (filters, model binding)
+- Large API surface
+
+**Pros**: Framework conventions, attribute routing, filters
+**Cons**: More ceremony, tied to framework
+
+---
+
+### Directory Structure
+
+```
+/Boundary
+  /DTOs
+    CreateUserDto.cs
+    UserDto.cs
+  /Web (optional)
+    ApiEndpoints.cs
+
+/Operators
+  UserOperator.cs
+
+/Core Abstractions
+  /Ports
+    IUserOperator.cs
+  /Exceptions
+    UserNotFoundException.cs
+
+/Implementations
+  /Web
+    UserWebAdapter.cs (or)
+    /Controllers
+      UsersController.cs
+
+/Bootstrap
+  /Middleware
+    ExceptionHandlerMiddleware.cs
+  WebApplicationExtensions.cs
+  Program.cs
+```
+
+---
+
+### Web API Decision Tree
+
+**Question**: Where should I add this code?
+
+- **Request/response DTO contract?** → Boundary/DTOs
+- **Business logic (orchestration)?** → Operators
+- **HTTP-specific code (IResult, status codes)?** → Implementations/Web
+- **Routing/endpoint mapping?** → Bootstrap
+- **Global middleware (exception, logging)?** → Bootstrap/Middleware
+- **Domain exceptions?** → Core Abstractions/Exceptions
+
+---
+
+### Common Mistakes
+
+❌ **Operators returning `IResult` or `IActionResult`**
+- Operators must be framework-agnostic
+
+❌ **Operators accessing `HttpContext`**
+- HTTP concerns belong in Web Adapters
+
+❌ **Business logic in Controllers/Web Adapters**
+- Controllers are thin adapters; orchestration in Operators
+
+❌ **DTOs containing framework attributes beyond serialization**
+- DTOs are pure contracts; validation attributes OK, but no `[FromBody]`, `[Route]`, etc.
+
+❌ **Direct exception-to-HTTP mapping in Operators**
+- Operators throw domain exceptions; Web Adapters map to HTTP
+
+---
+
 ## A.D.D-Extended (Complex Domains)
 
 ### Scope Modules
@@ -874,5 +1429,7 @@ When creating sub-module:
 **Fractal Pattern**: Every module at any depth has the same 5 layers. Only Implementations can contain sub-modules. This creates an infinitely nestable tree where LLMs can navigate vertically to understand context at any level.
 
 **UI Integration**: UI/Frontend also follows the same 5-layer fractal pattern, either as a separate module (SPA, Mobile) or sub-module (SSR, Monolith), ensuring consistency from backend to presentation layer.
+
+**Web API Integration**: Web framework code (Controllers, Minimal API handlers, Express routes) are Web Adapters in Implementations layer. Operators remain framework-agnostic (DTO in, DTO out), enabling framework swapping without changing business logic.
 
 **Core insight**: By enforcing strict layer dependencies and fractal self-similarity, A.D.D makes architecture evolvable, testable, and technology-independent by design.

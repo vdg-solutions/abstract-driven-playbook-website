@@ -1,6 +1,6 @@
 # Abstract Driven Development (A.D.D) V3 - Theory & Principles
 
-**Version**: 3.1.0
+**Version**: 3.2.0
 **Last Updated**: October 21, 2025
 
 ---
@@ -631,6 +631,184 @@ Backend/Operators emit Core Events
 
 ---
 
+## Web/REST API Integration
+
+### Overview
+
+Web/REST API framework code (ASP.NET Controllers, Minimal API, Express, FastAPI) is **technology-specific** and belongs in **Implementations layer** as **Web Adapters**.
+
+**Key principle**: Operators are framework-agnostic (DTO in, DTO out). Web Adapters translate between HTTP and Operators.
+
+---
+
+### Layer Responsibilities
+
+**Boundary**: DTOs (request/response contracts), optional endpoint path constants
+
+**Operators**: Business orchestration (framework-agnostic)
+- Input: DTO (from Boundary)
+- Output: DTO (to Boundary)
+- **NEVER return framework types** (`IResult`, `IActionResult`, `Response`)
+- **NEVER depend on HTTP context** (`HttpContext`, `Request`)
+
+**Implementations/Web**: Web Adapters
+- Translate HTTP requests ↔ Operator calls ↔ HTTP responses
+- Framework-specific code (ASP.NET, Express, FastAPI)
+- Handle HTTP concerns: status codes, headers, error mapping
+
+**Bootstrap**: Routing/endpoint mapping, global middleware
+
+---
+
+### Common Mistake: Framework Code in Operators
+
+❌ **WRONG**:
+```csharp
+// Operators/UserOperator.cs - WRONG!
+public async Task<IResult> GetUser(string id) // ❌ Returns framework type
+{
+    var entity = await _repo.FindById(id);
+    if (entity == null) return Results.NotFound(); // ❌ Framework code
+    return Results.Ok(MapEntityToDto(entity));
+}
+```
+
+**Why WRONG?**
+- `IResult` is ASP.NET Core type → Operators depend on framework
+- Violates: **Operators → Boundary + Core Abstractions ONLY**
+- Cannot swap framework or test without framework
+
+✅ **CORRECT**:
+```csharp
+// Operators/UserOperator.cs - CORRECT
+public async Task<UserDto> GetUser(string id) // ✅ Returns DTO
+{
+    var entity = await _repo.FindById(id);
+    if (entity == null) throw new UserNotFoundException(id);
+    return MapEntityToDto(entity);
+}
+
+// Implementations/Web/UserWebAdapter.cs - CORRECT
+public async Task<IResult> GetUser(string id)
+{
+    try
+    {
+        var dto = await _userOp.GetUser(id);
+        return Results.Ok(dto);
+    }
+    catch (UserNotFoundException) { return Results.NotFound(); }
+}
+```
+
+---
+
+### Patterns
+
+**Pattern 1: Inline in Bootstrap (simple)**
+```csharp
+// Bootstrap/WebApplicationExtensions.cs
+app.MapGet("/api/users/{id}",
+    async (string id, IUserOperator userOp) =>
+    {
+        try { return Results.Ok(await userOp.GetUser(id)); }
+        catch (UserNotFoundException) { return Results.NotFound(); }
+    });
+```
+
+**Pattern 2: Web Adapter class (complex)**
+```csharp
+// Implementations/Web/UserWebAdapter.cs
+public class UserWebAdapter
+{
+    private readonly IUserOperator _userOp;
+
+    public async Task<IResult> GetUser(string id)
+    {
+        try { return Results.Ok(await _userOp.GetUser(id)); }
+        catch (UserNotFoundException) { return Results.NotFound(); }
+        catch (ValidationException ex) { return Results.BadRequest(ex.Message); }
+    }
+}
+
+// Bootstrap
+var adapter = app.Services.GetRequiredService<UserWebAdapter>();
+app.MapGet("/api/users/{id}", adapter.GetUser);
+```
+
+**Pattern 3: Controller-based**
+```csharp
+// Implementations/Web/Controllers/UsersController.cs
+[ApiController]
+[Route("api/users")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserOperator _userOp;
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUser(string id)
+    {
+        try { return Ok(await _userOp.GetUser(id)); }
+        catch (UserNotFoundException) { return NotFound(); }
+    }
+}
+```
+
+---
+
+### Error Handling
+
+**Operators throw domain exceptions**:
+```csharp
+// Operators/UserOperator.cs
+public async Task<UserDto> GetUser(string id)
+{
+    var entity = await _repo.FindById(id);
+    if (entity == null) throw new UserNotFoundException(id); // Domain exception
+    return MapEntityToDto(entity);
+}
+```
+
+**Web Adapters map exceptions to HTTP**:
+```csharp
+// Implementations/Web/UserWebAdapter.cs
+try { return Results.Ok(await _userOp.GetUser(id)); }
+catch (UserNotFoundException) { return Results.NotFound(); }
+catch (ValidationException ex) { return Results.BadRequest(ex.Message); }
+```
+
+**Alternative: Global middleware** (in Bootstrap):
+```csharp
+// Bootstrap/Middleware/ExceptionHandlerMiddleware.cs
+public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+{
+    try { await next(context); }
+    catch (UserNotFoundException ex) { context.Response.StatusCode = 404; }
+    catch (ValidationException ex) { context.Response.StatusCode = 400; }
+}
+```
+
+---
+
+### Decision Tree
+
+- **Request/response DTO?** → Boundary/DTOs
+- **Business orchestration?** → Operators
+- **HTTP-specific code (IResult, status codes)?** → Implementations/Web
+- **Routing/endpoint mapping?** → Bootstrap
+- **Global middleware?** → Bootstrap/Middleware
+- **Domain exceptions?** → Core Abstractions/Exceptions
+
+---
+
+### Common Mistakes
+
+❌ **Operators returning `IResult`/`IActionResult`** → Framework-agnostic required
+❌ **Operators accessing `HttpContext`** → HTTP concerns in Web Adapters
+❌ **Business logic in Controllers** → Thin adapters only; orchestration in Operators
+❌ **Framework attributes in DTOs** (beyond serialization) → `[FromBody]`, `[Route]` belong in Web Adapters
+
+---
+
 ## A.D.D-Extended: For Complex Domains
 
 A.D.D V3 is sufficient for most applications. For complex domains with intricate business rules and cross-module coordination, A.D.D-Extended adds:
@@ -811,5 +989,7 @@ When in doubt: If it's abstract (interface, model), it's Core Abstractions or Bo
 **A.D.D V3 in one sentence**: Business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), in a fractal self-similar structure that enables infinite composition and easy technology replacement.
 
 **UI Integration**: UI/Frontend also follows the same 5-layer fractal pattern, either as a separate module (SPA, Mobile) or sub-module (SSR, Monolith), ensuring consistency from backend to presentation layer.
+
+**Web API Integration**: Web framework code (Controllers, Minimal API handlers, Express routes) are Web Adapters in Implementations layer. Operators remain framework-agnostic (DTO in, DTO out), enabling framework swapping without changing business logic.
 
 **Core insight**: By forcing all communication through abstractions, enforcing strict layer dependencies, and maintaining fractal self-similarity at all depths, A.D.D makes architecture evolvable, testable, technology-independent, and infinitely composable by design.
