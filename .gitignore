@@ -384,3 +384,5 @@ Thumbs.db
 # Temporary folders
 tmp/
 temp/
+
+.claude/settings.local.json
