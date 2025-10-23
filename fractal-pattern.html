@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -43,6 +44,29 @@
         .header p {
             font-size: 1.2em;
             opacity: 0.9;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-3px);
         }
 
         .tabs {
@@ -355,6 +379,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="index.html" class="back-home">← Back to Home</a>
             <h1>🏛️ A.D.D V3 - Fractal Architecture Pattern</h1>
             <p>Interactive Visualization: Architecture & Context Reading</p>
         </div>
