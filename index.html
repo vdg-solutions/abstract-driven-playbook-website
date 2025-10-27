@@ -24,37 +24,98 @@
     <link rel="stylesheet" href="lib/fontawesome.min.css">
 
     <style>
-        /* Quick Start Section Styles */
+        /* Modern Design System */
+        :root {
+            --radius-3xl: 24px;
+            --radius-2xl: 16px;
+            --radius-xl: 12px;
+            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.4);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animated gradient background */
+        body {
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            opacity: 0.15;
+            background: radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
+            animation: gradientShift 30s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background: radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
+            }
+            33% {
+                background: radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
+            }
+            66% {
+                background: radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
+            }
+        }
+
+        /* Quick Start Section */
         .quick-start-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: var(--space-3xl) 0;
+            padding: 4rem 0;
             color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-start-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
 
         .quick-start-container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 0 var(--space-lg);
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .quick-start-title {
             font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: var(--space-xl);
+            margin-bottom: 3rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .quick-start-steps {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: var(--space-2xl);
+            border-radius: var(--radius-3xl);
+            padding: 2.5rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .step {
-            margin-bottom: var(--space-xl);
+            margin-bottom: 2.5rem;
         }
 
         .step:last-child {
@@ -63,25 +124,26 @@
 
         .step-number {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            width: 40px;
-            height: 40px;
+            background: rgba(255, 255, 255, 0.25);
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             text-align: center;
-            line-height: 40px;
+            line-height: 48px;
             font-weight: 700;
-            font-size: 1.2rem;
-            margin-right: var(--space-md);
+            font-size: 1.3rem;
+            margin-right: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .step-content {
             display: inline-block;
             vertical-align: middle;
-            max-width: calc(100% - 60px);
+            max-width: calc(100% - 80px);
         }
 
         .step-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
@@ -89,19 +151,20 @@
         .step-desc {
             opacity: 0.9;
             font-size: 1rem;
+            line-height: 1.6;
         }
 
         .command-box {
             background: var(--gray-900);
             color: var(--gray-100);
-            padding: var(--space-xl);
-            border-radius: 12px;
-            margin: var(--space-lg) 0;
+            padding: 2rem;
+            border-radius: var(--radius-2xl);
+            margin: 1.5rem 0;
             position: relative;
             font-family: var(--font-mono);
             font-size: 0.95rem;
             line-height: 1.6;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         .command-box code {
@@ -110,21 +173,23 @@
 
         .copy-btn {
             position: absolute;
-            top: var(--space-md);
-            right: var(--space-md);
+            top: 1rem;
+            right: 1rem;
             background: rgba(2, 132, 199, 0.8);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-xl);
             cursor: pointer;
             font-weight: 600;
-            transition: var(--transition-normal);
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(10px);
         }
 
         .copy-btn:hover {
             background: rgba(2, 132, 199, 1);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
         }
 
         .copy-btn.copied {
@@ -133,9 +198,9 @@
 
         .action-buttons {
             display: flex;
-            gap: var(--space-md);
+            gap: 1rem;
             justify-content: center;
-            margin-top: var(--space-xl);
+            margin-top: 2.5rem;
             flex-wrap: wrap;
         }
 
@@ -144,10 +209,10 @@
             background: white;
             color: #667eea;
             padding: 1rem 2rem;
-            border-radius: 8px;
+            border-radius: var(--radius-2xl);
             text-decoration: none;
             font-weight: 600;
-            transition: var(--transition-normal);
+            transition: var(--transition-smooth);
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -157,60 +222,198 @@
         .btn-download:hover,
         .btn-fractal:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            color: #667eea;
         }
 
-        /* What's Inside Section */
-        .whats-inside-section {
-            padding: var(--space-3xl) 0;
-            background: var(--gray-50);
-        }
-
-        .whats-inside-grid {
+        /* Benefits Section - Modern Cards */
+        .benefits-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--space-lg);
-            margin-top: var(--space-2xl);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
         }
 
-        .inside-card {
+        .benefit-card {
             background: white;
-            padding: var(--space-xl);
-            border-radius: 12px;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-md);
-            transition: var(--transition-normal);
+            padding: 2rem;
+            border-radius: var(--radius-3xl);
+            border: 2px solid var(--gray-200);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
         }
 
-        .inside-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
-        .inside-card h3 {
-            color: var(--gray-800);
-            font-size: 1.3rem;
-            margin-bottom: var(--space-md);
+        .benefit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .benefit-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .benefit-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-2xl);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .inside-card p {
+        .benefit-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card p {
             color: var(--gray-600);
             line-height: 1.6;
             margin: 0;
         }
 
+        /* What's Inside Section */
+        .whats-inside-section {
+            padding: 4rem 0;
+            background: linear-gradient(180deg, var(--gray-50) 0%, white 100%);
+        }
+
+        .whats-inside-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .inside-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-3xl);
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .inside-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .inside-card h3 {
+            color: var(--gray-800);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .inside-card h3 i {
+            color: #667eea;
+        }
+
+        .inside-card p {
+            color: var(--gray-600);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .inside-card strong {
+            color: var(--gray-700);
+        }
+
         /* Version badge */
         .version-badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            padding: 0.5rem 1.2rem;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: var(--space-md);
+            margin-bottom: 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+        }
+
+        /* Hero improvements */
+        .hero {
+            background: linear-gradient(180deg, white 0%, var(--gray-50) 100%);
+            padding: 5rem 0;
+        }
+
+        .architecture-diagram .layer {
+            border-radius: var(--radius-2xl);
+            transition: var(--transition-smooth);
+        }
+
+        .architecture-diagram .layer:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        /* CTA Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius-2xl);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            border-radius: var(--radius-2xl);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background: var(--gray-100);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .quick-start-title {
+                font-size: 2rem;
+            }
+
+            .quick-start-steps {
+                padding: 1.5rem;
+            }
+
+            .step-number {
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
@@ -426,7 +629,7 @@
 
                 <div class="inside-card">
                     <h3><i class="fas fa-arrows-alt-h"></i> Dependency Rules</h3>
-                    <p>Strict boundaries: Operators → Core Abstractions only. Implementations → Core Abstractions (+ Boundary for system edge adapters). No circular dependencies.</p>
+                    <p>Strict boundaries: Operators → Boundary + Core Abstractions. Implementations → Core Abstractions (+ Boundary for system edge adapters). No circular dependencies.</p>
                 </div>
 
                 <div class="inside-card">
@@ -445,8 +648,8 @@
                 </div>
             </div>
 
-            <div style="text-align: center; margin-top: var(--space-2xl);">
-                <a href="fractal-pattern.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="fractal-pattern.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none;">
                     <i class="fas fa-project-diagram"></i> Explore Interactive Fractal Viewer
                 </a>
             </div>
