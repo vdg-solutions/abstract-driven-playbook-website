@@ -718,7 +718,7 @@
             },
             {
                 title: "📚 LLM Context Reading - Pure Fractal Navigation",
-                text: "Shows how LLMs navigate the F.A.P tree vertically to read context at ANY depth:\n\n• Level 0: Global pattern (F.A.P = self-similar structure)\n• Level 1: Root Module (5 layers)\n• Level 2: Implementations layer → sub-modules visible\n• Level 3: Sub-Module A (5 layers - fractal repeats!)\n• Level 4: Sub-Module A's Implementations → components visible\n• Level 5: Actual code files\n\nPath notation shows location in tree. LLMs can read context at each level independently."
+                text: "Shows how LLMs navigate the F.A.P tree vertically to read context at ANY depth:<br><br>• <strong>Level 0:</strong> Global pattern (F.A.P = self-similar structure)<br>• <strong>Level 1:</strong> Root Module (5 layers)<br>• <strong>Level 2:</strong> Implementations layer → sub-modules visible<br>• <strong>Level 3:</strong> Sub-Module A (5 layers - fractal repeats!)<br>• <strong>Level 4:</strong> Sub-Module A's Implementations → components visible<br>• <strong>Level 5:</strong> Actual code files<br><br>Path notation shows location in tree. LLMs can read context at each level independently."
             }
         ];
 
@@ -1084,7 +1084,7 @@
             });
 
             document.getElementById('desc-title').textContent = descriptions[index].title;
-            document.getElementById('desc-text').textContent = descriptions[index].text;
+            document.getElementById('desc-text').innerHTML = descriptions[index].text;
 
             if (index === 2) {
                 renderTree();
