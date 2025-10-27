@@ -1,7 +1,7 @@
 # Abstract Driven Development (A.D.D) V3 - Theory & Principles
 
-**Version**: 3.2.0
-**Last Updated**: October 21, 2025
+**Version**: 3.2.1
+**Last Updated**: October 27, 2025
 
 ---
 
@@ -154,17 +154,32 @@ When working with A.D.D V3 code, LLMs should:
 Valid references (compile-time):
   Bootstrap → Operators + Implementations
   Operators → Boundary + Core Abstractions
-  Implementations → Core Abstractions
+  Implementations → Core Abstractions + Boundary*
 
 Forbidden:
   Operators → Implementations (direct)
   Implementations → Operators
-  Implementations → Boundary
   Core Abstractions → Any other layer
   Boundary → Any other layer
 ```
 
+***Conditional**: `Implementations → Boundary` ONLY for adapters at system edge (API clients, webhook handlers, external event subscribers). See details below.
+
 **Key insight**: Operators and Implementations never reference each other directly. They communicate only through Ports (interfaces in Core Abstractions) resolved at runtime via DI.
+
+### Implementations → Boundary: When Allowed
+
+**ALLOWED when:**
+- ✅ Adapter is at **system boundary** (API Client, Webhook Handler, External MQ Consumer)
+- ✅ External contract **matches Boundary DTO** structure
+- ✅ **Cost of mapping > benefit of isolation**
+
+**NEVER allowed when:**
+- ❌ Internal implementations (Database Repository, Cache, File Storage)
+- ❌ Semantic difference exists between external and internal models
+- ❌ Business logic needs different structure
+
+**Rationale**: Pragmatic approach to avoid needless boilerplate when external contracts directly align with Boundary DTOs. Reduces mapping overhead without sacrificing architectural clarity.
 
 ## Data Flow (Standard Request)
 

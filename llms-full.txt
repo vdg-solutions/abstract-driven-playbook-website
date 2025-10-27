@@ -1,7 +1,7 @@
 # Abstract Driven Development (A.D.D) V3 - Complete Reference
 
-**Version**: 3.2.0
-**Last Updated**: October 21, 2025
+**Version**: 3.2.1
+**Last Updated**: October 27, 2025
 
 ---
 
@@ -282,10 +282,12 @@ Every module (root or nested) has exactly 5 layers:
 ```
 Bootstrap → Operators + Implementations (wiring only)
 Operators → Boundary + Core Abstractions
-Implementations → Core Abstractions
+Implementations → Core Abstractions + Boundary*
 Core Abstractions → nothing
 Boundary → nothing
 ```
+
+***Conditional**: Implementations → Boundary ONLY for adapters at system edge (see conditions below)
 
 ### Forbidden
 
@@ -294,6 +296,71 @@ Boundary → nothing
 ❌ Implementations → Operators
 ❌ Core Abstractions → any layer
 ❌ Boundary → any layer
+```
+
+### Implementations → Boundary: Conditional Rule
+
+**ALLOWED when adapter is at system boundary:**
+
+✅ **API Clients** (calling external REST APIs)
+✅ **Webhook Handlers** (receiving external events)
+✅ **External Message Queue Consumers** (reading external messages)
+✅ **External Event Subscribers** (subscribing to external event streams)
+
+**When to allow:**
+- Adapter communicates **directly with external system**
+- External contract **matches Boundary DTO** structure
+- **Cost of conversion > benefit of isolation** (avoiding needless mapping)
+
+**NEVER allow when:**
+
+❌ **Internal implementations**: Database Repositories, In-memory Cache, File Storage
+❌ **Semantic difference exists** between external and internal representation
+❌ **Business logic needs different structure** than external contract
+
+**Rationale:**
+- **Pragmatic over purist**: Reduces boilerplate when no semantic benefit
+- **Single source of truth**: Boundary DTO is the external contract
+- **Performance**: Avoids needless mapping overhead
+- **Hexagonal alignment**: Outbound adapters at system edge can reference external contracts
+
+**Example - API Client (ALLOWED):**
+
+```typescript
+// Boundary/PaymentResultDto.ts
+export interface PaymentResultDto {
+  transactionId: string;
+  status: 'success' | 'failed';
+  amount: number;
+}
+
+// Implementations/PaymentGatewayApiClient.ts
+class PaymentGatewayApiClient implements IPaymentGateway {
+  async processPayment(): Promise<PaymentResultDto> { // ✅ Returns Boundary DTO directly
+    const response = await fetch('/external-payment-api');
+    return response.json() as PaymentResultDto; // ✅ No needless conversion
+  }
+}
+```
+
+**Example - Repository (FORBIDDEN):**
+
+```typescript
+// ❌ WRONG: Internal adapter should NOT use Boundary DTO
+class PostgresUserRepository implements IUserRepository {
+  async findById(id: string): Promise<UserDto> { // ❌ Should return Entity from Core Abstractions
+    const row = await this.db.query('SELECT * FROM users WHERE id = $1', [id]);
+    return this.mapRowToDto(row); // ❌ Internal data should use internal model
+  }
+}
+
+// ✅ CORRECT: Use Core Abstractions Entity
+class PostgresUserRepository implements IUserRepository {
+  async findById(id: string): Promise<User> { // ✅ Returns Entity from Core Abstractions
+    const row = await this.db.query('SELECT * FROM users WHERE id = $1', [id]);
+    return this.mapRowToEntity(row);
+  }
+}
 ```
 
 ### Cross-Module Communication
@@ -1389,6 +1456,7 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 ✅ Can Operators reference Core Abstractions? → **Yes**
 ❌ Can Operators reference Implementations? → **No** (use Ports)
 ✅ Can Implementations reference Core Abstractions? → **Yes**
+✅ Can Implementations reference Boundary? → **Yes*** (only for system edge adapters: API clients, webhook handlers, external event subscribers)
 ❌ Can Implementations reference Operators? → **No**
 ✅ Can Bootstrap reference all layers? → **Yes** (wiring only)
 
