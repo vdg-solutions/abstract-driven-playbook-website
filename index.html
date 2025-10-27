@@ -319,22 +319,25 @@
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            gap: 1.5rem;
             margin-top: 3rem;
+            padding: 0 1rem;
         }
 
         /* Card */
         .card {
             position: relative;
-            padding: 2rem;
+            margin: 0;
             transition: all 0.3s;
         }
 
         .card-shadow {
             position: absolute;
-            inset: 0;
+            top: 8px;
+            left: 8px;
+            right: -8px;
+            bottom: -8px;
             background: #1a1a1a;
-            transform: translate(8px, 8px);
             transition: all 0.3s;
         }
 
@@ -348,7 +351,10 @@
         }
 
         .card:hover .card-shadow {
-            transform: translate(12px, 12px);
+            top: 12px;
+            left: 12px;
+            right: -12px;
+            bottom: -12px;
         }
 
         .card:hover .card-content {
