@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.D.D V3 - Framework Examples</title>
+    <meta name="description" content="Interactive examples for implementing A.D.D V3 with popular frameworks like ASP.NET, Express, FastAPI, React, and Vue">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Matrix background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+            font-size: 12px;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            border-bottom: 1px solid #333;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 6px;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .version {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        nav a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        .link-list {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Header */
+        .header {
+            padding: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+
+        /* Example Section */
+        .example-section {
+            padding: 3rem 0;
+        }
+
+        .example-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .example-title {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .example-subtitle {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #666;
+            color: #999;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .copy-btn.copied {
+            background: rgba(39, 201, 63, 0.2);
+            border-color: #27c93f;
+            color: #27c93f;
+        }
+
+        /* Code container */
+        .code-container {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .code-container:hover {
+            border-color: #666;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .code-header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-file {
+            color: #7fb3d5;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-layer {
+            color: #666;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            background: #0a0a0a;
+            border: 1px solid #333;
+        }
+
+        .code-body {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        pre {
+            margin: 0;
+        }
+
+        code {
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Override Prism theme for dark mode */
+        pre[class*="language-"] {
+            background: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Description box */
+        .description-box {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .description-box h3 {
+            color: #a8d5ba;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .description-box p {
+            color: #b0b0b0;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .description-box ul {
+            color: #b0b0b0;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .description-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        .description-box strong {
+            color: #fff;
+        }
+
+        .description-box code {
+            background: #1a1a1a;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            color: #7fb3d5;
+            font-size: 0.9em;
+        }
+
+        .description-box ol {
+            color: #b0b0b0;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .description-box ol li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        /* Architecture diagram mini */
+        .arch-diagram-mini {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .arch-diagram-mini h4 {
+            color: #d4af7a;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .dependency-graph {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dep-layer-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dep-arrow-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dep-label {
+            color: #666;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
+        .dep-label-none {
+            color: #555;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
+        .dep-targets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .dep-target {
+            padding: 0.25rem 0.5rem;
+            background: #0a0a0a;
+            border: 1px solid #444;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .arch-layer {
+            padding: 0.5rem 1rem;
+            border: 1px solid;
+            background: #000;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .arch-layer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .arch-layer.bootstrap { border-color: #7fb3d5; color: #7fb3d5; }
+        .arch-layer.operators { border-color: #a8d5ba; color: #a8d5ba; }
+        .arch-layer.core { border-color: #d4af7a; color: #d4af7a; }
+        .arch-layer.implementations { border-color: #d89b9e; color: #d89b9e; }
+        .arch-layer.boundary { border-color: #b0b0b0; color: #b0b0b0; }
+
+        .arch-layer.bootstrap:hover { background: rgba(127, 179, 213, 0.15); border-width: 2px; }
+        .arch-layer.operators:hover { background: rgba(168, 213, 186, 0.15); border-width: 2px; }
+        .arch-layer.core:hover { background: rgba(212, 175, 122, 0.15); border-width: 2px; }
+        .arch-layer.implementations:hover { background: rgba(216, 155, 158, 0.15); border-width: 2px; }
+        .arch-layer.boundary:hover { background: rgba(176, 176, 176, 0.15); border-width: 2px; }
+
+        .arch-layer-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #7fb3d5;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .arch-layer:hover .arch-layer-tooltip {
+            opacity: 1;
+        }
+
+        .arch-arrow {
+            color: #666;
+        }
+
+        /* Tab Navigation */
+        .code-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #333;
+        }
+
+        .code-tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .code-tab:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .code-tab.active {
+            color: #7fb3d5;
+            border-bottom-color: #7fb3d5;
+        }
+
+        .code-tab-content {
+            display: none;
+        }
+
+        .code-tab-content.active {
+            display: block;
+        }
+
+        .section-header {
+            color: #a8d5ba;
+            font-size: 1.3rem;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Layer Accordion */
+        .layer-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .layer-header {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .layer-header:hover {
+            background: #1a1a1a;
+            border-color: #666;
+        }
+
+        .layer-header.active {
+            border-color: #7fb3d5;
+            background: #1a1a1a;
+        }
+
+        .layer-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .layer-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .layer-badge {
+            font-size: 0.85rem;
+            color: #666;
+            padding: 0.25rem 0.75rem;
+            background: #000;
+            border-radius: 12px;
+        }
+
+        .layer-icon {
+            color: #666;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .layer-header.active .layer-icon {
+            transform: rotate(90deg);
+        }
+
+        .layer-content {
+            display: none;
+            padding: 1rem 0;
+        }
+
+        .layer-content.active {
+            display: block;
+        }
+
+        /* Layer colors - muted palette */
+        .layer-boundary .layer-name { color: #b0b0b0; }
+        .layer-core .layer-name { color: #d4af7a; }
+        .layer-operators .layer-name { color: #a8d5ba; }
+        .layer-implementations .layer-name { color: #d89b9e; }
+        .layer-bootstrap .layer-name { color: #7fb3d5; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #333;
+            padding: 3rem 0;
+            text-align: center;
+            color: #666;
+        }
+
+        footer a {
+            color: #999;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container, .nav-container {
+                padding: 0 1rem;
+            }
+
+            .header {
+                padding: 2rem 0 1rem;
+            }
+
+            .selector-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .example-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .arch-flow {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #606060;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix background -->
+    <div class="matrix-bg" id="matrix"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="traffic-lights">
+                    <div class="traffic-light red"></div>
+                    <div class="traffic-light yellow"></div>
+                    <div class="traffic-light green"></div>
+                </div>
+                <span class="logo">ABSTRACT DRIVEN</span>
+                <span class="version">v3.2.1</span>
+            </div>
+            <div class="link-list">
+                <a href="index.html">Home</a>
+                <a href="fractal-pattern.html">Fractal Viewer</a>
+                <a href="examples.html">Examples</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="header">
+        <div class="container">
+            <h1>Framework Examples</h1>
+            <p>Interactive code examples for implementing A.D.D V3 with popular frameworks</p>
+        </div>
+    </section>
+
+
+    <!-- Example Section -->
+    <section class="example-section">
+        <div class="container">
+            <div id="example-content">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="link-list" style="justify-content: center; margin-bottom: 1.5rem;">
+                <a href="llms-full.txt" download>Full Reference</a>
+                <a href="llms.txt" download>Quick Reference</a>
+                <a href="fractal-pattern.html">Fractal Viewer</a>
+            </div>
+            <p style="margin-top: 2rem;">© 2025 Abstract Driven Development V3</p>
+            <p style="margin-top: 0.5rem;">Made with ❤️ by vu.minh.quang@outlook.com</p>
+            <p style="margin-top: 0.5rem;">Open source under MIT License</p>
+        </div>
+    </footer>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+    <script src="examples-data.js"></script>
+    <script>
+        // Matrix effect
+        const matrix = document.getElementById('matrix');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`█▓▒░';
+
+        function createMatrixColumn() {
+            const column = document.createElement('div');
+            column.style.cssText = 'position: absolute; top: -100px; font-size: 14px; animation: fall ' + (5 + Math.random() * 10) + 's linear infinite; animation-delay: ' + (Math.random() * 5) + 's; left: ' + (Math.random() * 100) + '%; opacity: 0.5;';
+
+            let text = '';
+            for (let i = 0; i < 20; i++) {
+                text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+            }
+            column.innerHTML = text;
+            matrix.appendChild(column);
+        }
+
+        for (let i = 0; i < 50; i++) {
+            createMatrixColumn();
+        }
+
+        const style = document.createElement('style');
+        style.textContent = '@keyframes fall { to { transform: translateY(100vh); } }';
+        document.head.appendChild(style);
+
+        function updateExample() {
+            const framework = 'dotnet-minimal-vanilla';
+            const scenario = 'complete';
+
+            const example = window.EXAMPLES && window.EXAMPLES[framework] && window.EXAMPLES[framework][scenario];
+            if (!example) {
+                document.getElementById('example-content').innerHTML = '<div class="description-box"><h3>⚠️ Loading...</h3><p>Please wait while the example loads.</p></div>';
+                return;
+            }
+
+            let html = '<div class="description-box">' + example.description + '</div>';
+
+            // Split files first (needed for architecture flow)
+            var backendFiles = example.files.filter(function(f) { return f.path.startsWith('Backend/'); });
+            var frontendFiles = example.files.filter(function(f) { return f.path.startsWith('Frontend/'); });
+
+            if (example.architecture) {
+                // Backend Dependency Graph
+                html += '<div class="arch-diagram-mini">';
+                html += '<h4>📐 ' + example.architecture.backend.title + '</h4>';
+                html += '<p style="color: #b0b0b0; font-size: 0.85rem; margin-bottom: 1rem;">' + example.architecture.backend.description + '</p>';
+                html += '<div class="dependency-graph">';
+
+                example.architecture.backend.layers.forEach(function(layer) {
+                    var fileCount = backendFiles.filter(function(f) {
+                        return f.layer === layer.name;
+                    }).length;
+
+                    html += '<div class="dep-layer-item">';
+                    html += '<div class="arch-layer ' + layer.color + '" onclick="jumpToLayer(\'' + layer.name + '\', \'backend\')">';
+                    html += layer.name;
+                    html += '<span class="arch-layer-tooltip">' + fileCount + ' files - Click to view</span>';
+                    html += '</div>';
+
+                    if (layer.dependencies.length > 0) {
+                        html += '<div class="dep-arrow-container">';
+                        html += '<span class="dep-label">depends on</span>';
+                        html += '<div class="dep-targets">';
+                        layer.dependencies.forEach(function(dep) {
+                            html += '<span class="dep-target">' + dep + '</span>';
+                        });
+                        html += '</div>';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="dep-arrow-container"><span class="dep-label-none">depends on nothing</span></div>';
+                    }
+                    html += '</div>';
+                });
+
+                html += '</div></div>';
+
+                // Frontend Dependency Graph
+                html += '<div class="arch-diagram-mini" style="margin-top: 1.5rem;">';
+                html += '<h4>📐 ' + example.architecture.frontend.title + '</h4>';
+                html += '<p style="color: #b0b0b0; font-size: 0.85rem; margin-bottom: 1rem;">' + example.architecture.frontend.description + '</p>';
+                html += '<div class="dependency-graph">';
+
+                example.architecture.frontend.layers.forEach(function(layer) {
+                    var fileCount = frontendFiles.filter(function(f) {
+                        return f.layer === layer.name;
+                    }).length;
+
+                    html += '<div class="dep-layer-item">';
+                    html += '<div class="arch-layer ' + layer.color + '" onclick="jumpToLayer(\'' + layer.name + '\', \'frontend\')">';
+                    html += layer.name;
+                    html += '<span class="arch-layer-tooltip">' + fileCount + ' files - Click to view</span>';
+                    html += '</div>';
+
+                    if (layer.dependencies.length > 0) {
+                        html += '<div class="dep-arrow-container">';
+                        html += '<span class="dep-label">depends on</span>';
+                        html += '<div class="dep-targets">';
+                        layer.dependencies.forEach(function(dep) {
+                            html += '<span class="dep-target">' + dep + '</span>';
+                        });
+                        html += '</div>';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="dep-arrow-container"><span class="dep-label-none">depends on nothing</span></div>';
+                    }
+                    html += '</div>';
+                });
+
+                html += '</div></div>';
+            }
+
+            html += '<div class="example-header"><div><div class="example-title">' + example.title + '</div><div class="example-subtitle">' + example.subtitle + '</div></div><button class="copy-btn" onclick="copyAllCode()"><span id="copy-all-icon">📋</span> Copy All Code</button></div>';
+
+            // Tab navigation
+            html += '<div class="code-tabs">';
+            html += '<button class="code-tab active" onclick="switchTab(\'backend\')">Backend (.NET - 14 files)</button>';
+            html += '<button class="code-tab" onclick="switchTab(\'frontend\')">Frontend (Vanilla JS - 11 files)</button>';
+            html += '</div>';
+
+            // Backend tab content
+            html += '<div class="code-tab-content active" id="tab-backend">';
+            html += '<h3 class="section-header">🔧 Backend - .NET Minimal API (14 files)</h3>';
+            html += renderLayerSections(backendFiles, 'backend');
+            html += '</div>';
+
+            // Frontend tab content
+            html += '<div class="code-tab-content" id="tab-frontend">';
+            html += '<h3 class="section-header">🎨 Frontend - Vanilla JS (11 files)</h3>';
+            html += renderLayerSections(frontendFiles, 'frontend');
+            html += '</div>';
+
+            document.getElementById('example-content').innerHTML = html;
+            Prism.highlightAll();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderLayerSections(files, prefix) {
+            // Group files by layer
+            var layerGroups = {};
+            var layerOrder = ['Boundary', 'Core Abstractions', 'Operators', 'Implementations', 'Bootstrap', 'UI/Boundary', 'UI/Core Abstractions', 'UI/Operators', 'UI/Implementations', 'UI/Bootstrap'];
+
+            files.forEach(function(file) {
+                var layer = file.layer;
+                if (!layerGroups[layer]) {
+                    layerGroups[layer] = [];
+                }
+                layerGroups[layer].push(file);
+            });
+
+            var html = '';
+            var layerColors = {
+                'Boundary': 'boundary',
+                'Core Abstractions': 'core',
+                'Operators': 'operators',
+                'Implementations': 'implementations',
+                'Bootstrap': 'bootstrap',
+                'UI/Boundary': 'boundary',
+                'UI/Core Abstractions': 'core',
+                'UI/Operators': 'operators',
+                'UI/Implementations': 'implementations',
+                'UI/Bootstrap': 'bootstrap'
+            };
+
+            layerOrder.forEach(function(layer) {
+                if (layerGroups[layer]) {
+                    var layerId = prefix + '-layer-' + layer.replace(/\//g, '-').replace(/ /g, '-').toLowerCase();
+                    var layerClass = layerColors[layer] || 'boundary';
+                    var fileCount = layerGroups[layer].length;
+
+                    html += '<div class="layer-section layer-' + layerClass + '">';
+                    html += '<div class="layer-header" onclick="toggleLayer(\'' + layerId + '\')">';
+                    html += '<div class="layer-title">';
+                    html += '<span class="layer-name">' + layer + '</span>';
+                    html += '<span class="layer-badge">' + fileCount + ' file' + (fileCount > 1 ? 's' : '') + '</span>';
+                    html += '</div>';
+                    html += '<span class="layer-icon">▶</span>';
+                    html += '</div>';
+                    html += '<div class="layer-content" id="' + layerId + '">';
+
+                    layerGroups[layer].forEach(function(file) {
+                        html += '<div class="code-container"><div class="code-header"><div class="code-file"><span>📄</span> ' + file.path + '</div><div class="code-layer">' + file.layer + '</div></div><div class="code-body"><pre><code class="language-' + file.language + '">' + escapeHtml(file.code) + '</code></pre></div></div>';
+                    });
+
+                    html += '</div>';
+                    html += '</div>';
+                }
+            });
+
+            return html;
+        }
+
+        function copyAllCode() {
+            const framework = 'dotnet-minimal-vanilla';
+            const scenario = 'complete';
+            const example = window.EXAMPLES && window.EXAMPLES[framework] && window.EXAMPLES[framework][scenario];
+
+            if (!example) return;
+
+            let allCode = '';
+            example.files.forEach(function(file) {
+                allCode += '// ' + file.path + '\n// Layer: ' + file.layer + '\n\n' + file.code + '\n\n' + '='.repeat(80) + '\n\n';
+            });
+
+            navigator.clipboard.writeText(allCode).then(function() {
+                const btn = document.querySelector('.copy-btn');
+                const icon = document.getElementById('copy-all-icon');
+                btn.classList.add('copied');
+                icon.textContent = '✓';
+                btn.lastChild.textContent = ' Copied!';
+
+                setTimeout(function() {
+                    btn.classList.remove('copied');
+                    icon.textContent = '📋';
+                    btn.lastChild.textContent = ' Copy All Code';
+                }, 2000);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.code-tab-content').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.code-tab').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleLayer(layerId) {
+            var content = document.getElementById(layerId);
+            var header = content.previousElementSibling;
+
+            // Toggle active state
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                header.classList.remove('active');
+            } else {
+                content.classList.add('active');
+                header.classList.add('active');
+
+                // Highlight syntax for newly visible code
+                setTimeout(function() {
+                    Prism.highlightAll();
+                }, 100);
+            }
+        }
+
+        function jumpToLayer(layerName, tabName) {
+            // Switch to correct tab first
+            if (tabName === 'backend') {
+                document.getElementById('tab-backend').classList.add('active');
+                document.getElementById('tab-frontend').classList.remove('active');
+                document.querySelectorAll('.code-tab').forEach(function(btn) {
+                    if (btn.textContent.includes('Backend')) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            } else {
+                document.getElementById('tab-frontend').classList.add('active');
+                document.getElementById('tab-backend').classList.remove('active');
+                document.querySelectorAll('.code-tab').forEach(function(btn) {
+                    if (btn.textContent.includes('Frontend')) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            // Find and open the layer
+            var layerId = tabName + '-layer-' + layerName.replace(/\//g, '-').replace(/ /g, '-').toLowerCase();
+            var content = document.getElementById(layerId);
+
+            if (content) {
+                var header = content.previousElementSibling;
+
+                // Open the layer if not already open
+                if (!content.classList.contains('active')) {
+                    content.classList.add('active');
+                    header.classList.add('active');
+                }
+
+                // Scroll to the layer with smooth animation
+                setTimeout(function() {
+                    header.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // Highlight effect
+                    header.style.background = 'rgba(127, 179, 213, 0.2)';
+                    setTimeout(function() {
+                        header.style.background = '#1a1a1a';
+                    }, 1000);
+
+                    // Highlight syntax
+                    Prism.highlightAll();
+                }, 100);
+            }
+        }
+
+        updateExample();
+    </script>
+</body>
+</html>
