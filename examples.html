@@ -134,6 +134,51 @@
         }
 
 
+        /* Selector Section */
+        .selector-section {
+            padding: 2rem 0 1rem 0;
+        }
+
+        .selector-box {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .selector-box label {
+            color: #a8d5ba;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .selector-box select {
+            flex: 1;
+            max-width: 400px;
+            padding: 0.75rem 1rem;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .selector-box select:hover {
+            border-color: #7fb3d5;
+            background: #222;
+        }
+
+        .selector-box select:focus {
+            outline: none;
+            border-color: #7fb3d5;
+            box-shadow: 0 0 0 2px rgba(127, 179, 213, 0.2);
+        }
+
         /* Example Section */
         .example-section {
             padding: 3rem 0;
@@ -627,6 +672,18 @@
         </div>
     </section>
 
+    <!-- Framework Selector -->
+    <section class="selector-section">
+        <div class="container">
+            <div class="selector-box">
+                <label for="framework-select">Choose Framework:</label>
+                <select id="framework-select" onchange="updateExample()">
+                    <option value="dotnet-minimal-vanilla">.NET Minimal API + Vanilla JS</option>
+                    <option value="python-fastapi-vanilla">Python FastAPI + Vanilla JS</option>
+                </select>
+            </div>
+        </div>
+    </section>
 
     <!-- Example Section -->
     <section class="example-section">
@@ -659,7 +716,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
 
-    <script src="examples-data.js"></script>
+    <!-- Load example data files -->
+    <script src="examples-data/dotnet-minimal-vanilla.js"></script>
+    <script src="examples-data/python-fastapi-vanilla.js"></script>
     <script>
         // Matrix effect
         const matrix = document.getElementById('matrix');
@@ -686,7 +745,8 @@
         document.head.appendChild(style);
 
         function updateExample() {
-            const framework = 'dotnet-minimal-vanilla';
+            const select = document.getElementById('framework-select');
+            const framework = select ? select.value : 'dotnet-minimal-vanilla';
             const scenario = 'complete';
 
             const example = window.EXAMPLES && window.EXAMPLES[framework] && window.EXAMPLES[framework][scenario];

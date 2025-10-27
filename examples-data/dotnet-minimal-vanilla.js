@@ -1,41 +1,43 @@
-// Complete Example: User Management System with .NET Minimal API + Vanilla JS
-window.EXAMPLES = {
-    'dotnet-minimal-vanilla': {
-        complete: {
-            title: 'Complete User Management - .NET Minimal API + Vanilla JS',
-            subtitle: 'Full-stack example with all 5 layers (Backend + Frontend)',
-            description: '<h3>Complete User Management System</h3><p>This is a <strong>complete, production-ready example</strong> showing CRUD operations for users with proper A.D.D V3 separation in both backend and frontend.</p><h4>Features:</h4><ul><li>Create User</li><li>Get User by ID</li><li>List All Users</li><li>Update User</li><li>Delete User</li></ul><h4>What you will see:</h4><ul><li><strong>Backend (.NET)</strong>: All 5 layers - 14 files total</li><li><strong>Frontend (Vanilla JS)</strong>: UI Module with 5 layers - 11 files total</li><li>In-memory database for simplicity (can swap with EF Core)</li><li>Full error handling and validation</li><li>DTO mapping between layers</li></ul><h4>How to use this example:</h4><ol><li><strong>Click "Copy All Code"</strong> button below to copy all files</li><li><strong>Backend setup:</strong> Create .NET project with <code>dotnet new web -n UserManagement</code>, then create folder structure (Boundary/DTOs, CoreAbstractions, Operators, Implementations, Bootstrap) and paste code from clipboard</li><li><strong>Frontend setup:</strong> Create folder structure (ui/boundary, ui/core-abstractions, ui/operators, ui/implementations, ui/bootstrap) and paste respective files</li><li><strong>Run backend:</strong> <code>dotnet run</code> (will run on http://localhost:5000)</li><li><strong>Run frontend:</strong> Use any HTTP server like <code>npx serve .</code> or <code>python -m http.server 8080</code></li><li><strong>Open in browser:</strong> Navigate to your frontend server and test CRUD operations</li></ol><p><strong>Scroll down</strong> to see all 25 files organized by layer. Each file has detailed comments explaining its role in the architecture.</p>',
-            architecture: {
-                backend: {
-                    title: 'Backend Dependency Graph',
-                    description: 'Arrows show "depends on" direction',
-                    layers: [
-                        { name: 'Bootstrap', color: 'bootstrap', dependencies: ['Operators', 'Implementations'] },
-                        { name: 'Operators', color: 'operators', dependencies: ['Boundary', 'Core Abstractions'] },
-                        { name: 'Core Abstractions', color: 'core', dependencies: [] },
-                        { name: 'Implementations', color: 'implementations', dependencies: ['Core Abstractions'] },
-                        { name: 'Boundary', color: 'boundary', dependencies: [] }
-                    ]
-                },
-                frontend: {
-                    title: 'Frontend Dependency Graph',
-                    description: 'Arrows show "depends on" direction',
-                    layers: [
-                        { name: 'UI/Bootstrap', color: 'bootstrap', dependencies: ['UI/Operators', 'UI/Implementations'] },
-                        { name: 'UI/Operators', color: 'operators', dependencies: ['UI/Boundary', 'UI/Core Abstractions'] },
-                        { name: 'UI/Core Abstractions', color: 'core', dependencies: [] },
-                        { name: 'UI/Implementations', color: 'implementations', dependencies: ['UI/Core Abstractions'] },
-                        { name: 'UI/Boundary', color: 'boundary', dependencies: [] }
-                    ]
-                }
+// .NET Minimal API + Vanilla JS Example
+// Complete User Management System with all 5 layers
+
+window.EXAMPLES = window.EXAMPLES || {};
+window.EXAMPLES['dotnet-minimal-vanilla'] = {
+    complete: {
+        title: 'Complete User Management - .NET Minimal API + Vanilla JS',
+        subtitle: 'Full-stack example with all 5 layers (Backend + Frontend)',
+        description: '<h3>Complete User Management System</h3><p>This is a <strong>complete, production-ready example</strong> showing CRUD operations for users with proper A.D.D V3 separation in both backend and frontend.</p><h4>Features:</h4><ul><li>Create User</li><li>Get User by ID</li><li>List All Users</li><li>Update User</li><li>Delete User</li></ul><h4>What you will see:</h4><ul><li><strong>Backend (.NET)</strong>: All 5 layers - 14 files total</li><li><strong>Frontend (Vanilla JS)</strong>: UI Module with 5 layers - 11 files total</li><li>In-memory database for simplicity (can swap with EF Core)</li><li>Full error handling and validation</li><li>DTO mapping between layers</li></ul><h4>How to use this example:</h4><ol><li><strong>Click "Copy All Code"</strong> button below to copy all files</li><li><strong>Backend setup:</strong> Create .NET project with <code>dotnet new web -n UserManagement</code>, then create folder structure (Boundary/DTOs, CoreAbstractions, Operators, Implementations, Bootstrap) and paste code from clipboard</li><li><strong>Frontend setup:</strong> Create folder structure (ui/boundary, ui/core-abstractions, ui/operators, ui/implementations, ui/bootstrap) and paste respective files</li><li><strong>Run backend:</strong> <code>dotnet run</code> (will run on http://localhost:5000)</li><li><strong>Run frontend:</strong> Use any HTTP server like <code>npx serve .</code> or <code>python -m http.server 8080</code></li><li><strong>Open in browser:</strong> Navigate to your frontend server and test CRUD operations</li></ol><p><strong>Scroll down</strong> to see all 25 files organized by layer. Each file has detailed comments explaining its role in the architecture.</p>',
+        architecture: {
+            backend: {
+                title: 'Backend Dependency Graph',
+                description: 'Arrows show "depends on" direction',
+                layers: [
+                    { name: 'Bootstrap', color: 'bootstrap', dependencies: ['Operators', 'Implementations'] },
+                    { name: 'Operators', color: 'operators', dependencies: ['Boundary', 'Core Abstractions'] },
+                    { name: 'Core Abstractions', color: 'core', dependencies: [] },
+                    { name: 'Implementations', color: 'implementations', dependencies: ['Core Abstractions'] },
+                    { name: 'Boundary', color: 'boundary', dependencies: [] }
+                ]
             },
-            files: [
-                // ==================== BACKEND - BOUNDARY LAYER ====================
-                {
-                    path: 'Backend/Boundary/DTOs/CreateUserDto.cs',
-                    layer: 'Boundary',
-                    language: 'csharp',
-                    code: `using System.ComponentModel.DataAnnotations;
+            frontend: {
+                title: 'Frontend Dependency Graph',
+                description: 'Arrows show "depends on" direction',
+                layers: [
+                    { name: 'UI/Bootstrap', color: 'bootstrap', dependencies: ['UI/Operators', 'UI/Implementations'] },
+                    { name: 'UI/Operators', color: 'operators', dependencies: ['UI/Boundary', 'UI/Core Abstractions'] },
+                    { name: 'UI/Core Abstractions', color: 'core', dependencies: [] },
+                    { name: 'UI/Implementations', color: 'implementations', dependencies: ['UI/Core Abstractions'] },
+                    { name: 'UI/Boundary', color: 'boundary', dependencies: [] }
+                ]
+            }
+        },
+        files: [
+            // ==================== BACKEND - BOUNDARY LAYER ====================
+            {
+                path: 'Backend/Boundary/DTOs/CreateUserDto.cs',
+                layer: 'Boundary',
+                language: 'csharp',
+                code: `using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace UserManagement.Boundary.DTOs;
@@ -59,12 +61,12 @@ public class CreateUserDto
     [Range(18, 120, ErrorMessage = "Age must be between 18 and 120")]
     public int Age { get; set; }
 }`
-                },
-                {
-                    path: 'Backend/Boundary/DTOs/UpdateUserDto.cs',
-                    layer: 'Boundary',
-                    language: 'csharp',
-                    code: `using System.ComponentModel.DataAnnotations;
+            },
+            {
+                path: 'Backend/Boundary/DTOs/UpdateUserDto.cs',
+                layer: 'Boundary',
+                language: 'csharp',
+                code: `using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace UserManagement.Boundary.DTOs;
@@ -82,12 +84,12 @@ public class UpdateUserDto
     [Range(18, 120)]
     public int? Age { get; set; }
 }`
-                },
-                {
-                    path: 'Backend/Boundary/DTOs/UserDto.cs',
-                    layer: 'Boundary',
-                    language: 'csharp',
-                    code: `using System.Text.Json.Serialization;
+            },
+            {
+                path: 'Backend/Boundary/DTOs/UserDto.cs',
+                layer: 'Boundary',
+                language: 'csharp',
+                code: `using System.Text.Json.Serialization;
 
 namespace UserManagement.Boundary.DTOs;
 
@@ -114,12 +116,12 @@ public class UserDto
     [JsonPropertyName("updatedAt")]
     public DateTime? UpdatedAt { get; set; }
 }`
-                },
-                {
-                    path: 'Backend/Boundary/DTOs/UserListDto.cs',
-                    layer: 'Boundary',
-                    language: 'csharp',
-                    code: `using System.Text.Json.Serialization;
+            },
+            {
+                path: 'Backend/Boundary/DTOs/UserListDto.cs',
+                layer: 'Boundary',
+                language: 'csharp',
+                code: `using System.Text.Json.Serialization;
 
 namespace UserManagement.Boundary.DTOs;
 
@@ -140,14 +142,14 @@ public class UserListDto
     [JsonPropertyName("pageSize")]
     public int PageSize { get; set; }
 }`
-                },
+            },
 
-                // ==================== BACKEND - CORE ABSTRACTIONS LAYER ====================
-                {
-                    path: 'Backend/CoreAbstractions/Entities/User.cs',
-                    layer: 'Core Abstractions',
-                    language: 'csharp',
-                    code: `namespace UserManagement.CoreAbstractions.Entities;
+            // ==================== BACKEND - CORE ABSTRACTIONS LAYER ====================
+            {
+                path: 'Backend/CoreAbstractions/Entities/User.cs',
+                layer: 'Core Abstractions',
+                language: 'csharp',
+                code: `namespace UserManagement.CoreAbstractions.Entities;
 
 /// <summary>
 /// User entity - internal domain model
@@ -179,12 +181,12 @@ public class User
         return errors.Count == 0;
     }
 }`
-                },
-                {
-                    path: 'Backend/CoreAbstractions/Ports/IUserRepository.cs',
-                    layer: 'Core Abstractions',
-                    language: 'csharp',
-                    code: `using UserManagement.CoreAbstractions.Entities;
+            },
+            {
+                path: 'Backend/CoreAbstractions/Ports/IUserRepository.cs',
+                layer: 'Core Abstractions',
+                language: 'csharp',
+                code: `using UserManagement.CoreAbstractions.Entities;
 
 namespace UserManagement.CoreAbstractions.Ports;
 
@@ -203,12 +205,12 @@ public interface IUserRepository
     Task DeleteAsync(string id);
     Task<bool> ExistsAsync(string id);
 }`
-                },
-                {
-                    path: 'Backend/CoreAbstractions/Exceptions/UserNotFoundException.cs',
-                    layer: 'Core Abstractions',
-                    language: 'csharp',
-                    code: `namespace UserManagement.CoreAbstractions.Exceptions;
+            },
+            {
+                path: 'Backend/CoreAbstractions/Exceptions/UserNotFoundException.cs',
+                layer: 'Core Abstractions',
+                language: 'csharp',
+                code: `namespace UserManagement.CoreAbstractions.Exceptions;
 
 /// <summary>
 /// Domain exception - thrown when user is not found
@@ -223,12 +225,12 @@ public class UserNotFoundException : Exception
         UserId = userId;
     }
 }`
-                },
-                {
-                    path: 'Backend/CoreAbstractions/Exceptions/ValidationException.cs',
-                    layer: 'Core Abstractions',
-                    language: 'csharp',
-                    code: `namespace UserManagement.CoreAbstractions.Exceptions;
+            },
+            {
+                path: 'Backend/CoreAbstractions/Exceptions/ValidationException.cs',
+                layer: 'Core Abstractions',
+                language: 'csharp',
+                code: `namespace UserManagement.CoreAbstractions.Exceptions;
 
 /// <summary>
 /// Domain exception - thrown when validation fails
@@ -248,12 +250,12 @@ public class ValidationException : Exception
         Errors = errors;
     }
 }`
-                },
-                {
-                    path: 'Backend/CoreAbstractions/Exceptions/DuplicateUserException.cs',
-                    layer: 'Core Abstractions',
-                    language: 'csharp',
-                    code: `namespace UserManagement.CoreAbstractions.Exceptions;
+            },
+            {
+                path: 'Backend/CoreAbstractions/Exceptions/DuplicateUserException.cs',
+                layer: 'Core Abstractions',
+                language: 'csharp',
+                code: `namespace UserManagement.CoreAbstractions.Exceptions;
 
 /// <summary>
 /// Domain exception - thrown when trying to create user with existing email
@@ -268,14 +270,14 @@ public class DuplicateUserException : Exception
         Email = email;
     }
 }`
-                },
+            },
 
-                // ==================== BACKEND - OPERATORS LAYER ====================
-                {
-                    path: 'Backend/Operators/UserOperator.cs',
-                    layer: 'Operators',
-                    language: 'csharp',
-                    code: `using UserManagement.Boundary.DTOs;
+            // ==================== BACKEND - OPERATORS LAYER ====================
+            {
+                path: 'Backend/Operators/UserOperator.cs',
+                layer: 'Operators',
+                language: 'csharp',
+                code: `using UserManagement.Boundary.DTOs;
 using UserManagement.CoreAbstractions.Entities;
 using UserManagement.CoreAbstractions.Ports;
 using UserManagement.CoreAbstractions.Exceptions;
@@ -394,14 +396,14 @@ public class UserOperator
         };
     }
 }`
-                },
+            },
 
-                // ==================== BACKEND - IMPLEMENTATIONS LAYER ====================
-                {
-                    path: 'Backend/Implementations/Database/InMemoryUserRepository.cs',
-                    layer: 'Implementations',
-                    language: 'csharp',
-                    code: `using UserManagement.CoreAbstractions.Entities;
+            // ==================== BACKEND - IMPLEMENTATIONS LAYER ====================
+            {
+                path: 'Backend/Implementations/Database/InMemoryUserRepository.cs',
+                layer: 'Implementations',
+                language: 'csharp',
+                code: `using UserManagement.CoreAbstractions.Entities;
 using UserManagement.CoreAbstractions.Ports;
 
 namespace UserManagement.Implementations.Database;
@@ -495,14 +497,14 @@ public class InMemoryUserRepository : IUserRepository
         }
     }
 }`
-                },
+            },
 
-                // ==================== BACKEND - BOOTSTRAP LAYER ====================
-                {
-                    path: 'Backend/Bootstrap/Program.cs',
-                    layer: 'Bootstrap',
-                    language: 'csharp',
-                    code: `using UserManagement.Bootstrap;
+            // ==================== BACKEND - BOOTSTRAP LAYER ====================
+            {
+                path: 'Backend/Bootstrap/Program.cs',
+                layer: 'Bootstrap',
+                language: 'csharp',
+                code: `using UserManagement.Bootstrap;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -528,12 +530,12 @@ app.UseCors();
 app.MapUserEndpoints();
 
 app.Run();`
-                },
-                {
-                    path: 'Backend/Bootstrap/DependencyInjection.cs',
-                    layer: 'Bootstrap',
-                    language: 'csharp',
-                    code: `using UserManagement.CoreAbstractions.Ports;
+            },
+            {
+                path: 'Backend/Bootstrap/DependencyInjection.cs',
+                layer: 'Bootstrap',
+                language: 'csharp',
+                code: `using UserManagement.CoreAbstractions.Ports;
 using UserManagement.Implementations.Database;
 using UserManagement.Operators;
 
@@ -556,12 +558,12 @@ public static class DependencyInjection
         return services;
     }
 }`
-                },
-                {
-                    path: 'Backend/Bootstrap/WebApplicationExtensions.cs',
-                    layer: 'Bootstrap',
-                    language: 'csharp',
-                    code: `using Microsoft.AspNetCore.Mvc;
+            },
+            {
+                path: 'Backend/Bootstrap/WebApplicationExtensions.cs',
+                layer: 'Bootstrap',
+                language: 'csharp',
+                code: `using Microsoft.AspNetCore.Mvc;
 using UserManagement.Boundary.DTOs;
 using UserManagement.Operators;
 using UserManagement.CoreAbstractions.Exceptions;
@@ -663,14 +665,14 @@ public static class WebApplicationExtensions
         .WithOpenApi();
     }
 }`
-                },
+            },
 
-                // ==================== FRONTEND - UI/BOUNDARY ====================
-                {
-                    path: 'Frontend/ui/boundary/screen-props.js',
-                    layer: 'UI/Boundary',
-                    language: 'javascript',
-                    code: `// External contracts for UI screens
+            // ==================== FRONTEND - UI/BOUNDARY ====================
+            {
+                path: 'Frontend/ui/boundary/screen-props.js',
+                layer: 'UI/Boundary',
+                language: 'javascript',
+                code: `// External contracts for UI screens
 // Props that screens accept from outside
 
 export const UserListScreenProps = {
@@ -690,14 +692,14 @@ export const EditUserScreenProps = {
     onSuccess: 'function',
     onCancel: 'function'
 };`
-                },
+            },
 
-                // ==================== FRONTEND - UI/CORE ABSTRACTIONS ====================
-                {
-                    path: 'Frontend/ui/core-abstractions/ports/IApiClient.js',
-                    layer: 'UI/Core Abstractions',
-                    language: 'javascript',
-                    code: `// Port (interface) for API communication
+            // ==================== FRONTEND - UI/CORE ABSTRACTIONS ====================
+            {
+                path: 'Frontend/ui/core-abstractions/ports/IApiClient.js',
+                layer: 'UI/Core Abstractions',
+                language: 'javascript',
+                code: `// Port (interface) for API communication
 // Operators call this abstraction, Implementations provide concrete adapter
 
 export class IApiClient {
@@ -717,12 +719,12 @@ export class IApiClient {
         throw new Error('Not implemented');
     }
 }`
-                },
-                {
-                    path: 'Frontend/ui/core-abstractions/ports/INotificationService.js',
-                    layer: 'UI/Core Abstractions',
-                    language: 'javascript',
-                    code: `// Port for showing notifications to user
+            },
+            {
+                path: 'Frontend/ui/core-abstractions/ports/INotificationService.js',
+                layer: 'UI/Core Abstractions',
+                language: 'javascript',
+                code: `// Port for showing notifications to user
 
 export class INotificationService {
     success(message) {
@@ -737,12 +739,12 @@ export class INotificationService {
         throw new Error('Not implemented');
     }
 }`
-                },
-                {
-                    path: 'Frontend/ui/core-abstractions/view-models/UserViewModel.js',
-                    layer: 'UI/Core Abstractions',
-                    language: 'javascript',
-                    code: `// ViewModel - internal UI representation with computed/formatted fields
+            },
+            {
+                path: 'Frontend/ui/core-abstractions/view-models/UserViewModel.js',
+                layer: 'UI/Core Abstractions',
+                language: 'javascript',
+                code: `// ViewModel - internal UI representation with computed/formatted fields
 
 export class UserViewModel {
     constructor(userData) {
@@ -767,14 +769,14 @@ export class UserViewModel {
         return this.name.split(' ').map(n => n[0]).join('').toUpperCase();
     }
 }`
-                },
+            },
 
-                // ==================== FRONTEND - UI/OPERATORS ====================
-                {
-                    path: 'Frontend/ui/operators/UserListOperator.js',
-                    layer: 'UI/Operators',
-                    language: 'javascript',
-                    code: `import { UserViewModel } from '../core-abstractions/view-models/UserViewModel.js';
+            // ==================== FRONTEND - UI/OPERATORS ====================
+            {
+                path: 'Frontend/ui/operators/UserListOperator.js',
+                layer: 'UI/Operators',
+                language: 'javascript',
+                code: `import { UserViewModel } from '../core-abstractions/view-models/UserViewModel.js';
 
 // Presentation Operator - orchestrates user list logic
 // Framework-agnostic business presentation logic
@@ -817,12 +819,12 @@ export class UserListOperator {
         }
     }
 }`
-                },
-                {
-                    path: 'Frontend/ui/operators/UserFormOperator.js',
-                    layer: 'UI/Operators',
-                    language: 'javascript',
-                    code: `// Form submission operator - handles create/update logic
+            },
+            {
+                path: 'Frontend/ui/operators/UserFormOperator.js',
+                layer: 'UI/Operators',
+                language: 'javascript',
+                code: `// Form submission operator - handles create/update logic
 
 export class UserFormOperator {
     constructor(apiClient, notificationService) {
@@ -890,14 +892,14 @@ export class UserFormOperator {
         return errors;
     }
 }`
-                },
+            },
 
-                // ==================== FRONTEND - UI/IMPLEMENTATIONS ====================
-                {
-                    path: 'Frontend/ui/implementations/api/FetchApiClient.js',
-                    layer: 'UI/Implementations',
-                    language: 'javascript',
-                    code: `import { IApiClient } from '../../core-abstractions/ports/IApiClient.js';
+            // ==================== FRONTEND - UI/IMPLEMENTATIONS ====================
+            {
+                path: 'Frontend/ui/implementations/api/FetchApiClient.js',
+                layer: 'UI/Implementations',
+                language: 'javascript',
+                code: `import { IApiClient } from '../../core-abstractions/ports/IApiClient.js';
 
 // Concrete implementation of IApiClient using Fetch API
 // Adapter for HTTP communication
@@ -952,12 +954,12 @@ export class FetchApiClient extends IApiClient {
         return response.status === 204 ? null : await response.json();
     }
 }`
-                },
-                {
-                    path: 'Frontend/ui/implementations/notifications/ToastNotificationService.js',
-                    layer: 'UI/Implementations',
-                    language: 'javascript',
-                    code: `import { INotificationService } from '../../core-abstractions/ports/INotificationService.js';
+            },
+            {
+                path: 'Frontend/ui/implementations/notifications/ToastNotificationService.js',
+                layer: 'UI/Implementations',
+                language: 'javascript',
+                code: `import { INotificationService } from '../../core-abstractions/ports/INotificationService.js';
 
 // Simple toast notification implementation
 // Adapter for showing notifications
@@ -999,12 +1001,12 @@ export class ToastNotificationService extends INotificationService {
         }, 3000);
     }
 }`
-                },
-                {
-                    path: 'Frontend/ui/implementations/html/index.html',
-                    layer: 'UI/Implementations',
-                    language: 'markup',
-                    code: `<!DOCTYPE html>
+            },
+            {
+                path: 'Frontend/ui/implementations/html/index.html',
+                layer: 'UI/Implementations',
+                language: 'markup',
+                code: `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1056,12 +1058,12 @@ export class ToastNotificationService extends INotificationService {
     <script type="module" src="../../bootstrap/app.js"></script>
 </body>
 </html>`
-                },
-                {
-                    path: 'Frontend/ui/implementations/html/styles.css',
-                    layer: 'UI/Implementations',
-                    language: 'css',
-                    code: `* {
+            },
+            {
+                path: 'Frontend/ui/implementations/html/styles.css',
+                layer: 'UI/Implementations',
+                language: 'css',
+                code: `* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -1181,14 +1183,14 @@ header p {
     outline: none;
     border-color: #4a9eff;
 }`
-                },
+            },
 
-                // ==================== FRONTEND - UI/BOOTSTRAP ====================
-                {
-                    path: 'Frontend/ui/bootstrap/app.js',
-                    layer: 'UI/Bootstrap',
-                    language: 'javascript',
-                    code: `// Bootstrap - Application entry point
+            // ==================== FRONTEND - UI/BOOTSTRAP ====================
+            {
+                path: 'Frontend/ui/bootstrap/app.js',
+                layer: 'UI/Bootstrap',
+                language: 'javascript',
+                code: `// Bootstrap - Application entry point
 // Wires all dependencies together and initializes app
 
 import { FetchApiClient } from '../implementations/api/FetchApiClient.js';
@@ -1283,8 +1285,7 @@ function showListScreen() {
 
 // Start app
 initializeApp();`
-                }
-            ]
-        }
+            }
+        ]
     }
 };
