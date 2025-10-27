@@ -1,22 +1,15 @@
 <!DOCTYPE html>
-<!--
-  GitHub Links Status: TEMPORARILY DISABLED
-  All GitHub repository links have been commented out and can be re-enabled by:
-  1. Search for "GitHub link temporarily disabled" comments
-  2. Uncomment the desired GitHub links
-  3. Remove or comment out replacement links as needed
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abstract Driven Development - Scalable AI-Centric Software Architecture</title>
-    <meta name="description" content="Learn Abstract Driven Development (ADD) - a proven architecture pattern for building maintainable, testable, and scalable software systems with AI assistance, solving VIBE code problems.">
-    <meta name="keywords" content="software architecture, clean architecture, dependency inversion, abstract driven development, ADD, design patterns, AI development, VIBE code, AI-assisted coding">
+    <title>Abstract Driven Development - AI-Centric Software Architecture</title>
+    <meta name="description" content="Learn Abstract Driven Development (ADD) - a proven architecture pattern for building maintainable, testable, and scalable software systems with AI assistance.">
+    <meta name="keywords" content="software architecture, clean architecture, dependency inversion, abstract driven development, ADD, design patterns, AI development, AI-assisted coding">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Abstract Driven Development - Scalable AI-Centric Software Architecture">
-    <meta property="og:description" content="Build better software with ADD - a 5-layer architecture pattern with AI assistance, solving VIBE code problems">
+    <meta property="og:title" content="Abstract Driven Development - AI-Centric Software Architecture">
+    <meta property="og:description" content="Build better software with ADD - a 5-layer architecture pattern with AI assistance">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://abstractdriven.com">
 
@@ -26,10 +19,200 @@
     <!-- Styles -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
-    <link rel="stylesheet" href="styles/syntax-highlight.css">
 
     <!-- Icons -->
     <link rel="stylesheet" href="lib/fontawesome.min.css">
+
+    <style>
+        /* Quick Start Section Styles */
+        .quick-start-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: var(--space-3xl) 0;
+            color: white;
+        }
+
+        .quick-start-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+        }
+
+        .quick-start-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .quick-start-steps {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: var(--space-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .step {
+            margin-bottom: var(--space-xl);
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: var(--space-md);
+        }
+
+        .step-content {
+            display: inline-block;
+            vertical-align: middle;
+            max-width: calc(100% - 60px);
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-desc {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .command-box {
+            background: var(--gray-900);
+            color: var(--gray-100);
+            padding: var(--space-xl);
+            border-radius: 12px;
+            margin: var(--space-lg) 0;
+            position: relative;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .command-box code {
+            color: #a5f3fc;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: var(--space-md);
+            right: var(--space-md);
+            background: rgba(2, 132, 199, 0.8);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition-normal);
+        }
+
+        .copy-btn:hover {
+            background: rgba(2, 132, 199, 1);
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.8);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            margin-top: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        .btn-download,
+        .btn-fractal {
+            background: white;
+            color: #667eea;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-download:hover,
+        .btn-fractal:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* What's Inside Section */
+        .whats-inside-section {
+            padding: var(--space-3xl) 0;
+            background: var(--gray-50);
+        }
+
+        .whats-inside-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-2xl);
+        }
+
+        .inside-card {
+            background: white;
+            padding: var(--space-xl);
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+        }
+
+        .inside-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .inside-card h3 {
+            color: var(--gray-800);
+            font-size: 1.3rem;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .inside-card p {
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Version badge */
+        .version-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -44,17 +227,10 @@
 
             <div class="nav-menu" id="nav-menu">
                 <ul class="nav-list">
-                    <li><a href="#overview" class="nav-link">Overview</a></li>
-                    <li><a href="#principles" class="nav-link">Principles</a></li>
-                    <li><a href="#patterns" class="nav-link">Patterns</a></li>
-                    <li><a href="#examples" class="nav-link">Examples</a></li>
-                    <li><a href="documentation.html" class="nav-link">Docs</a></li>
+                    <li><a href="#quick-start" class="nav-link">Quick Start</a></li>
+                    <li><a href="#benefits" class="nav-link">Benefits</a></li>
+                    <li><a href="#resources" class="nav-link">Resources</a></li>
                     <li><a href="fractal-pattern.html" class="nav-link">Fractal Viewer</a></li>
-                    <!-- GitHub link temporarily disabled
-                    <li><a href="https://github.com/abstractdriven/abstract-driven-playbook" class="nav-link nav-github" target="_blank">
-                        <i class="fab fa-github"></i> GitHub
-                    </a></li>
-                    -->
                 </ul>
             </div>
 
@@ -70,22 +246,21 @@
     <section id="overview" class="hero">
         <div class="hero-container">
             <div class="hero-content">
+                <span class="version-badge">Version 3.2.1</span>
                 <h1 class="hero-title">
-                    Build Better Software with
-                    <span class="highlight">The First AI-Centric Architecture</span>
+                    <span class="highlight">Abstract Driven Development</span>
+                    The First AI-Centric Architecture
                 </h1>
                 <p class="hero-subtitle">
                     A proven 5-layer architecture pattern that enables AI to write complete software from start to finish,
-                    with human-in-the-loop control. Solving the uncontrollable VIBE code problem while maintaining
-                    enterprise-grade quality and scalability.
+                    with human-in-the-loop control. Build enterprise-grade applications with AI assistance while maintaining
+                    quality, testability, and scalability.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#overview" class="btn btn-primary">Get Started</a>
-                    <!-- GitHub button temporarily disabled
-                    <a href="https://github.com/abstractdriven/abstract-driven-playbook" class="btn btn-secondary" target="_blank">
-                        <i class="fab fa-github"></i> View on GitHub
+                    <a href="#quick-start" class="btn btn-primary">Get Started Now</a>
+                    <a href="fractal-pattern.html" class="btn btn-secondary">
+                        <i class="fas fa-project-diagram"></i> Explore Pattern
                     </a>
-                    -->
                 </div>
             </div>
 
@@ -93,7 +268,7 @@
                 <div class="architecture-diagram">
                     <div class="layer layer-boundary">
                         <span class="layer-label">Boundary</span>
-                        <span class="layer-desc">DTOs, Controllers, APIs</span>
+                        <span class="layer-desc">External Contracts</span>
                     </div>
                     <div class="layer layer-core">
                         <span class="layer-label">Core Abstractions</span>
@@ -105,18 +280,68 @@
                     </div>
                     <div class="layer layer-implementations">
                         <span class="layer-label">Implementations</span>
-                        <span class="layer-desc">Adapters, Repositories</span>
+                        <span class="layer-desc">Technology Adapters</span>
                     </div>
                     <div class="layer layer-bootstrap">
                         <span class="layer-label">Bootstrap</span>
-                        <span class="layer-desc">DI Configuration</span>
+                        <span class="layer-desc">DI & Configuration</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Overview Section -->
+    <!-- Quick Start Section -->
+    <section id="quick-start" class="quick-start-section">
+        <div class="quick-start-container">
+            <h2 class="quick-start-title">🚀 Apply A.D.D in 30 Seconds</h2>
+
+            <div class="quick-start-steps">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <div class="step-title">Open Your AI IDE</div>
+                        <div class="step-desc">Claude Code, Cursor, Windsurf, GitHub Copilot, or any LLM-powered IDE</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <div class="step-title">Copy This Command</div>
+                        <div class="command-box">
+                            <button class="copy-btn" onclick="copyCommand()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <pre><code>Read @https://abstractdriven.com/llms-full.txt and make my code 100% compatible with A.D.D V3 principles. Use Fractal Architecture Pattern (F.A.P).</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <div class="step-title">Let AI Architect Your Application!</div>
+                        <div class="step-desc">AI will structure your code following A.D.D V3: 5-layer architecture, dependency inversion, and fractal patterns</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="llms-full.txt" class="btn-download" download>
+                    <i class="fas fa-download"></i> Download Full Reference (llms-full.txt)
+                </a>
+                <a href="llms.txt" class="btn-download" download>
+                    <i class="fas fa-download"></i> Download Quick Reference (llms.txt)
+                </a>
+                <a href="fractal-pattern.html" class="btn-fractal">
+                    <i class="fas fa-project-diagram"></i> Explore Fractal Pattern
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
     <section id="benefits" class="section">
         <div class="container">
             <div class="section-header">
@@ -125,6 +350,14 @@
             </div>
 
             <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Driven Development</h3>
+                    <p>Enable AI to generate complete applications with human oversight. Clear structure allows AI to write maintainable code while maintaining control.</p>
+                </div>
+
                 <div class="benefit-card">
                     <div class="benefit-icon">
                         <i class="fas fa-exchange-alt"></i>
@@ -143,764 +376,79 @@
 
                 <div class="benefit-card">
                     <div class="benefit-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3>AI-Driven Development</h3>
-                    <p>Enable AI to generate complete applications with human oversight. Clear structure allows AI to write maintainable code while solving the uncontrollable VIBE code problem.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
                         <i class="fas fa-cogs"></i>
                     </div>
                     <h3>Maintainable Code</h3>
                     <p>Consistent patterns and clear separation make code predictable. New team members understand the structure quickly and contribute effectively.</p>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Architecture Section -->
-    <section class="section section-alt">
-        <div class="container">
-            <div class="section-header">
-                <h2>The 5-Layer Architecture</h2>
-                <p>Each layer has a specific responsibility and clear dependencies</p>
-            </div>
-
-            <div class="architecture-details">
-                <div class="layer-detail active" data-layer="boundary">
-                    <div class="layer-content">
-                        <h3><i class="fas fa-globe"></i> Boundary Layer</h3>
-                        <p>Handles external communication and data contracts. Controllers, DTOs, and API endpoints live here.</p>
-                        <ul>
-                            <li>HTTP/REST/GraphQL endpoints</li>
-                            <li>Input validation and sanitization</li>
-                            <li>Response formatting</li>
-                            <li>Authentication integration</li>
-                        </ul>
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-project-diagram"></i>
                     </div>
-                    <div class="layer-code">
-                        <pre><code class="language-typescript">@Controller('users')
-export class UserController {
-  constructor(
-    private readonly userOperator: UserOperator
-  ) {}
-
-  @Post()
-  async createUser(
-    @Body() dto: CreateUserDto
-  ): Promise<UserResponseDto> {
-    return await this.userOperator.createUser(dto);
-  }
-}</code></pre>
-                    </div>
+                    <h3>Fractal Architecture</h3>
+                    <p>Self-similar structure at all depths. Every module has the same 5 layers, enabling infinite composition and easy navigation for both humans and AI.</p>
                 </div>
 
-                <div class="layer-detail" data-layer="core">
-                    <div class="layer-content">
-                        <h3><i class="fas fa-heart"></i> Core Abstractions</h3>
-                        <p>Defines business concepts and rules through entities, value objects, ports, and domain events.</p>
-                        <ul>
-                            <li>Domain entities and value objects</li>
-                            <li>Business rules and invariants</li>
-                            <li>Port interfaces (Repository, Service)</li>
-                            <li>Domain events</li>
-                        </ul>
-                    </div>
-                    <div class="layer-code">
-                        <pre><code class="language-typescript">// Core Abstractions - User Entity
-export class User {
-  constructor(
-    public readonly id: UserId,
-    public readonly email: Email,
-    public readonly fullName: FullName,
-    public readonly isActive: boolean
-  ) {
-    this.validateBusinessRules();
-  }
-
-  static create(email: string, fullName: string): User {
-    return new User(
-      UserId.generate(),
-      new Email(email),
-      FullName.fromString(fullName),
-      true
-    );
-  }
-
-  private validateBusinessRules(): void {
-    if (!this.email.isValid()) {
-      throw new InvalidEmailError();
-    }
-  }
-}</code></pre>
-                    </div>
-                </div>
-
-                <div class="layer-detail" data-layer="operators">
-                    <div class="layer-content">
-                        <h3><i class="fas fa-cogs"></i> Operators</h3>
-                        <p>Orchestrates business workflows, coordinates transactions, and manages use case implementation.</p>
-                        <ul>
-                            <li>Use case orchestration</li>
-                            <li>Business workflow coordination</li>
-                            <li>DTO ↔ Entity mapping</li>
-                            <li>Cross-cutting concerns</li>
-                        </ul>
-                    </div>
-                    <div class="layer-code">
-                        <pre><code class="language-typescript">// Operators - Business Logic
-export class UserOperator {
-  constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly emailService: IEmailService
-  ) {}
-
-  async createUser(dto: CreateUserDto): Promise&lt;UserResponseDto&gt; {
-    // Business validation
-    await this.validateUniqueEmail(dto.email);
-
-    // Create entity
-    const user = User.create(dto.email, dto.fullName);
-
-    // Persist
-    await this.userRepository.save(user);
-
-    // Side effects
-    await this.emailService.sendWelcomeEmail(user.email);
-
-    return this.mapToResponse(user);
-  }
-}</code></pre>
-                    </div>
-                </div>
-
-                <div class="layer-detail" data-layer="implementations">
-                    <div class="layer-content">
-                        <h3><i class="fas fa-database"></i> Implementations</h3>
-                        <p>Provides concrete implementations of ports, handles external systems, and manages technical concerns.</p>
-                        <ul>
-                            <li>Database repositories</li>
-                            <li>External service adapters</li>
-                            <li>Infrastructure concerns</li>
-                            <li>Technical integrations</li>
-                        </ul>
-                    </div>
-                    <div class="layer-code">
-                        <pre><code class="language-typescript">// Implementations - Technical Details
-export class PostgresUserRepository implements IUserRepository {
-  constructor(private readonly pool: Pool) {}
-
-  async save(user: User): Promise&lt;void&gt; {
-    const query = `
-      INSERT INTO users (id, email, full_name, is_active)
-      VALUES ($1, $2, $3, $4)
-    `;
-
-    await this.pool.query(query, [
-      user.id.value,
-      user.email.value,
-      user.fullName.value,
-      user.isActive
-    ]);
-  }
-
-  async findById(id: UserId): Promise&lt;User | null&gt; {
-    const result = await this.pool.query(
-      'SELECT * FROM users WHERE id = $1',
-      [id.value]
-    );
-
-    return result.rows[0] ? this.mapToUser(result.rows[0]) : null;
-  }
-}</code></pre>
-                    </div>
-                </div>
-
-                <div class="layer-detail" data-layer="bootstrap">
-                    <div class="layer-content">
-                        <h3><i class="fas fa-play-circle"></i> Bootstrap</h3>
-                        <p>Configures dependency injection, manages application lifecycle, and wires all layers together.</p>
-                        <ul>
-                            <li>Dependency injection setup</li>
-                            <li>Application configuration</li>
-                            <li>Service registration</li>
-                            <li>Application startup</li>
-                        </ul>
-                    </div>
-                    <div class="layer-code">
-                        <pre><code class="language-typescript">// Bootstrap - Dependency Injection
-export class Container {
-  private services = new Map();
-
-  register(): void {
-    // Register implementations
-    this.services.set('userRepository',
-      new PostgresUserRepository(dbPool)
-    );
-
-    this.services.set('emailService',
-      new SendGridEmailService(apiKey)
-    );
-
-    // Register operators
-    this.services.set('userOperator',
-      new UserOperator(
-        this.get('userRepository'),
-        this.get('emailService')
-      )
-    );
-  }
-
-  get&lt;T&gt;(key: string): T {
-    return this.services.get(key);
-  }
-}</code></pre>
-                    </div>
-                </div>
-
-                <div class="layer-tabs">
-                    <button class="tab-btn active" data-layer="boundary">Boundary</button>
-                    <button class="tab-btn" data-layer="core">Core Abstractions</button>
-                    <button class="tab-btn" data-layer="operators">Operators</button>
-                    <button class="tab-btn" data-layer="implementations">Implementations</button>
-                    <button class="tab-btn" data-layer="bootstrap">Bootstrap</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Principles Section -->
-    <section id="principles" class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Core Principles</h2>
-                <p>Four fundamental principles that guide ADD implementation</p>
-            </div>
-
-            <div class="principles-grid">
-                <div class="principle-card">
-                    <div class="principle-icon">
-                        <i class="fas fa-arrows-alt-h"></i>
-                    </div>
-                    <h3>Dependency Inversion</h3>
-                    <p>High-level modules never depend on low-level modules. Both depend on abstractions, enabling flexibility and testability.</p>
-                    <a href="documentation.html#dependency-inversion" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
-                </div>
-
-                <div class="principle-card">
-                    <div class="principle-icon">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
                         <i class="fas fa-layer-group"></i>
                     </div>
-                    <h3>Clear Layer Separation</h3>
-                    <p>Strict boundaries between layers with unidirectional dependencies. Each layer has distinct responsibilities.</p>
-                    <a href="documentation.html#layer-separation" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
-                </div>
-
-                <div class="principle-card">
-                    <div class="principle-icon">
-                        <i class="fas fa-microchip"></i>
-                    </div>
-                    <h3>Technology Independence</h3>
-                    <p>Business logic operates independently of specific technologies, frameworks, or external services.</p>
-                    <a href="documentation.html#technology-independence" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
-                </div>
-
-                <div class="principle-card">
-                    <div class="principle-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <h3>Simplicity & KISS</h3>
-                    <p>Keep implementations simple and consistent while maintaining architectural power and flexibility.</p>
-                    <a href="documentation.html#simplicity" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                    <h3>Clear Boundaries</h3>
+                    <p>Strict layer dependencies prevent coupling. Operators never call Implementations directly - all communication through Ports and Events.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Patterns Section -->
-    <section id="patterns" class="section section-alt">
+    <!-- What's Inside Section -->
+    <section id="resources" class="whats-inside-section">
         <div class="container">
             <div class="section-header">
-                <h2>Proven Patterns</h2>
-                <p>Battle-tested patterns for implementing ADD effectively</p>
+                <h2>What's Inside A.D.D V3?</h2>
+                <p>Comprehensive architecture pattern with clear rules for humans and AI</p>
             </div>
 
-            <div class="patterns-container">
-                <div class="pattern-category">
-                    <h3><i class="fas fa-star"></i> Basic Patterns</h3>
-                    <p>Essential patterns for every ADD implementation</p>
-                    <div class="pattern-list">
-                        <div class="pattern-item">
-                            <h4>Port & Adapter</h4>
-                            <p>Isolate business logic from external systems</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/Port%20and%20Adapter" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                        <div class="pattern-item">
-                            <h4>DTO ↔ Entity Mapping</h4>
-                            <p>Transform data between external and internal models</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/DTO%20Entity%20Mapping" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                        <div class="pattern-item">
-                            <h4>Event-Driven Communication</h4>
-                            <p>Decouple components through asynchronous messaging</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/Event%20Driven%20Communication" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                    </div>
+            <div class="whats-inside-grid">
+                <div class="inside-card">
+                    <h3><i class="fas fa-layer-group"></i> 5-Layer Architecture</h3>
+                    <p><strong>Bootstrap</strong> → Composition root & DI<br>
+                    <strong>Operators</strong> → Business orchestration<br>
+                    <strong>Core Abstractions</strong> → Entities, Ports, Events<br>
+                    <strong>Implementations</strong> → Technology adapters<br>
+                    <strong>Boundary</strong> → External contracts</p>
                 </div>
 
-                <div class="pattern-category">
-                    <h3><i class="fas fa-rocket"></i> Extended Patterns</h3>
-                    <p>Advanced patterns for complex enterprise scenarios</p>
-                    <div class="pattern-list">
-                        <div class="pattern-item">
-                            <h4>Scope Modules</h4>
-                            <p>Organize complex domains into manageable sub-systems</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/Scope%20Modules" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                        <div class="pattern-item">
-                            <h4>RuleSet + Checkpoint</h4>
-                            <p>Flexible, composable business rule validation</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/RuleSet%20plus%20Checkpoint" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                        <div class="pattern-item">
-                            <h4>Transaction Group Operators</h4>
-                            <p>Coordinate multiple operations as atomic units</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/Transaction%20Group%20Operators" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                        <div class="pattern-item">
-                            <h4>Coordinator Operators</h4>
-                            <p>Orchestrate complex business workflows</p>
-                            <!-- GitHub pattern link temporarily disabled
-                            <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/patterns/Coordinator%20Operators" class="pattern-link" target="_blank">View Pattern</a>
-                            -->
-                        </div>
-                    </div>
+                <div class="inside-card">
+                    <h3><i class="fas fa-project-diagram"></i> Fractal Pattern (F.A.P)</h3>
+                    <p>Self-similar structure: Every module at any depth has the same 5 layers. Only Implementations can contain sub-modules. Infinite nesting enabled.</p>
+                </div>
+
+                <div class="inside-card">
+                    <h3><i class="fas fa-arrows-alt-h"></i> Dependency Rules</h3>
+                    <p>Strict boundaries: Operators → Core Abstractions only. Implementations → Core Abstractions (+ Boundary for system edge adapters). No circular dependencies.</p>
+                </div>
+
+                <div class="inside-card">
+                    <h3><i class="fas fa-plug"></i> Ports & Adapters</h3>
+                    <p>Interfaces (Ports) in Core Abstractions. Concrete implementations (Adapters) in Implementations. Operators call Ports, DI resolves to Adapters.</p>
+                </div>
+
+                <div class="inside-card">
+                    <h3><i class="fas fa-broadcast-tower"></i> Event-Driven</h3>
+                    <p><strong>Core Events</strong> for internal coordination between Operators ↔ Implementations. <strong>Boundary Events</strong> for external system integration.</p>
+                </div>
+
+                <div class="inside-card">
+                    <h3><i class="fas fa-brain"></i> LLM Navigation</h3>
+                    <p>Path notation for tree navigation. LLMs understand context at any depth. Vertical reading: Root → Module → Layer → Code.</p>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Code Example Section -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>See ADD in Action</h2>
-                <p>A complete user management example showing all layers working together</p>
-            </div>
-
-            <div class="code-example">
-                <div class="example-tabs">
-                    <button class="example-tab active" data-example="entity">Entity</button>
-                    <button class="example-tab" data-example="port">Port</button>
-                    <button class="example-tab" data-example="operator">Operator</button>
-                    <button class="example-tab" data-example="implementation">Implementation</button>
-                </div>
-
-                <div class="example-content">
-                    <div class="example-panel active" id="entity-example">
-                        <div class="code-block">
-                            <button class="copy-button">Copy</button>
-                            <pre><code class="language-typescript">// Core Abstractions - User Entity
-export class User {
-  constructor(
-    public readonly id: UserId,
-    public readonly email: Email,
-    public readonly fullName: FullName,
-    public readonly isActive: boolean,
-    public readonly createdAt: Date
-  ) {
-    this.validateBusinessRules();
-  }
-
-  static create(dto: CreateUserDto): User {
-    return new User(
-      UserId.generate(),
-      new Email(dto.email),
-      FullName.fromString(dto.fullName),
-      true,
-      new Date()
-    );
-  }
-
-  deactivate(): User {
-    return new User(
-      this.id,
-      this.email,
-      this.fullName,
-      false,
-      this.createdAt
-    );
-  }
-
-  updateProfile(fullName: string): User {
-    return new User(
-      this.id,
-      this.email,
-      FullName.fromString(fullName),
-      this.isActive,
-      this.createdAt
-    );
-  }
-
-  private validateBusinessRules(): void {
-    if (!this.email.isValid()) {
-      throw new InvalidEmailError(this.email.value);
-    }
-
-    if (this.fullName.isEmpty()) {
-      throw new EmptyNameError();
-    }
-  }
-}</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="example-panel" id="port-example">
-                        <div class="code-block">
-                            <button class="copy-button">Copy</button>
-                            <pre><code class="language-typescript">// Core Abstractions - Repository Port
-export interface IUserRepository {
-  save(user: User): Promise&lt;void&gt;;
-  findById(id: UserId): Promise&lt;User | null&gt;;
-  findByEmail(email: Email): Promise&lt;User | null&gt;;
-  findActiveUsers(): Promise&lt;User[]&gt;;
-  findUsersCreatedAfter(date: Date): Promise&lt;User[]&gt;;
-  delete(id: UserId): Promise&lt;void&gt;;
-}
-
-// Core Abstractions - Email Service Port
-export interface IEmailService {
-  sendWelcomeEmail(
-    email: Email,
-    userName: string
-  ): Promise&lt;void&gt;;
-
-  sendPasswordResetEmail(
-    email: Email,
-    resetToken: string
-  ): Promise&lt;void&gt;;
-
-  sendAccountDeactivationEmail(
-    email: Email,
-    userName: string
-  ): Promise&lt;void&gt;;
-}
-
-// Core Abstractions - Event Bus Port
-export interface IEventBus {
-  emit&lt;T extends DomainEvent&gt;(event: T): Promise&lt;void&gt;;
-  subscribe&lt;T extends DomainEvent&gt;(
-    eventType: new (...args: any[]) =&gt; T,
-    handler: (event: T) =&gt; Promise&lt;void&gt;
-  ): void;
-}</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="example-panel" id="operator-example">
-                        <div class="code-block">
-                            <button class="copy-button">Copy</button>
-                            <pre><code class="language-typescript">// Operators - Business Logic Orchestration
-export class UserOperator {
-  constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly emailService: IEmailService,
-    private readonly eventBus: IEventBus
-  ) {}
-
-  async createUser(dto: CreateUserDto): Promise&lt;UserResponseDto&gt; {
-    // Business validation
-    await this.validateUniqueEmail(dto.email);
-
-    // Create entity
-    const user = User.create(dto);
-
-    // Persist
-    await this.userRepository.save(user);
-
-    // Send welcome email
-    await this.emailService.sendWelcomeEmail(
-      user.email,
-      user.fullName.value
-    );
-
-    // Emit business event
-    await this.eventBus.emit(
-      new UserCreatedEvent(user.id.value)
-    );
-
-    return this.mapToResponseDto(user);
-  }
-
-  async deactivateUser(userId: UserId): Promise&lt;void&gt; {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new UserNotFoundError(userId.value);
-    }
-
-    const deactivatedUser = user.deactivate();
-    await this.userRepository.save(deactivatedUser);
-
-    await this.emailService.sendAccountDeactivationEmail(
-      user.email,
-      user.fullName.value
-    );
-
-    await this.eventBus.emit(
-      new UserDeactivatedEvent(userId.value)
-    );
-  }
-
-  private async validateUniqueEmail(email: string): Promise&lt;void&gt; {
-    const existingUser = await this.userRepository.findByEmail(
-      new Email(email)
-    );
-
-    if (existingUser) {
-      throw new EmailAlreadyExistsError(email);
-    }
-  }
-
-  private mapToResponseDto(user: User): UserResponseDto {
-    return {
-      id: user.id.value,
-      email: user.email.value,
-      fullName: user.fullName.value,
-      isActive: user.isActive,
-      createdAt: user.createdAt.toISOString()
-    };
-  }
-}</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="example-panel" id="implementation-example">
-                        <div class="code-block">
-                            <button class="copy-button">Copy</button>
-                            <pre><code class="language-typescript">// Implementations - Technical Implementation
-export class PostgresUserRepository implements IUserRepository {
-  constructor(private readonly db: Pool) {}
-
-  async save(user: User): Promise&lt;void&gt; {
-    const query = `
-      INSERT INTO users (id, email, full_name, is_active, created_at)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (id) DO UPDATE SET
-        email = EXCLUDED.email,
-        full_name = EXCLUDED.full_name,
-        is_active = EXCLUDED.is_active
-    `;
-
-    await this.db.query(query, [
-      user.id.value,
-      user.email.value,
-      user.fullName.value,
-      user.isActive,
-      user.createdAt
-    ]);
-  }
-
-  async findById(id: UserId): Promise&lt;User | null&gt; {
-    const result = await this.db.query(
-      'SELECT * FROM users WHERE id = $1',
-      [id.value]
-    );
-
-    return result.rows.length > 0
-      ? this.mapRowToUser(result.rows[0])
-      : null;
-  }
-
-  async findByEmail(email: Email): Promise&lt;User | null&gt; {
-    const result = await this.db.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email.value]
-    );
-
-    return result.rows.length > 0
-      ? this.mapRowToUser(result.rows[0])
-      : null;
-  }
-
-  async findActiveUsers(): Promise&lt;User[]&gt; {
-    const result = await this.db.query(
-      'SELECT * FROM users WHERE is_active = true ORDER BY created_at DESC'
-    );
-
-    return result.rows.map(row =&gt; this.mapRowToUser(row));
-  }
-
-  private mapRowToUser(row: any): User {
-    return new User(
-      new UserId(row.id),
-      new Email(row.email),
-      FullName.fromString(row.full_name),
-      row.is_active,
-      new Date(row.created_at)
-    );
-  }
-}</code></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Examples Section -->
-    <section id="examples" class="section section-alt">
-        <div class="container">
-            <div class="section-header">
-                <h2>Complete Examples</h2>
-                <p>Full working applications demonstrating ADD principles</p>
-            </div>
-
-            <div class="examples-grid">
-                <div class="example-card">
-                    <div class="example-header">
-                        <h3>Simple CRUD Application</h3>
-                        <span class="example-badge basic">Basic</span>
-                    </div>
-                    <p>A complete task management application showing fundamental ADD patterns with PostgreSQL and REST API.</p>
-                    <div class="example-tech">
-                        <span class="tech-tag">TypeScript</span>
-                        <span class="tech-tag">PostgreSQL</span>
-                        <span class="tech-tag">Express</span>
-                        <span class="tech-tag">Jest</span>
-                    </div>
-                    <div class="example-links">
-                        <a href="documentation.html#first-implementation" class="btn btn-sm btn-primary">View Guide</a>
-                        <!-- GitHub source link temporarily disabled
-                        <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/basic/simple-crud" class="btn btn-sm btn-secondary" target="_blank">
-                            <i class="fab fa-github"></i> Source
-                        </a>
-                        -->
-                    </div>
-                </div>
-
-                <div class="example-card">
-                    <div class="example-header">
-                        <h3>E-commerce Platform</h3>
-                        <span class="example-badge extended">Extended</span>
-                    </div>
-                    <p>Enterprise-scale application with advanced patterns, microservices, and complex business workflows.</p>
-                    <div class="example-tech">
-                        <span class="tech-tag">TypeScript</span>
-                        <span class="tech-tag">MongoDB</span>
-                        <span class="tech-tag">Redis</span>
-                        <span class="tech-tag">Docker</span>
-                    </div>
-                    <div class="example-links">
-                        <a href="documentation.html#advanced-theory" class="btn btn-sm btn-primary">View Guide</a>
-                        <!-- GitHub source link temporarily disabled
-                        <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/extended/complex-ecommerce" class="btn btn-sm btn-secondary" target="_blank">
-                            <i class="fab fa-github"></i> Source
-                        </a>
-                        -->
-                    </div>
-                </div>
-
-                <div class="example-card">
-                    <div class="example-header">
-                        <h3>Migration Examples</h3>
-                        <span class="example-badge migration">Migration</span>
-                    </div>
-                    <p>Real-world examples of migrating existing applications from various architectures to ADD.</p>
-                    <div class="example-tech">
-                        <span class="tech-tag">From DDD</span>
-                        <span class="tech-tag">From Clean Arch</span>
-                        <span class="tech-tag">From MVC</span>
-                    </div>
-                    <div class="example-links">
-                        <a href="documentation.html#setup" class="btn btn-sm btn-primary">Setup Guide</a>
-                        <!-- GitHub source link temporarily disabled
-                        <a href="https://github.com/abstractdriven/abstract-driven-playbook/tree/main/examples/migration" class="btn btn-sm btn-secondary" target="_blank">
-                            <i class="fab fa-github"></i> Source
-                        </a>
-                        -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Getting Started Section -->
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Ready to Get Started?</h2>
-                <p>Choose your path based on your experience and project needs</p>
-            </div>
-
-            <div class="getting-started-paths">
-                <div class="path-card">
-                    <div class="path-icon">
-                        <i class="fas fa-play"></i>
-                    </div>
-                    <h3>New to ADD?</h3>
-                    <p>Start with the fundamentals and work through basic examples</p>
-                    <ol>
-                        <li>Learn the <a href="principles/">core principles</a></li>
-                        <li>Understand <a href="documentation.html#layer-separation">layer separation</a></li>
-                        <li>Practice with <a href="documentation.html#first-implementation">step-by-step guide</a></li>
-                        <li>Apply <a href="documentation.html#port-adapter">basic patterns</a></li>
-                    </ol>
-                    <a href="documentation.html" class="btn btn-primary">Start Learning</a>
-                </div>
-
-                <div class="path-card">
-                    <div class="path-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3>Ready to Build?</h3>
-                    <p>Jump into implementation with our complete examples</p>
-                    <ol>
-                        <!-- GitHub reference temporarily disabled
-                        <li>Clone the <a href="https://github.com/abstractdriven/abstract-driven-playbook" target="_blank">repository</a></li>
-                        -->
-                        <li>Download the starter template</li>
-                        <li>Set up your <a href="documentation.html#setup">project structure</a></li>
-                        <li>Implement core <a href="patterns/">patterns</a></li>
-                        <li>Add business logic progressively</li>
-                    </ol>
-                    <!-- GitHub button temporarily disabled
-                    <a href="https://github.com/abstractdriven/abstract-driven-playbook" class="btn btn-primary" target="_blank">
-                        <i class="fab fa-github"></i> Get Code
-                    </a>
-                    -->
-                    <a href="#setup" class="btn btn-primary">
-                        <i class="fas fa-rocket"></i> Get Started
-                    </a>
-                </div>
-
-                <div class="path-card">
-                    <div class="path-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Training Your Team?</h3>
-                    <p>Use our comprehensive training materials and presentations</p>
-                    <ol>
-                        <li>Review <a href="documentation.html#advanced-theory">training materials</a></li>
-                        <li>Practice with <a href="documentation.html#examples">hands-on examples</a></li>
-                        <li>Implement in <a href="documentation.html#quick-start">existing projects</a></li>
-                        <li>Establish team <a href="principles/">coding standards</a></li>
-                    </ol>
-                    <a href="presentations/" class="btn btn-primary">Training Materials</a>
-                </div>
+            <div style="text-align: center; margin-top: var(--space-2xl);">
+                <a href="fractal-pattern.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-project-diagram"></i> Explore Interactive Fractal Viewer
+                </a>
             </div>
         </div>
     </section>
@@ -911,58 +459,37 @@ export class PostgresUserRepository implements IUserRepository {
             <div class="footer-content">
                 <div class="footer-section">
                     <h4><i class="fas fa-cube"></i> Abstract Driven</h4>
-                    <p>Build better software with proven architectural patterns. Master the principles that power enterprise-grade applications.</p>
-                    <div class="footer-social">
-                        <!-- GitHub social link temporarily disabled
-                        <a href="https://github.com/abstractdriven" target="_blank"><i class="fab fa-github"></i></a>
-                        -->
-                        <a href="https://twitter.com/abstractdriven" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="https://linkedin.com/company/abstractdriven" target="_blank"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h5>Learn</h5>
-                    <ul>
-                        <li><a href="principles/">Principles</a></li>
-                        <li><a href="documentation.html#port-adapter">Patterns</a></li>
-                        <li><a href="documentation.html#examples">Examples</a></li>
-                        <li><a href="documentation.html#advanced-theory">Training</a></li>
-                    </ul>
+                    <p>Build better software with proven architectural patterns. Master the principles that power enterprise-grade applications with AI assistance.</p>
                 </div>
 
                 <div class="footer-section">
                     <h5>Resources</h5>
                     <ul>
-                        <li><a href="documentation.html">Documentation</a></li>
-                        <li><a href="documentation.html#quick-start">Getting Started</a></li>
-                        <!-- GitHub links temporarily disabled
-                        <li><a href="https://github.com/abstractdriven/abstract-driven-playbook/discussions">FAQ</a></li>
-                        <li><a href="https://github.com/abstractdriven/abstract-driven-playbook/discussions">Community</a></li>
-                        -->
-                        <li><a href="documentation.html">FAQ</a></li>
-                        <li><a href="documentation.html">Community</a></li>
+                        <li><a href="llms-full.txt" download>Full Reference (llms-full.txt)</a></li>
+                        <li><a href="llms.txt" download>Quick Reference (llms.txt)</a></li>
+                        <li><a href="fractal-pattern.html">Fractal Pattern Viewer</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h5>Learn</h5>
+                    <ul>
+                        <li><a href="#quick-start">Quick Start</a></li>
+                        <li><a href="#benefits">Benefits</a></li>
+                        <li><a href="#resources">What's Inside</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
                     <h5>Connect</h5>
                     <ul>
-                        <!-- GitHub links temporarily disabled
-                        <li><a href="https://github.com/abstractdriven/abstract-driven-playbook" target="_blank">GitHub Repository</a></li>
-                        <li><a href="https://github.com/abstractdriven/abstract-driven-playbook/discussions" target="_blank">Discussions</a></li>
-                        <li><a href="https://github.com/abstractdriven/abstract-driven-playbook/issues" target="_blank">Report Issues</a></li>
-                        -->
-                        <li><a href="documentation.html">Documentation</a></li>
-                        <li><a href="mailto:hello@abstractdriven.com">Contact Support</a></li>
-                        <li><a href="documentation.html">Report Issues</a></li>
                         <li><a href="mailto:hello@abstractdriven.com">Contact</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 Abstract Driven Development. Open source under MIT License.</p>
+                <p>&copy; 2024 Abstract Driven Development V3. Open source under MIT License.</p>
                 <p>Built with ❤️ for the developer community</p>
             </div>
         </div>
@@ -970,7 +497,25 @@ export class PostgresUserRepository implements IUserRepository {
 
     <!-- Scripts -->
     <script src="js/main.js"></script>
-    <script src="js/highlight.min.js"></script>
-    <script src="js/syntax-highlight.js"></script>
+    <script>
+        function copyCommand() {
+            const command = "Read @https://abstractdriven.com/llms-full.txt and make my code 100% compatible with A.D.D V3 principles. Use Fractal Architecture Pattern (F.A.P).";
+
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.classList.add('copied');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Command copied to clipboard!');
+            });
+        }
+    </script>
 </body>
 </html>
