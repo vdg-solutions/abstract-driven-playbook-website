@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.D.D V3 - Fractal Architecture Pattern Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,142 +13,161 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background: #000;
+            color: #fff;
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Matrix background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             max-width: 1800px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
+            background: #0a0a0a;
+            border-bottom: 1px solid #333;
+            padding: 2rem;
             position: relative;
         }
 
+        .traffic-lights {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
+
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
 
         .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
+            color: #999;
+            font-size: 1rem;
         }
 
         .back-home {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
+            top: 2rem;
+            right: 2rem;
+            color: #999;
             text-decoration: none;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 14px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            transition: all 0.2s;
         }
 
         .back-home:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(-3px);
+            color: #fff;
+            border-color: #fff;
+            background: #1a1a1a;
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            gap: 10px;
+            background: #0a0a0a;
+            padding: 1rem;
+            gap: 0.5rem;
             overflow-x: auto;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 1px solid #333;
         }
 
         .tab-button {
-            padding: 12px 24px;
-            border: none;
-            background: white;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #333;
+            background: #000;
+            color: #999;
             cursor: pointer;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
             white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .tab-button:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #666;
         }
 
         .tab-button.active {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #fff;
         }
 
+        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #0a0a0a;
+            border-bottom: 1px solid #333;
         }
 
         .control-button {
-            padding: 10px 20px;
-            border: none;
-            background: #667eea;
-            color: white;
+            padding: 0.5rem 1rem;
+            border: 1px solid #666;
+            background: #000;
+            color: #fff;
             cursor: pointer;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
         }
 
         .control-button:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: #1a1a1a;
+            border-color: #fff;
         }
 
         .zoom-level {
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-            min-width: 80px;
+            font-size: 16px;
+            color: #4a9eff;
+            min-width: 60px;
             text-align: center;
         }
 
+        /* Diagram container */
         .diagram-container {
-            padding: 40px;
+            padding: 2rem;
             min-height: 600px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            background: #ffffff;
+            background: #000;
             overflow: auto;
         }
 
@@ -166,7 +186,7 @@
         .diagram-content {
             display: inline-block;
             min-height: 500px;
-            padding: 20px;
+            padding: 1rem;
         }
 
         .diagram-content svg {
@@ -182,44 +202,48 @@
             overflow: auto;
         }
 
+        #tree-container svg {
+            background: #000;
+        }
+
         .node rect {
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .node rect:hover {
-            filter: brightness(1.1);
+            filter: brightness(1.3);
             stroke-width: 4px;
         }
 
         .node text {
             font-size: 13px;
             font-weight: 600;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Courier Prime', monospace;
             cursor: pointer;
         }
 
         .link {
             fill: none;
-            stroke: #555;
-            stroke-width: 3px;
+            stroke: #666;
+            stroke-width: 2px;
             stroke-opacity: 0.6;
         }
 
         .event-arrow {
             fill: none;
-            stroke: #f57c00;
-            stroke-width: 2.5px;
+            stroke: #4a9eff;
+            stroke-width: 2px;
             stroke-dasharray: 6,4;
         }
 
         .collapse-icon {
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
         }
 
-        /* Modal for 5 Layers */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -228,42 +252,23 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            background-color: rgba(0,0,0,0.9);
         }
 
         .modal-content {
-            background: white;
+            background: #0a0a0a;
             margin: 5% auto;
             padding: 0;
             width: 80%;
             max-width: 800px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            border: 1px solid #333;
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 20px 30px;
-            border-radius: 15px 15px 0 0;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #333;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -271,116 +276,155 @@
 
         .modal-header h2 {
             margin: 0;
-            font-size: 1.8em;
+            font-size: 1.5rem;
         }
 
         .close {
-            color: white;
-            font-size: 35px;
+            color: #999;
+            font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            line-height: 1;
-            transition: transform 0.2s;
+            transition: color 0.2s;
         }
 
         .close:hover {
-            transform: scale(1.2);
+            color: #fff;
         }
 
         .modal-body {
-            padding: 30px;
+            padding: 2rem;
         }
 
         .layer-item {
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
             border-left: 4px solid;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
+            background: #1a1a1a;
+            transition: all 0.2s;
         }
 
         .layer-item:hover {
+            background: #222;
             transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .layer-item h3 {
-            margin: 0 0 8px 0;
-            font-size: 1.2em;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            color: #fff;
         }
 
         .layer-item p {
             margin: 0;
-            color: #666;
-            font-size: 0.95em;
+            color: #999;
+            font-size: 0.9rem;
         }
 
-        .layer-bootstrap { border-left-color: #01579b; }
-        .layer-operators { border-left-color: #e65100; }
-        .layer-core { border-left-color: #c2410c; }
-        .layer-implementations { border-left-color: #4a148c; }
-        .layer-boundary { border-left-color: #1b5e20; }
+        .layer-bootstrap { border-left-color: #4a9eff; }
+        .layer-operators { border-left-color: #27c93f; }
+        .layer-core { border-left-color: #ffbd2e; }
+        .layer-implementations { border-left-color: #ff5f56; }
+        .layer-boundary { border-left-color: #999; }
 
+        /* Description */
         .description {
-            padding: 20px 40px;
-            background: #f8f9fa;
-            border-top: 2px solid #dee2e6;
+            padding: 2rem;
+            background: #0a0a0a;
+            border-top: 1px solid #333;
         }
 
         .description h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.5em;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
 
         .description p {
-            color: #495057;
-            line-height: 1.6;
-            font-size: 1.1em;
+            color: #999;
+            line-height: 1.7;
+            font-size: 1rem;
         }
 
+        /* Footer */
         .footer {
-            padding: 20px;
+            padding: 1.5rem;
             text-align: center;
-            background: #343a40;
-            color: white;
+            background: #0a0a0a;
+            color: #666;
+            border-top: 1px solid #333;
         }
 
+        .footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #000;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 6px;
+            background: #404040;
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
+            background: #606060;
         }
 
-        .tree-hint {
-            text-align: center;
-            padding: 20px;
-            background: #e3f2fd;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: #01579b;
-            font-weight: 600;
+        /* Mermaid diagram overrides */
+        .diagram-content svg text {
+            fill: #fff !important;
+        }
+
+        .diagram-content .nodeLabel {
+            color: #fff !important;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .tabs {
+                padding: 0.5rem;
+            }
+
+            .tab-button {
+                padding: 0.5rem 1rem;
+                font-size: 12px;
+            }
+
+            .back-home {
+                position: static;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Matrix background -->
+    <div class="matrix-bg" id="matrix"></div>
+
     <div class="container">
         <div class="header">
+            <div class="traffic-lights">
+                <div class="traffic-light red"></div>
+                <div class="traffic-light yellow"></div>
+                <div class="traffic-light green"></div>
+            </div>
             <a href="index.html" class="back-home">← Back to Home</a>
-            <h1>🏛️ A.D.D V3 - Fractal Architecture Pattern</h1>
+            <h1>A.D.D V3 - Fractal Architecture Pattern Viewer</h1>
             <p>Interactive Visualization: Architecture & Context Reading</p>
         </div>
 
@@ -393,9 +437,9 @@
         </div>
 
         <div class="controls">
-            <button class="control-button" onclick="zoomOut()">🔍 Zoom Out</button>
+            <button class="control-button" onclick="zoomOut()">- Zoom Out</button>
             <span class="zoom-level" id="zoom-level">100%</span>
-            <button class="control-button" onclick="zoomIn()">🔍 Zoom In</button>
+            <button class="control-button" onclick="zoomIn()">+ Zoom In</button>
             <button class="control-button" onclick="resetZoom()">↺ Reset</button>
         </div>
 
@@ -423,8 +467,8 @@
         </div>
 
         <div class="footer">
-            <p>🏛️ Abstract Driven Development V3 - Fractal Architecture Pattern</p>
-            <p style="margin-top: 10px; opacity: 0.8;">Press 1-5 for diagrams • +/- to zoom • 0 to reset</p>
+            <p>A.D.D V3 - Fractal Architecture Pattern</p>
+            <p>Press 1-5 for diagrams • +/- to zoom • 0 to reset</p>
         </div>
     </div>
 
@@ -437,23 +481,23 @@
             </div>
             <div class="modal-body">
                 <div class="layer-item layer-bootstrap">
-                    <h3>🏗️ Bootstrap</h3>
+                    <h3>Bootstrap</h3>
                     <p>Composition Root & DI Container - wires all dependencies</p>
                 </div>
                 <div class="layer-item layer-operators">
-                    <h3>🎯 Operators</h3>
+                    <h3>Operators</h3>
                     <p>Business Orchestration - TGO, Coordinator, business flows</p>
                 </div>
                 <div class="layer-item layer-core">
-                    <h3>🎨 Core Abstractions</h3>
+                    <h3>Core Abstractions</h3>
                     <p>Entities, Ports, Events, RuleSets - contracts & domain</p>
                 </div>
                 <div class="layer-item layer-implementations">
-                    <h3>⚙️ Implementations</h3>
+                    <h3>Implementations</h3>
                     <p>Technology Adapters - DB, MQ, HTTP, ACL, Providers</p>
                 </div>
                 <div class="layer-item layer-boundary">
-                    <h3>🌐 Boundary</h3>
+                    <h3>Boundary</h3>
                     <p>DTOs & Boundary Events - external contracts</p>
                 </div>
             </div>
@@ -464,27 +508,67 @@
     <script src="lib/d3.min.js"></script>
     <script src="lib/mermaid.min.js"></script>
     <script>
+        // Matrix effect
+        const matrix = document.getElementById('matrix');
+        const chars = '01█▓▒░';
 
-        // Initialize Mermaid
+        for (let i = 0; i < 30; i++) {
+            const column = document.createElement('div');
+            column.style.cssText = `
+                position: absolute;
+                top: -100px;
+                font-size: 14px;
+                color: #27c93f;
+                animation: fall ${5 + Math.random() * 10}s linear infinite;
+                animation-delay: ${Math.random() * 5}s;
+                left: ${Math.random() * 100}%;
+            `;
+            let text = '';
+            for (let j = 0; j < 20; j++) {
+                text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+            }
+            column.innerHTML = text;
+            matrix.appendChild(column);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = '@keyframes fall { to { transform: translateY(100vh); } }';
+        document.head.appendChild(style);
+
+        // Initialize Mermaid with dark theme
         mermaid.initialize({
             startOnLoad: false,
-            theme: 'default',
+            theme: 'dark',
             securityLevel: 'loose',
             flowchart: {
                 useMaxWidth: false,
                 htmlLabels: true,
                 curve: 'basis'
+            },
+            themeVariables: {
+                primaryColor: '#1a1a1a',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#666',
+                lineColor: '#666',
+                secondaryColor: '#0a0a0a',
+                tertiaryColor: '#333',
+                background: '#000',
+                mainBkg: '#1a1a1a',
+                secondBkg: '#0a0a0a',
+                textColor: '#fff',
+                border1: '#666',
+                border2: '#999'
             }
         });
 
         const diagrams = [
             // Diagram 0: Basic A.D.D V3 Architecture (5 Layers)
             `flowchart TD
-    Bootstrap["🏗️ BOOTSTRAP<br/>Composition Root & DI Container"]
-    Operators["🎯 OPERATORS<br/>Business Orchestration"]
-    CoreAbs["🎨 CORE ABSTRACTIONS<br/>Entities, Ports, Events"]
-    Implementations["⚙️ IMPLEMENTATIONS<br/>Technology Adapters"]
-    Boundary["🌐 BOUNDARY<br/>DTOs & External Contracts"]
+    Bootstrap["Bootstrap<br/>Composition Root & DI"]
+    Operators["Operators<br/>Business Orchestration"]
+    CoreAbs["Core Abstractions<br/>Entities, Ports, Events"]
+    Implementations["Implementations<br/>Technology Adapters"]
+    Boundary["Boundary<br/>DTOs & External Contracts"]
 
     Bootstrap --> Operators
     Bootstrap --> Implementations
@@ -492,40 +576,40 @@
     Operators --> CoreAbs
     Implementations --> CoreAbs
 
-    style Bootstrap fill:#e1f5ff,stroke:#01579b,stroke-width:3px
-    style Operators fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    style CoreAbs fill:#fff7ed,stroke:#c2410c,stroke-width:3px
-    style Implementations fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
-    style Boundary fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px`,
+    style Bootstrap fill:#1a1a1a,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style Operators fill:#1a1a1a,stroke:#27c93f,stroke-width:3px,color:#fff
+    style CoreAbs fill:#1a1a1a,stroke:#ffbd2e,stroke-width:3px,color:#fff
+    style Implementations fill:#1a1a1a,stroke:#ff5f56,stroke-width:3px,color:#fff
+    style Boundary fill:#1a1a1a,stroke:#999,stroke-width:3px,color:#fff`,
 
             // Diagram 1: Module Internal Structure
             `flowchart TD
-    subgraph Module["📦 ONE MODULE (Scope Module)"]
+    subgraph Module["ONE MODULE (Scope Module)"]
         direction TB
 
-        subgraph Bootstrap_Layer["🏗️ BOOTSTRAP"]
+        subgraph Bootstrap_Layer["Bootstrap"]
             DI["DI Container<br/>Wiring"]
         end
 
-        subgraph Operators_Layer["🎯 OPERATORS"]
+        subgraph Operators_Layer["Operators"]
             TGO["Transaction Group<br/>Operators"]
             Coordinator["Coordinator<br/>Operators"]
         end
 
-        subgraph Core_Layer["🎨 CORE ABSTRACTIONS"]
+        subgraph Core_Layer["Core Abstractions"]
             Entities["Entities"]
             Ports["Ports<br/>(Interfaces)"]
             Events["Core Events"]
-            RuleSets["RuleSets &<br/>Checkpoints"]
+            RuleSets["RuleSets"]
         end
 
-        subgraph Impl_Layer["⚙️ IMPLEMENTATIONS"]
+        subgraph Impl_Layer["Implementations"]
             Adapters["Adapters"]
             Providers["Providers"]
             ACL["Anti-Corruption<br/>Layer"]
         end
 
-        subgraph Boundary_Layer["🌐 BOUNDARY"]
+        subgraph Boundary_Layer["Boundary"]
             DTOs["DTOs"]
             BoundaryEvents["Boundary Events"]
         end
@@ -537,25 +621,25 @@
         Impl_Layer --> Core_Layer
     end
 
-    style Module fill:#f0f0f0,stroke:#333,stroke-width:4px
-    style Bootstrap_Layer fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    style Operators_Layer fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Core_Layer fill:#fff7ed,stroke:#c2410c,stroke-width:2px
-    style Impl_Layer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    style Boundary_Layer fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px`,
+    style Module fill:#000,stroke:#666,stroke-width:2px
+    style Bootstrap_Layer fill:#0a0a0a,stroke:#4a9eff,stroke-width:2px,color:#fff
+    style Operators_Layer fill:#0a0a0a,stroke:#27c93f,stroke-width:2px,color:#fff
+    style Core_Layer fill:#0a0a0a,stroke:#ffbd2e,stroke-width:2px,color:#fff
+    style Impl_Layer fill:#0a0a0a,stroke:#ff5f56,stroke-width:2px,color:#fff
+    style Boundary_Layer fill:#0a0a0a,stroke:#999,stroke-width:2px,color:#fff`,
 
             null, // Diagram 2 will be D3.js tree
 
-            // Diagram 3: F.A.P with Event Communication (Pure Fractal)
+            // Diagram 3: F.A.P with Event Communication
             `flowchart TD
-    Root["🌍 System Root<br/>(Module with 5 layers)"]
+    Root["System Root<br/>(Module with 5 layers)"]
 
-    ModA["📦 Module A<br/>(5 layers)"]
-    ModB["📦 Module B<br/>(5 layers)"]
-    ModC["📦 Module C<br/>(5 layers)"]
+    ModA["Module A<br/>(5 layers)"]
+    ModB["Module B<br/>(5 layers)"]
+    ModC["Module C<br/>(5 layers)"]
 
-    ModB1["📄 Module B1<br/>(5 layers)"]
-    ModB2["📄 Module B2<br/>(5 layers)"]
+    ModB1["Module B1<br/>(5 layers)"]
+    ModB2["Module B2<br/>(5 layers)"]
 
     Root -->|contains in<br/>Implementations| ModA
     Root -->|contains in<br/>Implementations| ModB
@@ -564,42 +648,41 @@
     ModB -->|contains in<br/>Implementations| ModB1
     ModB -->|contains in<br/>Implementations| ModB2
 
-    %% Core Events (horizontal communication)
     ModA -.->|Core Event| ModB
     ModB1 -.->|Core Event| ModB2
     ModB -.->|Core Event| ModC
 
-    style Root fill:#e1f5ff,stroke:#01579b,stroke-width:4px
-    style ModA fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    style ModB fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
-    style ModC fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
-    style ModB1 fill:#fff9c4,stroke:#f57f17,stroke-width:2px
-    style ModB2 fill:#ffe0f5,stroke:#c2185b,stroke-width:2px`,
+    style Root fill:#1a1a1a,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style ModA fill:#1a1a1a,stroke:#27c93f,stroke-width:2px,color:#fff
+    style ModB fill:#1a1a1a,stroke:#ff5f56,stroke-width:2px,color:#fff
+    style ModC fill:#1a1a1a,stroke:#999,stroke-width:2px,color:#fff
+    style ModB1 fill:#0a0a0a,stroke:#ffbd2e,stroke-width:2px,color:#fff
+    style ModB2 fill:#0a0a0a,stroke:#4a9eff,stroke-width:2px,color:#fff`,
 
-            // Diagram 4: LLM Context Reading (Pure Fractal)
+            // Diagram 4: LLM Context Reading
             `flowchart TD
-    subgraph L0["📚 LEVEL 0: GLOBAL ARCHITECTURE"]
-        L0Info["A.D.D V3 Fractal (F.A.P)<br/>Self-similar: Every module has 5 layers<br/>Infinite nesting via Implementations"]
+    subgraph L0["LEVEL 0: GLOBAL ARCHITECTURE"]
+        L0Info["A.D.D V3 Fractal (F.A.P)<br/>Self-similar structure<br/>Infinite nesting"]
     end
 
-    subgraph L1["🏛️ LEVEL 1: ROOT MODULE"]
-        L1Info["Module: System Root<br/>5 Layers: Bootstrap → Operators → Core → Impl → Boundary<br/>Path: /"]
+    subgraph L1["LEVEL 1: ROOT MODULE"]
+        L1Info["Module: System Root<br/>5 Layers<br/>Path: /"]
     end
 
-    subgraph L2["⚙️ LEVEL 2: IMPLEMENTATIONS LAYER"]
-        L2Info["Layer: Implementations (of System Root)<br/>Contains: Sub-modules A, B, C...<br/>Path: /Implementations"]
+    subgraph L2["LEVEL 2: IMPLEMENTATIONS LAYER"]
+        L2Info["Layer: Implementations<br/>Contains: Sub-modules<br/>Path: /Implementations"]
     end
 
-    subgraph L3["📦 LEVEL 3: SUB-MODULE"]
-        L3Info["Module: A (inside Implementations)<br/>5 Layers: Bootstrap → Operators → Core → Impl → Boundary<br/>Path: /Implementations/A"]
+    subgraph L3["LEVEL 3: SUB-MODULE"]
+        L3Info["Module: A<br/>5 Layers<br/>Path: /Implementations/A"]
     end
 
-    subgraph L4["⚙️ LEVEL 4: SUB-IMPLEMENTATIONS LAYER"]
-        L4Info["Layer: Implementations (of Module A)<br/>Contains: Components & deeper modules<br/>Path: /Implementations/A/Implementations"]
+    subgraph L4["LEVEL 4: SUB-IMPLEMENTATIONS"]
+        L4Info["Layer: Implementations<br/>Contains: Components<br/>Path: /Implementations/A/Implementations"]
     end
 
-    subgraph L5["💻 LEVEL 5: CODE"]
-        L5Code["class UserRepository implements IUserRepo {<br/>  async save(user: User) { ... }<br/>}<br/>Path: /Implementations/A/Implementations/UserRepo.ts"]
+    subgraph L5["LEVEL 5: CODE"]
+        L5Code["class UserRepository<br/>  implements IUserRepo<br/>Path: .../UserRepo.ts"]
     end
 
     L0 --> L1
@@ -608,12 +691,12 @@
     L3 --> L4
     L4 --> L5
 
-    style L0 fill:#e1f5ff,stroke:#01579b,stroke-width:4px
-    style L1 fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    style L2 fill:#fff7ed,stroke:#d84315,stroke-width:3px
-    style L3 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
-    style L4 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style L5 fill:#fafafa,stroke:#616161,stroke-width:1px`
+    style L0 fill:#1a1a1a,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style L1 fill:#1a1a1a,stroke:#27c93f,stroke-width:2px,color:#fff
+    style L2 fill:#1a1a1a,stroke:#ffbd2e,stroke-width:2px,color:#fff
+    style L3 fill:#1a1a1a,stroke:#ff5f56,stroke-width:2px,color:#fff
+    style L4 fill:#1a1a1a,stroke:#999,stroke-width:2px,color:#fff
+    style L5 fill:#0a0a0a,stroke:#666,stroke-width:1px,color:#999`
         ];
 
         const descriptions = [
@@ -627,76 +710,67 @@
             },
             {
                 title: "🌳 Fractal Architecture Pattern - Infinite Tree (Lazy Loading)",
-                text: "Infinite Fractal with 6 node types: Module + 5 Layers. Rule: Only Implementations can contain children. Click ▼ on Implementations → lazy creates random 1-5 sub-modules (Module A, B, C...). Each sub-module has same 5-layer structure (fractal repeats). Keep expanding Implementations infinitely to explore the tree! Orange arrow = Event from root Implementations → Boundary. Click node name to view 5 layers modal."
+                text: "Infinite Fractal with 6 node types: Module + 5 Layers. Rule: Only Implementations can contain children. Click ▼ on Implementations → lazy creates random 1-5 sub-modules. Each sub-module has same 5-layer structure (fractal repeats). Keep expanding Implementations infinitely to explore the tree! Blue arrow = Event from root Implementations → Boundary. Click node name to view 5 layers modal."
             },
             {
                 title: "📡 F.A.P with Event Communication (Pure Fractal)",
-                text: "Pure Fractal with event communication. Every module has full 5-layer structure (shown as simplified notation). Vertical arrows labeled 'contains in Implementations' = fractal containment (sub-modules live inside parent's Implementations layer). Dotted horizontal arrows = Core Events for cross-module communication. Example: Module A sends event to Module B. Module B1 sends event to B2. Modules communicate ONLY via Core Events and Ports (defined in Core Abstractions), never direct calls. Each module is self-contained and can be tested independently."
+                text: "Pure Fractal with event communication. Every module has full 5-layer structure (shown as simplified notation). Vertical arrows labeled 'contains in Implementations' = fractal containment. Dotted horizontal arrows = Core Events for cross-module communication. Modules communicate ONLY via Core Events and Ports, never direct calls. Each module is self-contained and can be tested independently."
             },
             {
                 title: "📚 LLM Context Reading - Pure Fractal Navigation",
-                text: "Shows how LLMs navigate F.A.P tree vertically to read context at ANY depth. Level 0: Understands global pattern (F.A.P = self-similar). Level 1: Root Module with 5 layers. Level 2: Zoom into Implementations layer → sees sub-modules. Level 3: Sub-Module A (also has 5 layers! - fractal repeats). Level 4: Zoom into A's Implementations → sees components. Level 5: Actual code. Path notation shows location in tree: /Implementations/A/Implementations/... LLM can read context at each level to understand 'where am I in the fractal?'"
+                text: "Shows how LLMs navigate F.A.P tree vertically to read context at ANY depth. Level 0: Understands global pattern (F.A.P = self-similar). Level 1: Root Module with 5 layers. Level 2: Zoom into Implementations layer → sees sub-modules. Level 3: Sub-Module A (also has 5 layers! - fractal repeats). Level 4: Zoom into A's Implementations → sees components. Level 5: Actual code. Path notation shows location in tree. LLM can read context at each level."
             }
         ];
 
         // Infinite Fractal with Lazy Loading
-        // Rule: Only Module and Implementations can contain children
-        // Children are created dynamically when user expands
-
         let moduleCounter = 0;
 
         function createModule(name, depth = 0, isRoot = false) {
             const module = {
                 name: name,
                 type: "module",
-                color: "#e1f5fe",
-                stroke: "#0288d1",
+                color: "#1a1a1a",
+                stroke: "#4a9eff",
                 depth: depth,
                 id: `module-${moduleCounter++}`,
                 children: [
-                    // Bootstrap - leaf node
                     {
                         name: "Bootstrap",
                         type: "bootstrap",
-                        color: "#e3f2fd",
-                        stroke: "#1976d2",
+                        color: "#0a0a0a",
+                        stroke: "#4a9eff",
                         id: `bootstrap-${moduleCounter++}`
                     },
-                    // Operators - leaf node
                     {
                         name: "Operators",
                         type: "operators",
-                        color: "#e8f5e9",
-                        stroke: "#388e3c",
+                        color: "#0a0a0a",
+                        stroke: "#27c93f",
                         id: `operators-${moduleCounter++}`
                     },
-                    // Core Abstractions - leaf node
                     {
                         name: "Core Abstractions",
                         type: "core",
-                        color: "#fff7ed",
-                        stroke: "#d84315",
+                        color: "#0a0a0a",
+                        stroke: "#ffbd2e",
                         id: `core-${moduleCounter++}`
                     },
-                    // Implementations - can contain sub-modules (lazy loaded)
                     {
                         name: "Implementations",
                         type: "implementations",
-                        color: "#fff3e0",
-                        stroke: "#f57c00",
-                        hasEvent: isRoot,  // Event at root level only
-                        eventTarget: 4,  // → Boundary
-                        canExpand: true,  // Mark as expandable
+                        color: "#0a0a0a",
+                        stroke: "#ff5f56",
+                        hasEvent: isRoot,
+                        eventTarget: 4,
+                        canExpand: true,
                         depth: depth,
                         id: `impl-${moduleCounter++}`
-                        // No children initially - will be created on expand
                     },
-                    // Boundary - leaf node
                     {
                         name: "Boundary",
                         type: "boundary",
-                        color: "#f3e5f5",
-                        stroke: "#7b1fa2",
+                        color: "#0a0a0a",
+                        stroke: "#999",
                         id: `boundary-${moduleCounter++}`
                     }
                 ]
@@ -705,14 +779,12 @@
             return module;
         }
 
-        // Lazy create children for Implementations node
         let subModuleCounter = 0;
         const moduleLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
         function lazyCreateImplementationsChildren(implNode) {
-            if (implNode.children) return; // Already created
+            if (implNode.children) return;
 
-            // Random 1-5 modules
             const childrenCount = Math.floor(Math.random() * 5) + 1;
             implNode.children = [];
             for (let i = 0; i < childrenCount; i++) {
@@ -725,7 +797,7 @@
 
         const treeData = createModule("System Root", 0, true);
 
-        // D3 Tree Rendering (Top-Down Layout)
+        // D3 Tree Rendering
         let treeRendered = false;
 
         function renderTree() {
@@ -741,12 +813,9 @@
             const svg = d3.select("#tree-container")
                 .append("svg");
 
-            // Will be updated dynamically based on tree size
-
             const g = svg.append("g")
                 .attr("transform", "translate(50,30)");
 
-            // Arrow marker definition (only once)
             svg.append("defs").append("marker")
                 .attr("id", "arrowhead")
                 .attr("markerWidth", 10)
@@ -756,24 +825,20 @@
                 .attr("orient", "auto")
                 .append("polygon")
                 .attr("points", "0 0, 10 3, 0 6")
-                .attr("fill", "#f57c00");
+                .attr("fill", "#4a9eff");
 
             let root = d3.hierarchy(treeData);
 
-            // Collapse all except root
             root.descendants().forEach((d, i) => {
                 d._children = d.children;
                 if (d.depth > 0) d.children = null;
             });
 
             function rebuildTree() {
-                // Rebuild hierarchy from updated treeData
                 const newRoot = d3.hierarchy(treeData);
 
-                // Preserve expand/collapse state
                 function restoreState(oldNode, newNode) {
                     if (!oldNode || !newNode) {
-                        // New node - collapse it if it's a module
                         if (newNode && newNode.data.type === "module" && newNode.children) {
                             newNode._children = newNode.children;
                             newNode.children = null;
@@ -781,13 +846,11 @@
                         return;
                     }
 
-                    // If old node was collapsed, collapse new node
                     if (oldNode._children && !oldNode.children) {
                         newNode._children = newNode.children;
                         newNode.children = null;
                     }
 
-                    // Recursively restore children state
                     if (newNode.children) {
                         newNode.children.forEach((newChild, i) => {
                             const oldChild = oldNode.children ? oldNode.children[i] :
@@ -808,7 +871,6 @@
             }
 
             function update(source) {
-                // Clear all previous drawings
                 g.selectAll("*").remove();
 
                 const nodes = root.descendants().filter(d => {
@@ -822,24 +884,20 @@
                     return true;
                 });
 
-                // Calculate positions (top-down)
                 const levels = {};
                 nodes.forEach(d => {
                     if (!levels[d.depth]) levels[d.depth] = [];
                     levels[d.depth].push(d);
                 });
 
-                // Calculate required dimensions
                 const maxDepth = Math.max(...Object.keys(levels).map(Number));
                 const maxNodesInLevel = Math.max(...Object.values(levels).map(arr => arr.length));
                 const requiredWidth = Math.max(minWidth, maxNodesInLevel * (nodeWidth + 50) + 100);
                 const requiredHeight = Math.max(minHeight, (maxDepth + 1) * levelHeight + 100);
 
-                // Update SVG size
                 svg.attr("width", requiredWidth)
                    .attr("height", requiredHeight);
 
-                // Position nodes horizontally in each level
                 Object.keys(levels).forEach(depth => {
                     const nodesInLevel = levels[depth];
                     const totalWidth = nodesInLevel.length * (nodeWidth + 50);
@@ -851,7 +909,6 @@
                     });
                 });
 
-                // Draw vertical links
                 const links = root.links().filter(d => nodes.includes(d.source) && nodes.includes(d.target));
 
                 links.forEach(link => {
@@ -863,8 +920,6 @@
                                     V${link.target.y - nodeHeight/2}`);
                 });
 
-                // Draw event arrows (horizontal) - only for nodes with hasEvent
-                // Group arrows by depth to calculate offset
                 const arrowsByDepth = {};
                 nodes.forEach(sourceNode => {
                     if (sourceNode.data.hasEvent && sourceNode.data.eventTarget !== undefined) {
@@ -882,12 +937,10 @@
                     }
                 });
 
-                // Draw arrows with vertical offset to avoid overlapping
                 Object.entries(arrowsByDepth).forEach(([depth, arrows]) => {
                     const totalArrows = arrows.length;
                     arrows.forEach((arrow, index) => {
                         const { sourceNode, targetNode } = arrow;
-                        // Offset range: -10 to +10 pixels
                         const offsetRange = 20;
                         const yOffset = totalArrows > 1
                             ? (index / (totalArrows - 1)) * offsetRange - offsetRange / 2
@@ -901,22 +954,18 @@
                     });
                 });
 
-                // Draw nodes
                 nodes.forEach(d => {
                     const nodeGroup = g.append("g")
                         .attr("class", "node")
                         .attr("transform", `translate(${d.x - nodeWidth/2},${d.y - nodeHeight/2})`);
 
-                    // Rectangle
                     nodeGroup.append("rect")
                         .attr("width", nodeWidth)
                         .attr("height", nodeHeight)
-                        .attr("rx", 8)
                         .style("fill", d.data.color)
                         .style("stroke", d.data.stroke)
-                        .style("stroke-width", 3)
+                        .style("stroke-width", 2)
                         .on("click", (event) => {
-                            // Lazy load children for Implementations
                             if (d.data.type === "implementations" && d.data.canExpand && !d.data.children && !d._children) {
                                 lazyCreateImplementationsChildren(d.data);
                                 rebuildTree();
@@ -932,19 +981,17 @@
                             update(d);
                         });
 
-                    // Text
                     nodeGroup.append("text")
                         .attr("x", nodeWidth / 2)
                         .attr("y", nodeHeight / 2)
                         .attr("dy", "0.35em")
                         .attr("text-anchor", "middle")
                         .text(d.data.name)
-                        .style("fill", "#333")
+                        .style("fill", "#fff")
                         .on("click", (event) => {
                             showLayersModal(d.data.name);
                         });
 
-                    // Collapse icon - show for nodes that have children or can expand
                     if (d._children || d.children || (d.data.type === "implementations" && d.data.canExpand)) {
                         nodeGroup.append("text")
                             .attr("class", "collapse-icon")
@@ -952,11 +999,10 @@
                             .attr("y", nodeHeight + 15)
                             .attr("text-anchor", "middle")
                             .text(d.children ? "▲" : "▼")
-                            .style("fill", "#667eea")
+                            .style("fill", "#4a9eff")
                             .on("click", (event) => {
                                 event.stopPropagation();
 
-                                // Lazy load children for Implementations
                                 if (d.data.type === "implementations" && d.data.canExpand && !d.data.children && !d._children) {
                                     lazyCreateImplementationsChildren(d.data);
                                     rebuildTree();
@@ -1002,11 +1048,10 @@
                 try {
                     const { svg } = await mermaid.render(`diagram-${i}-svg`, diagrams[i]);
                     document.getElementById(`diagram-${i}`).innerHTML = svg;
-                    console.log(`Diagram ${i} rendered successfully`);
                 } catch (error) {
                     console.error(`Error rendering diagram ${i}:`, error);
-                    document.getElementById(`diagram-${i}`).innerHTML = `<div style="padding:20px;color:red;border:2px solid red;border-radius:8px;">
-                        <h3>❌ Error rendering diagram ${i}</h3>
+                    document.getElementById(`diagram-${i}`).innerHTML = `<div style="padding:20px;color:#ff5f56;border:1px solid #ff5f56;">
+                        <h3>Error rendering diagram ${i}</h3>
                         <pre style="margin-top:10px;font-size:12px;">${error.message}</pre>
                     </div>`;
                 }
@@ -1019,7 +1064,7 @@
             renderDiagrams();
         }
 
-        // Global functions - make them accessible from HTML onclick handlers
+        // Global functions
         function showDiagram(index) {
             const wrappers = document.querySelectorAll('.diagram-wrapper');
             wrappers.forEach(d => d.classList.remove('active'));
@@ -1041,7 +1086,6 @@
             document.getElementById('desc-title').textContent = descriptions[index].title;
             document.getElementById('desc-text').textContent = descriptions[index].text;
 
-            // Render tree when showing diagram 2
             if (index === 2) {
                 renderTree();
             }
