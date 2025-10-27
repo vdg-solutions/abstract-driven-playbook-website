@@ -44,13 +44,12 @@
             background: #0a0a0a;
             border-bottom: 1px solid #333;
             padding: 2rem;
-            position: relative;
+            text-align: center;
         }
 
         .traffic-lights {
             display: flex;
             gap: 6px;
-            margin-bottom: 1rem;
         }
 
         .traffic-light {
@@ -73,23 +72,8 @@
             font-size: 1rem;
         }
 
-        .back-home {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            color: #999;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 0.5rem 1rem;
-            border: 1px solid #333;
-            background: #0a0a0a;
-            transition: all 0.2s;
-        }
-
-        .back-home:hover {
-            color: #fff;
-            border-color: #fff;
-            background: #1a1a1a;
+        nav a:hover {
+            color: #fff !important;
         }
 
         /* Tabs */
@@ -387,6 +371,11 @@
         }
 
         @media (max-width: 768px) {
+            nav > div {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
             .header {
                 padding: 1rem;
             }
@@ -403,12 +392,6 @@
                 padding: 0.5rem 1rem;
                 font-size: 12px;
             }
-
-            .back-home {
-                position: static;
-                display: inline-block;
-                margin-bottom: 1rem;
-            }
         }
     </style>
 </head>
@@ -416,14 +399,28 @@
     <!-- Matrix background -->
     <div class="matrix-bg" id="matrix"></div>
 
+    <!-- Navigation -->
+    <nav style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 100;">
+        <div style="max-width: 1800px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="traffic-lights">
+                    <div class="traffic-light red"></div>
+                    <div class="traffic-light yellow"></div>
+                    <div class="traffic-light green"></div>
+                </div>
+                <span style="font-weight: bold; font-size: 1.1rem;">ABSTRACT DRIVEN</span>
+                <span style="color: #666; font-size: 0.85rem;">v3.2.1</span>
+            </div>
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <a href="index.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Home</a>
+                <a href="fractal-pattern.html" style="color: #fff; text-decoration: none; transition: color 0.2s;">Fractal Viewer</a>
+                <a href="examples.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Examples</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="header">
-            <div class="traffic-lights">
-                <div class="traffic-light red"></div>
-                <div class="traffic-light yellow"></div>
-                <div class="traffic-light green"></div>
-            </div>
-            <a href="index.html" class="back-home">← Back to Home</a>
             <h1>A.D.D V3 - Fractal Architecture Pattern Viewer</h1>
             <p>Interactive Visualization: Architecture & Context Reading</p>
         </div>
