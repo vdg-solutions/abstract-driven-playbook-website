@@ -322,6 +322,12 @@
             gap: 1.5rem;
             margin-top: 3rem;
             padding: 0 1rem;
+            align-items: stretch;
+        }
+
+        .grid > .card {
+            display: flex;
+            flex-direction: column;
         }
 
         /* Card */
@@ -329,6 +335,7 @@
             position: relative;
             margin: 0;
             transition: all 0.3s;
+            height: 100%;
         }
 
         .card-shadow {
@@ -346,7 +353,10 @@
             background: #000;
             border: 1px solid #333;
             padding: 2rem;
-            min-height: 200px;
+            height: 100%;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
             transition: all 0.3s;
         }
 
