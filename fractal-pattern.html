@@ -702,19 +702,19 @@
         const descriptions = [
             {
                 title: "📊 Basic A.D.D V3 Architecture",
-                text: "The foundation of A.D.D V3: 5 layers with clear separation. Bootstrap at top wires dependencies. Operators orchestrate business logic. Core Abstractions define contracts. Implementations provide technology adapters. Boundary defines external contracts. This is the atomic unit that repeats in Fractal Architecture Pattern."
+                text: "The foundation of A.D.D V3: 5 layers with clear separation.<br><br><strong>Layer Responsibilities:</strong><br>• <span style='color:#4a9eff'>Bootstrap</span> - wires all dependencies<br>• <span style='color:#27c93f'>Operators</span> - orchestrate business logic<br>• <span style='color:#ffbd2e'>Core Abstractions</span> - define contracts & domain<br>• <span style='color:#ff5f56'>Implementations</span> - provide technology adapters<br>• <span style='color:#999'>Boundary</span> - define external contracts<br><br>This is the atomic unit that repeats in Fractal Architecture Pattern."
             },
             {
                 title: "🔧 Module Internal Structure",
-                text: "Zooming into ONE module (Scope Module) to see the 5 layers in detail. Each module is self-contained with full A.D.D structure: Bootstrap (DI), Operators (TGO + Coordinator), Core Abstractions (Entities, Ports, Events, RuleSets), Implementations (Adapters, Providers, ACL), and Boundary (DTOs, Boundary Events)."
+                text: "Zooming into ONE module (Scope Module) to see the 5 layers in detail.<br><br><strong>Layer Components:</strong><br>• <span style='color:#4a9eff'>Bootstrap</span> - DI Container, Composition Root<br>• <span style='color:#27c93f'>Operators</span> - TGO, Coordinator, Business Flows<br>• <span style='color:#ffbd2e'>Core Abstractions</span> - Entities, Ports, Events, RuleSets<br>• <span style='color:#ff5f56'>Implementations</span> - Adapters, Providers, ACL<br>• <span style='color:#999'>Boundary</span> - DTOs, Boundary Events<br><br>Each module is self-contained with full A.D.D structure."
             },
             {
                 title: "🌳 Fractal Architecture Pattern - Infinite Tree (Lazy Loading)",
-                text: "Infinite Fractal with 6 node types: Module + 5 Layers. Rule: Only Implementations can contain children. Click ▼ on Implementations → lazy creates random 1-5 sub-modules. Each sub-module has same 5-layer structure (fractal repeats). Keep expanding Implementations infinitely to explore the tree! Blue arrow = Event from root Implementations → Boundary. Click node name to view 5 layers modal."
+                text: "Infinite Fractal with 6 node types: Module + 5 Layers.<br><br><strong>Expansion Rule:</strong><br>• Only Implementations can contain children<br>• Click ▼ on Implementations → lazy creates random 1-5 sub-modules<br>• Each sub-module has same 5-layer structure (fractal repeats!)<br><br><strong>Interactions:</strong><br>• Keep expanding Implementations infinitely to explore the tree<br>• Blue dashed arrow = Event from root Implementations → Boundary<br>• Click node name to view 5 layers modal"
             },
             {
                 title: "📡 F.A.P with Event Communication (Pure Fractal)",
-                text: "Pure Fractal with event communication. Every module has full 5-layer structure (shown as simplified notation). Vertical arrows labeled 'contains in Implementations' = fractal containment. Dotted horizontal arrows = Core Events for cross-module communication. Modules communicate ONLY via Core Events and Ports, never direct calls. Each module is self-contained and can be tested independently."
+                text: "Pure Fractal with event communication. Every module has full 5-layer structure (shown as simplified notation).<br><br><strong>Visual Elements:</strong><br>• Vertical arrows (<em>\"contains in Implementations\"</em>) = fractal containment<br>• Dotted horizontal arrows = Core Events for cross-module communication<br><br><strong>Communication Rules:</strong><br>• Modules communicate ONLY via Core Events and Ports<br>• Never direct calls between modules<br>• Each module is self-contained and testable independently"
             },
             {
                 title: "📚 LLM Context Reading - Pure Fractal Navigation",
