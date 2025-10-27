@@ -833,15 +833,24 @@
 
             html += '<div class="example-header"><div><div class="example-title">' + example.title + '</div><div class="example-subtitle">' + example.subtitle + '</div></div><button class="copy-btn" onclick="copyAllCode()"><span id="copy-all-icon">📋</span> Copy All Code</button></div>';
 
+            // Detect framework name
+            var backendName = '.NET';
+            if (framework.indexOf('python') >= 0) {
+                backendName = 'Python';
+            } else if (framework.indexOf('dotnet') >= 0) {
+                backendName = '.NET';
+            }
+
             // Tab navigation
             html += '<div class="code-tabs">';
-            html += '<button class="code-tab active" onclick="switchTab(\'backend\')">Backend (.NET - 14 files)</button>';
+            html += '<button class="code-tab active" onclick="switchTab(\'backend\')">Backend (' + backendName + ' - 14 files)</button>';
             html += '<button class="code-tab" onclick="switchTab(\'frontend\')">Frontend (Vanilla JS - 11 files)</button>';
             html += '</div>';
 
             // Backend tab content
             html += '<div class="code-tab-content active" id="tab-backend">';
-            html += '<h3 class="section-header">🔧 Backend - .NET Minimal API (14 files)</h3>';
+            var backendFullName = backendName === 'Python' ? 'Python FastAPI' : '.NET Minimal API';
+            html += '<h3 class="section-header">🔧 Backend - ' + backendFullName + ' (14 files)</h3>';
             html += renderLayerSections(backendFiles, 'backend');
             html += '</div>';
 
