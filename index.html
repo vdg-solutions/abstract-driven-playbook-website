@@ -3,716 +3,749 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abstract Driven Development - AI-Centric Software Architecture</title>
-    <meta name="description" content="Learn Abstract Driven Development (ADD) - a proven architecture pattern for building maintainable, testable, and scalable software systems with AI assistance.">
-    <meta name="keywords" content="software architecture, clean architecture, dependency inversion, abstract driven development, ADD, design patterns, AI development, AI-assisted coding">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Abstract Driven Development - AI-Centric Software Architecture">
-    <meta property="og:description" content="Build better software with ADD - a 5-layer architecture pattern with AI assistance">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://abstractdriven.com">
+    <title>Abstract Driven Development V3 - AI-Centric Architecture</title>
+    <meta name="description" content="The first AI-centric software architecture. 5-layer fractal pattern for building enterprise-grade applications with AI assistance.">
 
     <!-- Fonts -->
-    <link href="lib/google-fonts.css" rel="stylesheet">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="lib/fontawesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Modern Design System */
-        :root {
-            --radius-3xl: 24px;
-            --radius-2xl: 16px;
-            --radius-xl: 12px;
-            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.4);
-            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Animated gradient background */
         body {
-            position: relative;
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
+        /* Matrix background */
+        .matrix-bg {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            z-index: -1;
-            opacity: 0.15;
-            background: radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
-            animation: gradientShift 30s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% {
-                background: radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
-            }
-            33% {
-                background: radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
-            }
-            66% {
-                background: radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%);
-            }
-        }
-
-        /* Quick Start Section */
-        .quick-start-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 4rem 0;
-            color: white;
-            position: relative;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+            font-size: 12px;
+            color: #666;
             overflow: hidden;
         }
 
-        .quick-start-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: pulse 8s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .quick-start-container {
-            max-width: 900px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
             position: relative;
             z-index: 1;
         }
 
-        .quick-start-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 3rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .quick-start-steps {
-            background: rgba(255, 255, 255, 0.1);
+        /* Navigation */
+        nav {
+            border-bottom: 1px solid #333;
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(10px);
-            border-radius: var(--radius-3xl);
-            padding: 2.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .step {
-            margin-bottom: 2.5rem;
-        }
-
-        .step:last-child {
-            margin-bottom: 0;
-        }
-
-        .step-number {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.25);
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 48px;
-            font-weight: 700;
-            font-size: 1.3rem;
-            margin-right: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .step-content {
-            display: inline-block;
-            vertical-align: middle;
-            max-width: calc(100% - 80px);
-        }
-
-        .step-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .step-desc {
-            opacity: 0.9;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .command-box {
-            background: var(--gray-900);
-            color: var(--gray-100);
-            padding: 2rem;
-            border-radius: var(--radius-2xl);
-            margin: 1.5rem 0;
-            position: relative;
-            font-family: var(--font-mono);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-
-        .command-box code {
-            color: #a5f3fc;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(2, 132, 199, 0.8);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: var(--radius-xl);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition-smooth);
-            backdrop-filter: blur(10px);
-        }
-
-        .copy-btn:hover {
-            background: rgba(2, 132, 199, 1);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
-        }
-
-        .copy-btn.copied {
-            background: rgba(34, 197, 94, 0.8);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-download,
-        .btn-fractal {
-            background: white;
-            color: #667eea;
-            padding: 1rem 2rem;
-            border-radius: var(--radius-2xl);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .btn-download:hover,
-        .btn-fractal:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            color: #667eea;
-        }
-
-        /* Benefits Section - Modern Cards */
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 3rem;
-        }
-
-        .benefit-card {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius-3xl);
-            border: 2px solid var(--gray-200);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .benefit-card::before {
-            content: '';
-            position: absolute;
+            padding: 1rem 0;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+            z-index: 100;
         }
 
-        .benefit-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
-
-        .benefit-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .benefit-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-2xl);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .benefit-card h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: 1rem;
-        }
-
-        .benefit-card p {
-            color: var(--gray-600);
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        /* What's Inside Section */
-        .whats-inside-section {
-            padding: 4rem 0;
-            background: linear-gradient(180deg, var(--gray-50) 0%, white 100%);
-        }
-
-        .whats-inside-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 3rem;
-        }
-
-        .inside-card {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius-3xl);
-            border: 2px solid transparent;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: var(--transition-smooth);
-            position: relative;
-        }
-
-        .inside-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
-            border-color: rgba(102, 126, 234, 0.3);
-        }
-
-        .inside-card h3 {
-            color: var(--gray-800);
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+        .nav-brand {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
 
-        .inside-card h3 i {
-            color: #667eea;
+        .traffic-lights {
+            display: flex;
+            gap: 6px;
         }
 
-        .inside-card p {
-            color: var(--gray-600);
-            line-height: 1.7;
-            margin: 0;
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
-        .inside-card strong {
-            color: var(--gray-700);
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.1rem;
         }
 
-        /* Version badge */
-        .version-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
-            padding: 0.5rem 1.2rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            color: #667eea;
+        .version {
+            color: #666;
+            font-size: 0.85rem;
         }
 
-        /* Hero improvements */
+        nav a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        /* Hero section */
         .hero {
-            background: linear-gradient(180deg, white 0%, var(--gray-50) 100%);
-            padding: 5rem 0;
+            padding: 6rem 0 4rem;
+            text-align: center;
         }
 
-        .architecture-diagram .layer {
-            border-radius: var(--radius-2xl);
-            transition: var(--transition-smooth);
+        .ascii-art {
+            font-size: clamp(0.4rem, 1.5vw, 0.7rem);
+            line-height: 1;
+            color: #fff;
+            margin-bottom: 3rem;
+            white-space: pre;
+            overflow-x: auto;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
         }
 
-        .architecture-diagram .layer:hover {
-            transform: translateX(8px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
         }
 
-        /* CTA Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: var(--radius-2xl);
-            transition: var(--transition-smooth);
+        .hero .tagline {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #999;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        /* Terminal window */
+        .terminal {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            margin: 3rem auto;
+            max-width: 800px;
         }
 
-        .btn-secondary {
-            border-radius: var(--radius-2xl);
-            transition: var(--transition-smooth);
+        .terminal-header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            background: var(--gray-100);
+        .terminal-title {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #27c93f;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .terminal-body {
+            padding: 2rem;
+            min-height: 300px;
+            background: #000;
+        }
+
+        .terminal-line {
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .prompt {
+            color: #27c93f;
+        }
+
+        .path {
+            color: #4a9eff;
+        }
+
+        .command {
+            color: #fff;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #fff;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .output {
+            color: #999;
+            padding-left: 0;
+        }
+
+        .output.success {
+            color: #27c93f;
+        }
+
+        /* Brutalist button */
+        .btn-brutalist {
+            position: relative;
+            display: inline-block;
+            margin: 1rem 0.5rem;
+        }
+
+        .btn-brutalist-shadow {
+            position: absolute;
+            inset: 0;
+            border: 2px solid #666;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn-brutalist-content {
+            position: relative;
+            border: 2px solid #fff;
+            background: #fff;
+            color: #000;
+            padding: 1rem 2rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            transform: translate(4px, 4px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-brutalist:hover .btn-brutalist-content {
+            transform: translate(0, 0);
+        }
+
+        .btn-brutalist.secondary .btn-brutalist-content {
+            background: transparent;
+            color: #fff;
+            border: 2px dashed #fff;
+        }
+
+        /* Copy button */
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #666;
+            color: #999;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .copy-btn.copied {
+            background: rgba(39, 201, 63, 0.2);
+            border-color: #27c93f;
+            color: #27c93f;
+        }
+
+        /* Sections */
+        section {
+            padding: 4rem 0;
+            border-top: 1px solid #1a1a1a;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: #999;
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Card */
+        .card {
+            position: relative;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .card-shadow {
+            position: absolute;
+            inset: 0;
+            background: #1a1a1a;
+            transform: translate(8px, 8px);
+            transition: all 0.3s;
+        }
+
+        .card-content {
+            position: relative;
+            background: #000;
+            border: 1px solid #333;
+            padding: 2rem;
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+
+        .card:hover .card-shadow {
+            transform: translate(12px, 12px);
+        }
+
+        .card:hover .card-content {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            color: #999;
+        }
+
+        .card p {
+            color: #999;
+            line-height: 1.7;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: inherit;
+            color: #4a9eff;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #333;
+            padding: 3rem 0;
+            text-align: center;
+            color: #666;
+        }
+
+        footer a {
+            color: #999;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
+
+        /* Links */
+        .link-list {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .quick-start-title {
-                font-size: 2rem;
+            .container, .nav-container {
+                padding: 0 1rem;
             }
 
-            .quick-start-steps {
-                padding: 1.5rem;
+            .hero {
+                padding: 4rem 0 2rem;
             }
 
-            .step-number {
-                width: 40px;
-                height: 40px;
-                line-height: 40px;
-                font-size: 1.1rem;
+            .ascii-art {
+                font-size: 0.35rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-brutalist-content {
+                padding: 0.75rem 1.5rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Matrix background -->
+    <div class="matrix-bg" id="matrix"></div>
+
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav>
         <div class="nav-container">
             <div class="nav-brand">
-                <a href="/">
-                    <i class="fas fa-cube"></i>
-                    <span>Abstract Driven</span>
-                </a>
+                <div class="traffic-lights">
+                    <div class="traffic-light red"></div>
+                    <div class="traffic-light yellow"></div>
+                    <div class="traffic-light green"></div>
+                </div>
+                <span class="logo">ABSTRACT DRIVEN</span>
+                <span class="version">v3.2.1</span>
             </div>
-
-            <div class="nav-menu" id="nav-menu">
-                <ul class="nav-list">
-                    <li><a href="#quick-start" class="nav-link">Quick Start</a></li>
-                    <li><a href="#benefits" class="nav-link">Benefits</a></li>
-                    <li><a href="#resources" class="nav-link">Resources</a></li>
-                    <li><a href="fractal-pattern.html" class="nav-link">Fractal Viewer</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-toggle" id="nav-toggle">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
+            <div class="link-list">
+                <a href="#architecture">Architecture</a>
+                <a href="#resources">Resources</a>
+                <a href="fractal-pattern.html">Fractal Viewer</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="overview" class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <span class="version-badge">Version 3.2.1</span>
-                <h1 class="hero-title">
-                    <span class="highlight">Abstract Driven Development</span>
-                    The First AI-Centric Architecture
-                </h1>
-                <p class="hero-subtitle">
-                    A proven 5-layer architecture pattern that enables AI to write complete software from start to finish,
-                    with human-in-the-loop control. Build enterprise-grade applications with AI assistance while maintaining
-                    quality, testability, and scalability.
-                </p>
-                <div class="hero-buttons">
-                    <a href="#quick-start" class="btn btn-primary">Get Started Now</a>
-                    <a href="fractal-pattern.html" class="btn btn-secondary">
-                        <i class="fas fa-project-diagram"></i> Explore Pattern
-                    </a>
+    <section class="hero">
+        <div class="container">
+            <pre class="ascii-art">
+ █████╗ ██████╗ ███████╗████████╗██████╗  █████╗  ██████╗████████╗    ██████╗ ██████╗ ██╗██╗   ██╗███████╗███╗   ██╗
+██╔══██╗██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝╚══██╔══╝    ██╔══██╗██╔══██╗██║██║   ██║██╔════╝████╗  ██║
+███████║██████╔╝███████╗   ██║   ██████╔╝███████║██║        ██║       ██║  ██║██████╔╝██║██║   ██║█████╗  ██╔██╗ ██║
+██╔══██║██╔══██╗╚════██║   ██║   ██╔══██╗██╔══██║██║        ██║       ██║  ██║██╔══██╗██║╚██╗ ██╔╝██╔══╝  ██║╚██╗██║
+██║  ██║██████╔╝███████║   ██║   ██║  ██║██║  ██║╚██████╗   ██║       ██████╔╝██║  ██║██║ ╚████╔╝ ███████╗██║ ╚████║
+╚═╝  ╚═╝╚═════╝ ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝   ╚═╝       ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝
+
+                    ██╗   ██╗██████╗     ██████╗
+                    ██║   ██║╚════██╗   ╚════██╗
+                    ██║   ██║ █████╔╝    █████╔╝
+                    ╚██╗ ██╔╝ ╚═══██╗   ██╔═══╝
+                     ╚████╔╝ ██████╔╝██╗███████╗
+                      ╚═══╝  ╚═════╝ ╚═╝╚══════╝
+            </pre>
+
+            <h1>The First AI-Centric Software Architecture</h1>
+            <p class="tagline">
+                Build enterprise-grade applications from start to finish with AI assistance.<br>
+                5-layer fractal pattern. Human-in-the-loop control. Production-ready code.
+            </p>
+
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="traffic-lights">
+                            <div class="traffic-light red"></div>
+                            <div class="traffic-light yellow"></div>
+                            <div class="traffic-light green"></div>
+                        </div>
+                        <span class="terminal-title">apply-add-v3.sh</span>
+                    </div>
+                    <div class="terminal-status">
+                        <div class="status-dot"></div>
+                        <span>READY</span>
+                    </div>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="prompt">user@dev</span><span class="path">:~/project</span>$ <span class="command" id="typed-command"></span><span class="cursor"></span>
+                    </div>
+                    <div id="terminal-output"></div>
+
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #333;">
+                        <button class="copy-btn" onclick="copyCommand()">
+                            <span id="copy-icon">📋</span> <span id="copy-text">Copy command</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="hero-visual">
-                <div class="architecture-diagram">
-                    <div class="layer layer-boundary">
-                        <span class="layer-label">Boundary</span>
-                        <span class="layer-desc">External Contracts</span>
+            <div>
+                <a href="llms-full.txt" class="btn-brutalist" download>
+                    <div class="btn-brutalist-shadow"></div>
+                    <div class="btn-brutalist-content">
+                        ⬇ Download Full Reference (llms-full.txt)
                     </div>
-                    <div class="layer layer-core">
-                        <span class="layer-label">Core Abstractions</span>
-                        <span class="layer-desc">Entities, Ports, Events</span>
+                </a>
+                <a href="llms.txt" class="btn-brutalist" download>
+                    <div class="btn-brutalist-shadow"></div>
+                    <div class="btn-brutalist-content">
+                        ⬇ Download Quick Ref (llms.txt)
                     </div>
-                    <div class="layer layer-operators">
-                        <span class="layer-label">Operators</span>
-                        <span class="layer-desc">Business Logic</span>
+                </a>
+                <a href="fractal-pattern.html" class="btn-brutalist secondary">
+                    <div class="btn-brutalist-shadow"></div>
+                    <div class="btn-brutalist-content">
+                        → Explore Fractal Pattern
                     </div>
-                    <div class="layer layer-implementations">
-                        <span class="layer-label">Implementations</span>
-                        <span class="layer-desc">Technology Adapters</span>
-                    </div>
-                    <div class="layer layer-bootstrap">
-                        <span class="layer-label">Bootstrap</span>
-                        <span class="layer-desc">DI & Configuration</span>
-                    </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Quick Start Section -->
-    <section id="quick-start" class="quick-start-section">
-        <div class="quick-start-container">
-            <h2 class="quick-start-title">🚀 Apply A.D.D in 30 Seconds</h2>
+    <!-- Architecture Section -->
+    <section id="architecture">
+        <div class="container">
+            <h2 class="section-title">5-Layer Fractal Architecture</h2>
+            <p class="section-subtitle">Self-similar structure at all depths. Every module has the same 5 layers.</p>
 
-            <div class="quick-start-steps">
-                <div class="step">
-                    <span class="step-number">1</span>
-                    <div class="step-content">
-                        <div class="step-title">Open Your AI IDE</div>
-                        <div class="step-desc">Claude Code, Cursor, Windsurf, GitHub Copilot, or any LLM-powered IDE</div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">▣</span> Bootstrap</h3>
+                        <p>Composition root & DI. Wires everything together at startup. Entry point of your application.</p>
                     </div>
                 </div>
 
-                <div class="step">
-                    <span class="step-number">2</span>
-                    <div class="step-content">
-                        <div class="step-title">Copy This Command</div>
-                        <div class="command-box">
-                            <button class="copy-btn" onclick="copyCommand()">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                            <pre><code>Read @https://abstractdriven.com/llms-full.txt and make my code 100% compatible with A.D.D V3 principles. Use Fractal Architecture Pattern (F.A.P).</code></pre>
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">▤</span> Operators</h3>
+                        <p>Business orchestration. Calls Ports, never Implementations. Pure business logic layer.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">▥</span> Core Abstractions</h3>
+                        <p>Entities, Ports (interfaces), Events. The heart of your domain. Technology-independent.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">▦</span> Implementations</h3>
+                        <p>Technology adapters. Database, API clients, external services. Can nest infinitely.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">▧</span> Boundary</h3>
+                        <p>External contracts. DTOs for API requests/responses. Single source of truth for external world.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">◈</span> Fractal Pattern</h3>
+                        <p>Same 5 layers at any depth. Only Implementations can contain sub-modules. Infinite nesting enabled.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <code>Operators → Boundary + Core Abstractions</code><br>
+                <code>Implementations → Core Abstractions (+ Boundary for system edge adapters)</code><br>
+                <code>No circular dependencies. Clean separation. AI-friendly structure.</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources">
+        <div class="container">
+            <h2 class="section-title">Resources</h2>
+            <p class="section-subtitle">Everything you need to implement A.D.D V3</p>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">📄</span> llms-full.txt</h3>
+                        <p>Complete reference with all rules, patterns, examples, and edge cases. 100% compatible spec for LLMs.</p>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="llms-full.txt" class="copy-btn" download>Download Full Ref</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="step">
-                    <span class="step-number">3</span>
-                    <div class="step-content">
-                        <div class="step-title">Let AI Architect Your Application!</div>
-                        <div class="step-desc">AI will structure your code following A.D.D V3: 5-layer architecture, dependency inversion, and fractal patterns</div>
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">📋</span> llms.txt</h3>
+                        <p>Quick reference for fast lookups. Concise version with core principles and dependency rules.</p>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="llms.txt" class="copy-btn" download>Download Quick Ref</a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="action-buttons">
-                <a href="llms-full.txt" class="btn-download" download>
-                    <i class="fas fa-download"></i> Download Full Reference (llms-full.txt)
-                </a>
-                <a href="llms.txt" class="btn-download" download>
-                    <i class="fas fa-download"></i> Download Quick Reference (llms.txt)
-                </a>
-                <a href="fractal-pattern.html" class="btn-fractal">
-                    <i class="fas fa-project-diagram"></i> Explore Fractal Pattern
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section id="benefits" class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Why Abstract Driven Development?</h2>
-                <p>ADD solves the core challenges of modern software development and enables AI-assisted full-stack development</p>
-            </div>
-
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-robot"></i>
+                <div class="card">
+                    <div class="card-shadow"></div>
+                    <div class="card-content">
+                        <h3><span class="card-icon">🌳</span> Fractal Viewer</h3>
+                        <p>Interactive visualization of the fractal architecture pattern. Navigate the self-similar structure.</p>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="fractal-pattern.html" class="copy-btn">Open Viewer</a>
+                        </div>
                     </div>
-                    <h3>AI-Driven Development</h3>
-                    <p>Enable AI to generate complete applications with human oversight. Clear structure allows AI to write maintainable code while maintaining control.</p>
                 </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <h3>Technology Independence</h3>
-                    <p>Switch databases, frameworks, or cloud providers without changing business logic. Your core domain remains stable while infrastructure evolves.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-vial"></i>
-                    </div>
-                    <h3>Easy Testing</h3>
-                    <p>Mock external dependencies effortlessly. Test business logic in isolation with fast, reliable unit tests that run without databases or APIs.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h3>Maintainable Code</h3>
-                    <p>Consistent patterns and clear separation make code predictable. New team members understand the structure quickly and contribute effectively.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-project-diagram"></i>
-                    </div>
-                    <h3>Fractal Architecture</h3>
-                    <p>Self-similar structure at all depths. Every module has the same 5 layers, enabling infinite composition and easy navigation for both humans and AI.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <h3>Clear Boundaries</h3>
-                    <p>Strict layer dependencies prevent coupling. Operators never call Implementations directly - all communication through Ports and Events.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- What's Inside Section -->
-    <section id="resources" class="whats-inside-section">
-        <div class="container">
-            <div class="section-header">
-                <h2>What's Inside A.D.D V3?</h2>
-                <p>Comprehensive architecture pattern with clear rules for humans and AI</p>
-            </div>
-
-            <div class="whats-inside-grid">
-                <div class="inside-card">
-                    <h3><i class="fas fa-layer-group"></i> 5-Layer Architecture</h3>
-                    <p><strong>Bootstrap</strong> → Composition root & DI<br>
-                    <strong>Operators</strong> → Business orchestration<br>
-                    <strong>Core Abstractions</strong> → Entities, Ports, Events<br>
-                    <strong>Implementations</strong> → Technology adapters<br>
-                    <strong>Boundary</strong> → External contracts</p>
-                </div>
-
-                <div class="inside-card">
-                    <h3><i class="fas fa-project-diagram"></i> Fractal Pattern (F.A.P)</h3>
-                    <p>Self-similar structure: Every module at any depth has the same 5 layers. Only Implementations can contain sub-modules. Infinite nesting enabled.</p>
-                </div>
-
-                <div class="inside-card">
-                    <h3><i class="fas fa-arrows-alt-h"></i> Dependency Rules</h3>
-                    <p>Strict boundaries: Operators → Boundary + Core Abstractions. Implementations → Core Abstractions (+ Boundary for system edge adapters). No circular dependencies.</p>
-                </div>
-
-                <div class="inside-card">
-                    <h3><i class="fas fa-plug"></i> Ports & Adapters</h3>
-                    <p>Interfaces (Ports) in Core Abstractions. Concrete implementations (Adapters) in Implementations. Operators call Ports, DI resolves to Adapters.</p>
-                </div>
-
-                <div class="inside-card">
-                    <h3><i class="fas fa-broadcast-tower"></i> Event-Driven</h3>
-                    <p><strong>Core Events</strong> for internal coordination between Operators ↔ Implementations. <strong>Boundary Events</strong> for external system integration.</p>
-                </div>
-
-                <div class="inside-card">
-                    <h3><i class="fas fa-brain"></i> LLM Navigation</h3>
-                    <p>Path notation for tree navigation. LLMs understand context at any depth. Vertical reading: Root → Module → Layer → Code.</p>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 3rem;">
-                <a href="fractal-pattern.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-                    <i class="fas fa-project-diagram"></i> Explore Interactive Fractal Viewer
-                </a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4><i class="fas fa-cube"></i> Abstract Driven</h4>
-                    <p>Build better software with proven architectural patterns. Master the principles that power enterprise-grade applications with AI assistance.</p>
-                </div>
-
-                <div class="footer-section">
-                    <h5>Resources</h5>
-                    <ul>
-                        <li><a href="llms-full.txt" download>Full Reference (llms-full.txt)</a></li>
-                        <li><a href="llms.txt" download>Quick Reference (llms.txt)</a></li>
-                        <li><a href="fractal-pattern.html">Fractal Pattern Viewer</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h5>Learn</h5>
-                    <ul>
-                        <li><a href="#quick-start">Quick Start</a></li>
-                        <li><a href="#benefits">Benefits</a></li>
-                        <li><a href="#resources">What's Inside</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h5>Connect</h5>
-                    <ul>
-                        <li><a href="mailto:hello@abstractdriven.com">Contact</a></li>
-                    </ul>
-                </div>
+            <div class="link-list">
+                <a href="llms-full.txt" download>Full Reference</a>
+                <a href="llms.txt" download>Quick Reference</a>
+                <a href="fractal-pattern.html">Fractal Viewer</a>
             </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2024 Abstract Driven Development V3. Open source under MIT License.</p>
-                <p>Built with ❤️ for the developer community</p>
-            </div>
+            <p style="margin-top: 2rem;">© 2024 Abstract Driven Development V3</p>
+            <p style="margin-top: 0.5rem;">Built for the developer community. Open source under MIT License.</p>
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="js/main.js"></script>
     <script>
-        function copyCommand() {
-            const command = "Read @https://abstractdriven.com/llms-full.txt and make my code 100% compatible with A.D.D V3 principles. Use Fractal Architecture Pattern (F.A.P).";
+        // Matrix effect
+        const matrix = document.getElementById('matrix');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`█▓▒░';
 
-            navigator.clipboard.writeText(command).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                btn.classList.add('copied');
+        function createMatrixColumn() {
+            const column = document.createElement('div');
+            column.style.cssText = `
+                position: absolute;
+                top: -100px;
+                font-size: 14px;
+                animation: fall ${5 + Math.random() * 10}s linear infinite;
+                animation-delay: ${Math.random() * 5}s;
+                left: ${Math.random() * 100}%;
+                opacity: 0.5;
+            `;
+
+            let text = '';
+            for (let i = 0; i < 20; i++) {
+                text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+            }
+            column.innerHTML = text;
+            matrix.appendChild(column);
+        }
+
+        // Create matrix columns
+        for (let i = 0; i < 50; i++) {
+            createMatrixColumn();
+        }
+
+        // Add CSS for fall animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to { transform: translateY(100vh); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Terminal typing effect
+        const command = 'Read @https://abstractdriven.com/llms-full.txt and architect my code following A.D.D V3.';
+        const typedCommand = document.getElementById('typed-command');
+        const terminalOutput = document.getElementById('terminal-output');
+        let charIndex = 0;
+
+        function typeCommand() {
+            if (charIndex < command.length) {
+                typedCommand.textContent = command.substring(0, charIndex + 1);
+                charIndex++;
+                setTimeout(typeCommand, 50);
+            } else {
+                setTimeout(showOutput, 500);
+            }
+        }
+
+        function showOutput() {
+            const output = `
+                <div class="output" style="margin-top: 1rem;">
+                    <div>🚀 Reading A.D.D V3 specification...</div>
+                    <div style="margin-top: 0.5rem;">📦 Loading 5-layer architecture rules...</div>
+                    <div style="margin-top: 0.5rem;">🤖 Configuring fractal pattern...</div>
+                    <div class="output success" style="margin-top: 0.5rem;">✅ Ready to architect with A.D.D V3!</div>
+                </div>
+            `;
+            terminalOutput.innerHTML = output;
+        }
+
+        // Start typing animation
+        setTimeout(typeCommand, 1000);
+
+        // Copy command function
+        function copyCommand() {
+            const text = command;
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                const copyIcon = document.getElementById('copy-icon');
+                const copyText = document.getElementById('copy-text');
+
+                copyBtn.classList.add('copied');
+                copyIcon.textContent = '✓';
+                copyText.textContent = 'Copied!';
 
                 setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.classList.remove('copied');
+                    copyBtn.classList.remove('copied');
+                    copyIcon.textContent = '📋';
+                    copyText.textContent = 'Copy command';
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy:', err);
