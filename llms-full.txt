@@ -259,9 +259,9 @@ Every module (root or nested) has exactly 5 layers:
 **Never depends on**: Implementations (calls via Ports)
 
 ### 3. Core Abstractions
-**Responsibility**: Internal abstractions, domain models
-**Contains**: Entities, Ports (interfaces), Core Events, RuleSets
-**Depends on**: Nothing (pure abstractions)
+**Responsibility**: Internal abstractions, domain models, pure domain logic
+**Contains**: Entities, Ports (interfaces), Core Events, RuleSets, Domain Helpers
+**Depends on**: Nothing (pure abstractions — BCL counts as "nothing"; NuGet packages do not)
 
 ### 4. Implementations
 **Responsibility**: Technology adapters, concrete implementations
@@ -461,6 +461,13 @@ class PostgresUserRepository implements IUserRepository {
 - Location: Core Abstractions
 - Purpose: Pipeline combining multiple RuleSets
 - Executed: Before state changes in Operators
+
+**Domain Helper (Pure Static)**:
+- Location: Core Abstractions/Domain
+- Purpose: Pure algorithm/utility with no I/O, no state, no NuGet deps
+- Examples: keyword matcher, slug normalizer, pattern evaluator
+- Rules: BCL-only deps; if NuGet required → move to Implementations instead
+- Why here: Operators call directly without IPort indirection — valid because Domain "depends on nothing"
 
 ---
 
@@ -1446,6 +1453,8 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 - **Is this a DTO or external contract?** → Boundary
 - **Is this an interface/port or domain entity?** → Core Abstractions
+- **Is this pure logic, BCL-only, no I/O?** → Core Abstractions/Domain (Domain Helper)
+- **Is this pure logic but needs a NuGet package?** → Implementations (static helper, no port needed)
 - **Is this business orchestration or workflow?** → Operators
 - **Is this technology-specific (DB, API, MQ)?** → Implementations
 - **Is this DI wiring or configuration?** → Bootstrap
@@ -1467,6 +1476,8 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 ❌ Technology details (SQL, HTTP) in Operators → Hide in Implementations behind Ports
 ❌ Heavy business logic in Entities → Keep thin, validation only
 ❌ Creating new layer types for sub-modules → Use same 5 layers (fractal)
+❌ Pure static helper in Implementations called from Operators → Extract to Core Abstractions/Domain (if BCL-only) or keep in Implementations but never expose as public static to Operators
+❌ Treating "accessible from Operators" as a reason to put code in Domain → The reason is purity + BCL-only; accessibility is a consequence, not a cause
 
 ### Fractal Checklist
 

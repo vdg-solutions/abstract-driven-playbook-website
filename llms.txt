@@ -37,8 +37,9 @@ A.D.D is a software architecture methodology built on Dependency Inversion Princ
 - Ports (Interfaces) - contracts for repositories, services, gateways
 - Core Events - internal events for Operators↔Implementations communication
 - Domain models - business concepts
+- Domain Helpers - pure static logic, BCL-only deps (e.g. keyword matchers, normalizers)
 
-**Dependencies**: None
+**Dependencies**: None (BCL counts as "nothing"; NuGet packages are external deps → move to Implementations)
 **Purpose**: Abstract away all implementation details; define "what" not "how"
 
 ### 3. Operators
@@ -940,6 +941,12 @@ A.D.D V3 is sufficient for most applications. For complex domains with intricate
 ❌ **Direct module-to-module calls**
 - Use Ports and Core Events for cross-module communication
 
+❌ **Pure static helper in Implementations called from Operators**
+- Extract to Core Abstractions/Domain if BCL-only; never expose as public static from Implementations to Operators
+
+❌ **Treating "accessible from Operators" as reason to put code in Domain**
+- The reason is purity + BCL-only deps; accessibility is a consequence, not a cause
+
 ❌ **Creating custom layer types for sub-modules** (Core', Providers')
 - Violates pure fractal - every module must have exactly 5 layers
 
@@ -993,6 +1000,8 @@ When adding code, ask:
 
 - **Is this a DTO or external contract?** → Boundary
 - **Is this an interface/port or domain entity?** → Core Abstractions
+- **Is this pure logic, BCL-only, no I/O?** → Core Abstractions/Domain (Domain Helper)
+- **Is this pure logic but needs a NuGet package?** → Implementations (static helper, no port needed)
 - **Is this business orchestration or workflow?** → Operators
 - **Is this technology-specific (DB, API, MQ)?** → Implementations
 - **Is this DI wiring or configuration?** → Bootstrap
