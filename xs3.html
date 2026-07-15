@@ -32,6 +32,22 @@
         .dl-btn { display: inline-block; border: 1px solid #27c93f; color: #27c93f; text-decoration: none; padding: 0.6rem 1.2rem; margin: 0.4rem; border-radius: 6px; transition: all 0.2s; }
         .dl-btn:hover { background: #27c93f; color: #000; }
         h2 { font-size: 1.2rem; margin: 3rem 0 1rem; color: #27c93f; }
+        .vs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .vs-card { border: 1px solid #333; border-radius: 10px; background: #0a0a0a; padding: 1.3rem 1.3rem 1.1rem; position: relative; }
+        .vs-card.winner { border: 2px solid #27c93f; box-shadow: 0 0 24px rgba(39, 201, 63, 0.25); }
+        .vs-name { font-size: 1.25rem; font-weight: bold; letter-spacing: 0.03em; }
+        .vs-sub { color: #777; font-size: 0.8rem; margin-top: 0.15rem; }
+        .vs-badge { position: absolute; top: 1.1rem; right: 1.1rem; font-size: 0.7rem; font-weight: bold; padding: 0.2rem 0.55rem; border-radius: 4px; letter-spacing: 0.08em; transform: rotate(3deg); }
+        .vs-badge.lossy-red { background: #ff5f56; color: #000; }
+        .vs-badge.lossy-orange { background: #ffbd2e; color: #000; }
+        .vs-badge.lossless { background: #27c93f; color: #000; }
+        .vs-rows { margin-top: 1rem; }
+        .vs-row { display: flex; gap: 0.6rem; color: #bbb; font-size: 0.88rem; margin: 0.55rem 0; line-height: 1.45; }
+        .vs-row .ic { flex: 0 0 auto; }
+        .vs-chip { display: inline-block; margin-top: 0.9rem; border: 1px solid #27c93f; color: #27c93f; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 999px; }
+        .hook { border: 1px dashed #4a9eff; border-radius: 10px; padding: 1.3rem 1.5rem; margin: 2.2rem 0; background: rgba(74, 158, 255, 0.05); }
+        .hook h3 { color: #4a9eff; font-size: 1.05rem; margin-bottom: 0.6rem; }
+        .hook p { margin-bottom: 0.8rem; }
         p { color: #bbb; margin-bottom: 1rem; }
         pre.card { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: #ddd; white-space: pre; }
         code { color: #27c93f; }
@@ -105,15 +121,58 @@
             <tr><td>Rules written as prose policies</td><td>Rules are data: <code>{?x a deploy; at friday} mark 🚫.</code> forbids a whole class of actions in one line</td></tr>
         </table>
 
+        <h2>A communication language for multi-agent systems</h2>
+        <p>AutoGen, CrewAI, LangGraph solved the <em>routing</em> of agent-to-agent messages. The messages themselves are still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no way to prove a message arrived with its meaning intact. XS3 is the wire format built for exactly that seat:</p>
+        <pre class="card">#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
+#m2 a tell; from coder; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 %95}.
+#m3 a confirm; from planner; re #m2; hash "9f3a".</pre>
+        <p>A question is a pattern with variables; the answer is the same graph with the variables bound; the receipt is a hash of the normalized edge set — agreement is checked by machine, not by re-reading. Uncertainty (<code>%95</code>, <code>conf</code>), deadlines (<code>@</code>), and law (<code>!must / !🚫</code>) travel <em>inside</em> the message. Any framework that passes strings between agents can carry XS3 today — no adapter, no SDK.</p>
+
         <h2>How it compares</h2>
         <p>Prompt compression today comes in two flavors — both lossy:</p>
-        <table>
-            <tr><th>Approach</th><th>How it shrinks</th><th>What survives</th><th>Can agents speak it?</th></tr>
-            <tr><td><strong>Caveman prompting</strong><br><span style="color:#666;">telegraphic English, hand-made</span></td><td>a human drops grammar, articles, connectives</td><td>vibes — no ground truth; meaning drift is invisible</td><td>barely — ambiguous, no structure for time, law, or uncertainty</td></tr>
-            <tr><td><strong>Token pruning</strong><br><span style="color:#666;">LLMLingua and friends</span></td><td>a small LM deletes low-information tokens</td><td>probabilistic — unverifiable; output is read-only debris</td><td>no — a one-way artifact nobody writes or replies in</td></tr>
-            <tr><td><strong>XS3</strong></td><td>re-encodes meaning as graph edges; only the non-meaning is deleted</td><td>100% of the meaning edges — checkable: same edge set, or it didn't compress, it broke</td><td>yes — it is a language: ask/tell, rules, time, affect, receipts</td></tr>
-        </table>
+
+        <div class="vs-grid">
+            <div class="vs-card">
+                <span class="vs-badge lossy-red">LOSSY</span>
+                <div class="vs-name">CAVEMAN<br>PROMPTING</div>
+                <div class="vs-sub">hand-made telegraphic English</div>
+                <div class="vs-rows">
+                    <div class="vs-row"><span class="ic">❌</span><span>No ground truth — meaning drift is invisible</span></div>
+                    <div class="vs-row"><span class="ic">❌</span><span>No structure for time, law, or uncertainty</span></div>
+                    <div class="vs-row"><span class="ic">⚠️</span><span>Barely speakable — ambiguity everywhere</span></div>
+                </div>
+            </div>
+            <div class="vs-card">
+                <span class="vs-badge lossy-orange">LOSSY</span>
+                <div class="vs-name">LLMLINGUA</div>
+                <div class="vs-sub">token pruning by a small LM — and friends</div>
+                <div class="vs-rows">
+                    <div class="vs-row"><span class="ic">❌</span><span>Survival is probabilistic — unverifiable</span></div>
+                    <div class="vs-row"><span class="ic">❌</span><span>Output is read-only debris</span></div>
+                    <div class="vs-row"><span class="ic">❌</span><span>One-way: nobody writes or replies in it</span></div>
+                </div>
+            </div>
+            <div class="vs-card winner">
+                <span class="vs-badge lossless">LOSSLESS</span>
+                <div class="vs-name">XS3</div>
+                <div class="vs-sub">graph re-encoding — only the non-meaning is deleted</div>
+                <div class="vs-rows">
+                    <div class="vs-row"><span class="ic">✅</span><span>100% of the meaning edges — machine-checkable</span></div>
+                    <div class="vs-row"><span class="ic">✅</span><span>Agents read it cold and write it from one card</span></div>
+                    <div class="vs-row"><span class="ic">✅</span><span>Rules, time, affect, receipts — first-class</span></div>
+                </div>
+                <span class="vs-chip">−70% measured on a real 53 KB reference</span>
+            </div>
+        </div>
+
         <blockquote>Caveman prompting guesses. Token pruners like LLMLingua make prompts smaller and hope. XS3 makes them smaller and proves it.</blockquote>
+
+        <div class="hook">
+            <h3>Looking for a lossless LLMLingua alternative?</h3>
+            <p>Don't take the badge's word for it — verify in 60 seconds. Give your model this prompt, hand it any document, and diff the meaning yourself:</p>
+            <span class="prompt-chip" onclick="copyPrompt(this)" title="Click to copy">Read @https://abstractdriven.com/llms-language.txt and re-encode my next document in XS3, keeping every meaning edge.</span>
+            <p style="margin-top: 0.9rem; font-size: 0.85rem; color: #666;">Or inspect the receipts: <a href="llms-full.xs3.txt">53 KB of architecture rules re-encoded at −70%</a>, every threshold and decision table intact.</p>
+        </div>
 
         <footer>
             Abstract Driven Development · <a href="llms-language.txt">llms-language.txt</a> (the language) · <a href="llms.txt">llms.txt</a> (A.D.D law in XS3) · <a href="category-theory.html">Mathematical grounding</a>
