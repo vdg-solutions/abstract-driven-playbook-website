@@ -43,7 +43,7 @@ const XS3Decode = (function () {
   }
 
   // ---- parse ----
-  function parse(toks) {
+  function parse(toks, strict) {
     let p = 0;
     const peek = () => toks[p];
     const next = () => toks[p++];
@@ -75,6 +75,7 @@ const XS3Decode = (function () {
           const items = [];
           while (peek() && peek().t !== ']') items.push(parseTerm());
           expect(']');
+          if (strict && items.length !== 3) throw new Error(`[ ] must hold exactly s p o, got ${items.length} terms`);
           if (items.length < 2) throw new Error('[ ] needs at least s p');
           const o = items.length === 2 ? { t: 'name', v: '', implicit: true }
             : items.length === 3 ? items[2]
@@ -111,8 +112,9 @@ const XS3Decode = (function () {
     }
 
     function parseObj() {
-      // tolerant: consecutive terms without commas fold into one phrase
       const items = [parseTerm()];
+      if (strict) return { term: items[0], quals: parseQuals() };
+      // tolerant: consecutive terms without commas fold into one phrase
       while (!atDelim()) items.push(parseTerm());
       const term = items.length === 1 ? items[0] : { t: 'phrase', items };
       return { term, quals: parseQuals() };
@@ -120,9 +122,9 @@ const XS3Decode = (function () {
 
     function parseStmt(inGraph) {
       const subj = parseTerm();
-      const subjQuals = parseQuals(); // tolerant: quals right after a bare subject
+      const subjQuals = strict ? [] : parseQuals(); // tolerant: quals right after a bare subject
       const coMentions = [];
-      while (peek() && peek().t === ',') { // tolerant: "{act, ~x}" — bare mention list
+      while (!strict && peek() && peek().t === ',') { // tolerant: "{act, ~x}" — bare mention list
         next();
         if (!atDelim()) coMentions.push(parseTerm());
         subjQuals.push(...parseQuals());
@@ -137,15 +139,20 @@ const XS3Decode = (function () {
         const objs = [];
         if (!atDelim()) {
           do { objs.push(parseObj()); } while (peek() && peek().t === ',' && next());
-        } else {
+        } else if (!strict) {
           objs.push({ term: { t: 'name', v: '', implicit: true }, quals: parseQuals() }); // bare "s p."
+        } else {
+          throw new Error(`predicate '${pk.v}' has no object`);
         }
         const groupQuals = objs.flatMap(o => o.quals); // qualifier distributes over the , group
         chains.push({ pred: pk.v, rev, objs: objs.map(o => o.term), quals: groupQuals });
         if (peek() && peek().t === ';') { next(); continue; }
         break;
       }
-      if (chains.length === 0) chains.push({ pred: null, rev: false, objs: coMentions, quals: subjQuals }); // bare mention
+      if (chains.length === 0) {
+        if (strict) throw new Error(`statement about '${peekTermName(subj)}' has no predicate`);
+        chains.push({ pred: null, rev: false, objs: coMentions, quals: subjQuals }); // bare mention
+      }
       if (peek() && peek().t === 'end') next();
       else if (!(inGraph && peek() && peek().t === '}') && peek()) throw new Error(`expected '.', got '${peek().v || peek().t}'`);
       return { subj, chains };
@@ -155,6 +162,8 @@ const XS3Decode = (function () {
     while (p < toks.length) doc.push(parseStmt(false));
     return doc;
   }
+
+  function peekTermName(t) { return t.v || t.t; }
 
   // ---- desugar -> 3-column table ----
   function termKey(t) {
@@ -368,13 +377,22 @@ const XS3Decode = (function () {
     return stmts.map(st => rStmt(st).replace(/\.$/, '')).join('; ');
   }
 
-  function decode(src) {
-    const doc = parse(lex(src));
+  function decode(src, opts) {
+    const strict = !!(opts && opts.strict);
+    const doc = parse(lex(src), strict);
     const edges = desugar(doc);
+    // đo "độ lỏng" để UI phân biệt XS3 thật với văn xuôi lọt qua tolerant mode
+    let chains = 0, loose = 0;
+    for (const st of doc) for (const ch of st.chains) {
+      chains++;
+      if (ch.pred === null) loose++;
+      else if (ch.objs.some(o => o.t === 'phrase')) loose++;
+    }
     return {
       text: doc.map(rStmt).join('\n'),
       edges: edges.map(e => [termKey(e.s), e.p, termKey(e.o)]),
       stmts: doc.length,
+      looseness: chains ? loose / chains : 1,
     };
   }
 

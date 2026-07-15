@@ -141,6 +141,7 @@
         .decode-duel textarea { display: block; width: 100%; min-height: 270px; background: transparent; border: none; outline: none; resize: vertical; color: #ddd; font-family: inherit; font-size: 0.75rem; line-height: 1.5; padding: 1rem; white-space: pre; }
         .decode-out { margin: 0; padding: 1rem; min-height: 270px; font-size: 0.82rem; line-height: 1.7; white-space: pre-wrap; color: #ddd; }
         .decode-out.err { color: #ff5f56; }
+        .decode-out:empty::before { content: attr(data-hint); color: #555; }
         .ex-chips { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.6rem 0 1rem; align-items: center; }
         .ex-chip { border: 1px solid #555; border-radius: 999px; background: #0a0a0a; color: #bbb; font-size: 0.78rem; padding: 0.3rem 0.85rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .ex-chip:hover { border-color: #27c93f; color: #27c93f; }
@@ -414,22 +415,22 @@ decision owner user; put each; await answer.
     say {#beast a hound; size enormous; color coal-black;
          breathe fire; haunt moor}.
 sir-charles a baskerville; own baskerville-hall;
-    die @1889-06; in yew-alley.
-[sir-charles die by heart-attack] conf 60.
-#print a footprint; near body; of {?h a hound; size gigantic}.
+    found dead @1889-06; in yew-alley.
+[sir-charles die-of heart-attack] conf 60.
+#track a footprint; near body; of {?h a hound; size gigantic}.
 {?p a baskerville; walk moor @night} => {#beast hunt ?p} %80 ~fear%90.
 #m1 a tell; from mortimer; to holmes;
     body {sir-henry a heir; of house-baskerville; arrive london @+1d.
           {sir-henry walk moor @night} mark 🚫}.`,
             grilling: `// mattpocock/skills · grilling, in XS3
 #you a interviewer; interview user ~relentless; until shared-understanding.
-#you walk decision-tree branch-by-branch; resolve dependency one-by-one.
+#you walk each-branch; resolve each-dependency.
 each-question carry recommended-answer.
 #you ask one-at-a-time; await feedback.
 {#you ask many-at-once} mark 🚫.
 {?f a fact; in environment} => {#you look-up ?f; ask user %0}.
 decision owner user; put each; await answer.
-{#you act before shared-understanding} mark 🚫.`,
+{act before shared-understanding} mark 🚫.`,
             chat: `#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
 #m2 a tell; from coder; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 %95}.
 #m3 a confirm; from planner; re #m2; hash "9f3a".`,
@@ -437,37 +438,61 @@ decision owner user; put each; await answer.
 #m2 a tell; from ta-5; re #m1;
     body {#d7 a design; for story-90; cost 3d %90.
           #d7 risk {api v2 break} ~fear%40.
-          [#d7 ship before 2026-08] conf 70}.
+          [#d7 ship 2026-08] conf 70}.
 #m3 a tell; from pm-2; re #m2; body {#d7 approved true !must. #d7 deadline 2026-08-01}.
 #m4 a confirm; from ta-5; re #m3; hash "c41b".`,
         };
         const dcEsc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        function dcRun() {
-            const src = document.getElementById('dc-in').value;
+        const MAX_PROSE_LOOSENESS = 0.4; // trên ngưỡng này input coi như văn xuôi, không phải XS3
+        function dcClear(placeholder) {
             const out = document.getElementById('dc-out');
-            const table = document.getElementById('dc-edges');
-            const stats = document.getElementById('dc-stats');
+            out.classList.remove('err');
+            out.textContent = '';
+            out.setAttribute('data-hint', placeholder || '');
+            document.getElementById('dc-stats').textContent = '';
+            document.getElementById('dc-edges').innerHTML = '';
+        }
+        function dcShow(r, note) {
+            const out = document.getElementById('dc-out');
+            out.classList.remove('err');
+            out.textContent = (note ? note + '\n\n' : '') + r.text;
+            document.getElementById('dc-stats').textContent = r.stmts + ' statements · ' + r.edges.length + ' edges';
+            document.getElementById('dc-edges').innerHTML =
+                '<tr><th>subject</th><th>predicate</th><th>object</th></tr>' +
+                r.edges.map(e => '<tr><td>' + e.map(dcEsc).join('</td><td>') + '</td></tr>').join('');
+        }
+        function dcFail(msg) {
+            dcClear();
+            const out = document.getElementById('dc-out');
+            out.classList.add('err');
+            out.textContent = msg;
+        }
+        function dcRun() {
+            const src = document.getElementById('dc-in').value.trim();
             document.getElementById('dc-bytes').textContent = new Blob([src]).size + ' bytes';
+            if (!src) { dcFail('nothing to decode — paste XS3 on the left'); return; }
             try {
-                const r = XS3Decode.decode(src);
-                out.classList.remove('err');
-                out.textContent = r.text;
-                stats.textContent = r.stmts + ' statements · ' + r.edges.length + ' edges';
-                table.innerHTML = '<tr><th>subject</th><th>predicate</th><th>object</th></tr>' +
-                    r.edges.map(e => '<tr><td>' + e.map(dcEsc).join('</td><td>') + '</td></tr>').join('');
-            } catch (err) {
-                out.classList.add('err');
-                out.textContent = "didn't parse: " + err.message;
-                stats.textContent = '';
-                table.innerHTML = '';
+                dcShow(XS3Decode.decode(src, { strict: true }));
+                return;
+            } catch (strictErr) {
+                try {
+                    const r = XS3Decode.decode(src);
+                    if (r.looseness > MAX_PROSE_LOOSENESS) {
+                        dcFail("this doesn't look like XS3 — it reads as plain prose.\n\nThis decoder goes one way: XS3 → words. To go the other way (words → XS3), point an LLM at llms-language.txt (see the last slide).");
+                        return;
+                    }
+                    dcShow(r, '⚠ loose XS3 (grammar deviations) — best-effort reading:');
+                } catch (e) {
+                    dcFail("didn't parse as XS3: " + e.message);
+                }
             }
         }
         function dcExample(k) {
             document.getElementById('dc-in').value = DC_EXAMPLES[k];
-            dcRun();
+            document.getElementById('dc-bytes').textContent = new Blob([DC_EXAMPLES[k]]).size + ' bytes';
+            dcClear('now press ▶ decode to words');
         }
         dcExample('baskerville');
-        document.getElementById('dc-in').addEventListener('input', dcRun);
     </script>
     <script>
         function copyPrompt(el) {
