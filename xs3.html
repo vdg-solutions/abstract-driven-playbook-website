@@ -109,10 +109,10 @@
         footer { border-top: 1px solid #333; margin-top: 4rem; padding: 2rem 0; color: #666; font-size: 0.85rem; text-align: center; }
 
         /* presentation deck */
-        .deck { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; scroll-padding-top: 3.5rem; scrollbar-width: none; }
+        .deck { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; scrollbar-width: none; }
         .deck::-webkit-scrollbar { width: 0; height: 0; }
-        .slide { min-height: 100vh; scroll-snap-align: center; display: flex; flex-direction: column; justify-content: center; padding: 4.6rem 2rem 3rem; }
-        .slide-inner { max-width: 1000px; margin: 0 auto; width: 100%; }
+        .slide { min-height: 100vh; scroll-snap-align: start; display: flex; flex-direction: column; padding: 4.6rem 2rem 3rem; }
+        .slide-inner { max-width: 1000px; margin: auto; width: 100%; }
         .slide h2 { margin: 0 0 1.1rem; }
         .eyebrow { color: #27c93f; font-size: 0.82rem; font-weight: bold; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.7rem; opacity: 0.85; }
         .slide-title { font-size: 1.7rem; }
@@ -205,18 +205,62 @@ decision owner user; put each; await answer.
                 </div>
             </div>
 
-            <blockquote><strong>Try it yourself:</strong> point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your favorite prompt or skill — watch it come back as XS3.</blockquote>
+            <blockquote><strong>Try it yourself:</strong> point any LLM at <a href="llms-language.txt">llms-language.txt</a>, hand it your favorite prompt or skill, and watch it come back as XS3. Paste this:</blockquote>
+            <div class="prompt-line" style="margin-top: 0.8rem;">
+                <span class="prompt-chip" onclick="copyPrompt(this)" title="Click to copy">Read @https://abstractdriven.com/llms-language.txt and re-encode this prompt in XS3, keeping every meaning edge.</span>
+            </div>
+        </div></section>
+
+        <section class="slide"><div class="slide-inner">
+            <h2>How it compares</h2>
+            <p>Prompt compression today comes in two flavors — both lossy:</p>
+
+            <div class="vs-grid">
+                <div class="vs-card">
+                    <span class="vs-badge lossy-red">LOSSY</span>
+                    <div class="vs-name">CAVEMAN<br>PROMPTING</div>
+                    <div class="vs-sub">hand-made telegraphic English</div>
+                    <div class="vs-rows">
+                        <div class="vs-row"><span class="ic">❌</span><span>No ground truth — meaning drift is invisible</span></div>
+                        <div class="vs-row"><span class="ic">❌</span><span>No structure for time, law, or uncertainty</span></div>
+                        <div class="vs-row"><span class="ic">⚠️</span><span>Barely speakable — ambiguity everywhere</span></div>
+                    </div>
+                </div>
+                <div class="vs-card">
+                    <span class="vs-badge lossy-orange">LOSSY</span>
+                    <div class="vs-name">LLMLINGUA</div>
+                    <div class="vs-sub">token pruning by a small LM — and friends</div>
+                    <div class="vs-rows">
+                        <div class="vs-row"><span class="ic">❌</span><span>Survival is probabilistic — unverifiable</span></div>
+                        <div class="vs-row"><span class="ic">❌</span><span>Output is read-only debris</span></div>
+                        <div class="vs-row"><span class="ic">❌</span><span>One-way: nobody writes or replies in it</span></div>
+                    </div>
+                </div>
+                <div class="vs-card winner">
+                    <span class="vs-badge lossless">LOSSLESS</span>
+                    <div class="vs-name">XS3</div>
+                    <div class="vs-sub">graph re-encoding — only the non-meaning is deleted</div>
+                    <div class="vs-rows">
+                        <div class="vs-row"><span class="ic">✅</span><span>100% of the meaning edges — machine-checkable</span></div>
+                        <div class="vs-row"><span class="ic">✅</span><span>Agents read it cold and write it from one card</span></div>
+                        <div class="vs-row"><span class="ic">✅</span><span>Rules, time, affect, receipts — first-class</span></div>
+                    </div>
+                    <span class="vs-chip">−70% measured on a real 53 KB reference</span>
+                </div>
+            </div>
+
+            <blockquote>Caveman prompting guesses. Token pruners like LLMLingua make prompts smaller and hope. XS3 makes them smaller and proves it.</blockquote>
         </div></section>
 
         <section class="slide"><div class="slide-inner hero">
-            <div class="prompt-line" style="margin-top: 0;">
+            <h1>XS3</h1>
+            <div class="tagline">The first agent-centric language.</div>
+            <p class="sub">Every language you know was designed for humans or for compilers. XS3 is designed for the third audience: <strong>LLM agents talking to LLM agents</strong>. One sentence is one graph edge. Facts, time, emotion, rules, and law — all first-class, all a few bytes.</p>
+
+            <div class="prompt-line">
                 <span class="prompt-label">1 prompt:</span>
                 <span class="prompt-chip" onclick="copyPrompt(this)" title="Click to copy">Read @https://abstractdriven.com/llms-language.txt and use XS3 as your communication language to other agents.</span>
             </div>
-
-            <h1 style="margin-top: 2rem;">XS3</h1>
-            <div class="tagline">The first agent-centric language.</div>
-            <p class="sub">Every language you know was designed for humans or for compilers. XS3 is designed for the third audience: <strong>LLM agents talking to LLM agents</strong>. One sentence is one graph edge. Facts, time, emotion, rules, and law — all first-class, all a few bytes.</p>
 
             <div class="stats">
                 <div class="stat"><div class="num">65–85%</div><div class="label"><span class="hl">compression</span> without sacrifice*</div></div>
@@ -282,47 +326,6 @@ decision owner user; put each; await answer.
         </div></section>
 
         <section class="slide"><div class="slide-inner">
-            <h2>How it compares</h2>
-            <p>Prompt compression today comes in two flavors — both lossy:</p>
-
-            <div class="vs-grid">
-                <div class="vs-card">
-                    <span class="vs-badge lossy-red">LOSSY</span>
-                    <div class="vs-name">CAVEMAN<br>PROMPTING</div>
-                    <div class="vs-sub">hand-made telegraphic English</div>
-                    <div class="vs-rows">
-                        <div class="vs-row"><span class="ic">❌</span><span>No ground truth — meaning drift is invisible</span></div>
-                        <div class="vs-row"><span class="ic">❌</span><span>No structure for time, law, or uncertainty</span></div>
-                        <div class="vs-row"><span class="ic">⚠️</span><span>Barely speakable — ambiguity everywhere</span></div>
-                    </div>
-                </div>
-                <div class="vs-card">
-                    <span class="vs-badge lossy-orange">LOSSY</span>
-                    <div class="vs-name">LLMLINGUA</div>
-                    <div class="vs-sub">token pruning by a small LM — and friends</div>
-                    <div class="vs-rows">
-                        <div class="vs-row"><span class="ic">❌</span><span>Survival is probabilistic — unverifiable</span></div>
-                        <div class="vs-row"><span class="ic">❌</span><span>Output is read-only debris</span></div>
-                        <div class="vs-row"><span class="ic">❌</span><span>One-way: nobody writes or replies in it</span></div>
-                    </div>
-                </div>
-                <div class="vs-card winner">
-                    <span class="vs-badge lossless">LOSSLESS</span>
-                    <div class="vs-name">XS3</div>
-                    <div class="vs-sub">graph re-encoding — only the non-meaning is deleted</div>
-                    <div class="vs-rows">
-                        <div class="vs-row"><span class="ic">✅</span><span>100% of the meaning edges — machine-checkable</span></div>
-                        <div class="vs-row"><span class="ic">✅</span><span>Agents read it cold and write it from one card</span></div>
-                        <div class="vs-row"><span class="ic">✅</span><span>Rules, time, affect, receipts — first-class</span></div>
-                    </div>
-                    <span class="vs-chip">−70% measured on a real 53 KB reference</span>
-                </div>
-            </div>
-
-            <blockquote>Caveman prompting guesses. Token pruners like LLMLingua make prompts smaller and hope. XS3 makes them smaller and proves it.</blockquote>
-        </div></section>
-
-        <section class="slide"><div class="slide-inner">
             <h2>Looking for a lossless LLMLingua alternative?</h2>
             <div class="hook">
                 <p>Don't take the badge's word for it — verify in 60 seconds. Give your model this prompt, hand it any document, and diff the meaning yourself:</p>
@@ -339,9 +342,9 @@ decision owner user; put each; await answer.
 
     <div class="dots" id="dots">
         <button class="dot active" title="Compression"></button>
+        <button class="dot" title="How it compares"></button>
         <button class="dot" title="What XS3 is"></button>
         <button class="dot" title="Multi-agent"></button>
-        <button class="dot" title="How it compares"></button>
         <button class="dot" title="Try it"></button>
     </div>
     <div class="present-hint">↑ ↓ / PgUp PgDn to present · 5 screens</div>
