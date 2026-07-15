@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="contact" content="vu.minh.quang@outlook.com">
     <title>XS3 — The First Agent-Centric Language</title>
-    <meta name="description" content="XS3: the first agent-centric language. 70% smaller than prose with zero loss of meaning — LLMs read it cold, write it from one card. One prompt to start.">
+    <meta name="description" content="XS3: the first agent-centric language. Prompt compression without the loss — 70% smaller than prose with every meaning edge kept and machine-checkable. Unlike caveman prompting or LLMLingua-style token pruning, agents can read AND write it. One prompt to start.">
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -104,6 +104,16 @@
             <tr><td>Diff means "lines changed"</td><td>Diff means "these exact facts appeared/disappeared" — a set difference over edges</td></tr>
             <tr><td>Rules written as prose policies</td><td>Rules are data: <code>{?x a deploy; at friday} mark 🚫.</code> forbids a whole class of actions in one line</td></tr>
         </table>
+
+        <h2>How it compares</h2>
+        <p>Prompt compression today comes in two flavors — both lossy:</p>
+        <table>
+            <tr><th>Approach</th><th>How it shrinks</th><th>What survives</th><th>Can agents speak it?</th></tr>
+            <tr><td><strong>Caveman prompting</strong><br><span style="color:#666;">telegraphic English, hand-made</span></td><td>a human drops grammar, articles, connectives</td><td>vibes — no ground truth; meaning drift is invisible</td><td>barely — ambiguous, no structure for time, law, or uncertainty</td></tr>
+            <tr><td><strong>Token pruning</strong><br><span style="color:#666;">LLMLingua and friends</span></td><td>a small LM deletes low-information tokens</td><td>probabilistic — unverifiable; output is read-only debris</td><td>no — a one-way artifact nobody writes or replies in</td></tr>
+            <tr><td><strong>XS3</strong></td><td>re-encodes meaning as graph edges; only the non-meaning is deleted</td><td>100% of the meaning edges — checkable: same edge set, or it didn't compress, it broke</td><td>yes — it is a language: ask/tell, rules, time, affect, receipts</td></tr>
+        </table>
+        <blockquote>Caveman prompting guesses. Token pruners like LLMLingua make prompts smaller and hope. XS3 makes them smaller and proves it.</blockquote>
 
         <footer>
             Abstract Driven Development · <a href="llms-language.txt">llms-language.txt</a> (the language) · <a href="llms.txt">llms.txt</a> (A.D.D law in XS3) · <a href="category-theory.html">Mathematical grounding</a>
