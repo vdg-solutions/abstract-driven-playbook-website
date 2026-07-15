@@ -1,65 +1,33 @@
-```lisp
-(@ADD_V3_Architecture_Manifesto
-  (⊗ 📐 1.0) ; Tone: Strict Architecture / DIP-First
-  (⊗ 🧊 1.0) ; Tone: Absolute Layer Isolation
+// A.D.D V3 manifesto — XS3. Reading key: `subject predicate object .` = one edge; ; keeps subject; , keeps subject+predicate; {} = pattern; !mark = deontic.
+#add a architecture-method; name "A.D.D V3"; mark 📐; tone strict-dip-first, absolute-layer-isolation.
+contract-is-law law "contract defines truth; implementations adhere strictly" !🔒.
+{?x change contract-silently} mark 🚨.
 
-  ;; ⚖️ Core Principle 1: Contract is Law
-  (Ω:Contract_Is_Law
-    (∀x(System) ⇒ (x ⇔ Contract) ⊗ 🚨(Δ(Contract) ⇒ Critical_Defect))
-    (∫(Impl)∂(Contract) ⇔ Truth) ; Implementations must strictly adhere to Contracts
-  )
+// F.A.P
+{?m a module} => {?m layer bootstrap, operators, core-abstractions, implementations, boundary} !🔒.
+{?s a module; nested-in ?m} => {?s lives-in implementations-of ?m} !🔒.
+{?m invent custom-layer-type} mark 🚫.
+system-root a module !🔒; gloss "root obeys the same law — top-level modules live in the ROOT's implementations, never beside the root"; path-demo "/Implementations/OrderModule/Implementations/PayFastAdapter".
 
-  ;; 🌀 Core Principle 2: Fractal Architecture Pattern (F.A.P)
-  (Φ:Fractal
-    (def F.A.P (M)
-      (≡ M (Boot Ops Core Impl Bndry))
-      (⇒ (SubMod M_Child) (⊂ M_Child Impl)) ; Nested modules exist exclusively within Implementations
-    )
-  )
+// layers + purity
+bootstrap duty "composition root, DI"; may-ref all-layers.
+{bootstrap hold business-logic} mark 🚫.
+operators duty "business orchestration: TGO (strong), Coordinator (eventual)"; may-ref boundary, core-abstractions; gloss "framework-agnostic: DTO in, DTO out".
+{operators ref implementations} mark 🚫.
+{operators import tech} mark 🚫.
+core-abstractions duty "Ports, Entities, Core Events, RuleSets"; may-ref nothing.
+{core-abstractions hold tech-or-logic} mark 🚫.
+implementations duty "adapters, ACL, UI/web frameworks, sub-modules"; may-ref core-abstractions.
+{implementations hold business-logic} mark 🚫.
+{?a a system-edge-adapter} => {?a may-ref boundary}; demo <api-client webhook-handler external-mq-consumer>.
+boundary duty "DTOs, Boundary Events"; may-ref nothing.
+{boundary hold logic} mark 🚫.
 
-  ;; 🥞 The 5 Strict Layers & Semantic Purity Constraints
-  (Σ:Layers
-    ;; 1. Boundary: External Contracts & System Edges
-    (L1:Bndry ⇒ ∅) 
-    (⇒ L1 (∉ Logic)) ; Strictly DTOs, BoundaryEvents. Zero business logic permitted.
-
-    ;; 2. Core Abstractions: Domain Rules & Internal Contracts
-    (L2:Core ⇒ ∅)
-    (⇒ L2 (∉ (∪ Logic Tech))) ; Strictly Interfaces(Ports), Entities, CoreEvents. Zero tech details.
-
-    ;; 3. Operators: Business Orchestration & Workflows
-    (L3:Ops ⇒ (∪ L2 L1))
-    (⇒ L3 (↛ L4)) ; Strict Prohibition: Operators must never reference Implementations directly.
-    (⇒ L3 (∉ Tech)) ; TGOs (Strong), Coordinators (Eventual). Framework-agnostic. No tech imports.
-
-    ;; 4. Implementations: Technology Adapters & Concrete Logic
-    (L4:Impl ⇒ L2) (? SysEdge (⇒ L4 L1))
-    (⇒ L4 (∉ BizLogic)) ; Adapters, UI/Web Frameworks, ACL (Anti-Corruption Layer). Execute contracts only.
-
-    ;; 5. Bootstrap: Composition Root & Dependency Injection
-    (L5:Boot ⇒ (∪ L1 L2 L3 L4))
-    (⇒ L5 (∉ BizLogic)) ; Solely for wiring components and DI.
-  )
-
-  ;; 🧩 Advanced Mechanics & Inter-Module Communication
-  (Γ:Mechanics
-    (⇒ (Message Module_A Module_B) 
-       (∨ (Call (Port :in L2)) 
-          (Emit (CoreEvent :in L2)))) ; Inter-module communication strictly via Ports or Events.
-    (↛ (Direct_Call (Ops M_A) (Ops M_B))) ; NEVER invoke peer Operators directly.
-  )
-
-  ;; 🛑 Execution Flow & Dependency Matrix Validation
-  (Π:DepRules
-    (∫_t (Execution)
-      (⇔ (DTO :in L1) L3)
-      (⇒ L3 (Call (Port :in L2)))
-      (⇒ (Adapter :in L4) (Implement (Port :in L2)))
-    )
-    (⇒ (∪ Circular_Dependency Upward_Dependency) 
-       (Δ (⊗ 📐) (⊗ 🚨 1.0)) 
-       (Halt "CONTRACT IS LAW! ARCHITECTURE VIOLATION DETECTED. REVERTING.")
-    )
-  )
-)
-```
+// communication + enforcement
+{?a a module. ?b a module. ?a message ?b} => {?a via port-call, core-event} !🔒.
+{operators-of ?a call operators-of ?b} mark 🚫.
+{dto in boundary} handled-by operators.
+{?ad a adapter} => {?ad implement port-in-core-abstractions}.
+{?d a circular-dependency} mark 🚨.
+{?d a upward-dependency} mark 🚨.
+on-violation halt "CONTRACT IS LAW! ARCHITECTURE VIOLATION DETECTED. REVERTING." !🚨.

@@ -1,0 +1,176 @@
+// A.D.D V3 — complete reference, XS3 encoding. Source: llms-full.txt v3.2.1 (2025-10-27).
+// Code samples in the source demonstrate laws already encoded below — they are derivable, not extra edges, and are omitted.
+// Reading key: every sentence is `subject predicate object .` — one labeled edge. ; keeps subject. , keeps subject+predicate.
+
+#add a architecture-method; name "Abstract Driven Development V3"; version "3.2.1"; mark 📐.
+#add one-sentence "business flows (Operators) orchestrate via interfaces (Core Abstractions) implemented by technology adapters (Implementations), in a fractal self-similar structure that enables infinite composition".
+#add core-insight "strict layer dependencies + fractal self-similarity -> evolvable, testable, technology-independent by design".
+contract-is-law law "contract defines truth; implementations adhere strictly" !🔒.
+{?x change contract-silently} mark 🚨.
+on-violation halt "CONTRACT IS LAW! ARCHITECTURE VIOLATION DETECTED. REVERTING." !🚨.
+
+// ── goals & principles ──
+#add goal dip-first, easy-replacement, simplicity, testability.
+dip-first gloss "abstractions never depend on concretes".
+easy-replacement gloss "swap technology without changing business logic".
+simplicity gloss "same structure everywhere (fractal)".
+testability gloss "pure rules, clear boundaries".
+#add principle dependency-inversion, layer-isolation, interface-driven, event-based, fractal-structure.
+interface-driven gloss "Operators call Ports, never concrete implementations".
+event-based gloss "Core Events for internal coordination; Boundary Events for external".
+
+// ── F.A.P — fractal architecture pattern ──
+#fap a pattern; gloss "self-similar, infinitely nestable"; node-types <module bootstrap operators core-abstractions implementations boundary>; node-type-count 6 !🔒.
+{?m a module} => {?m layer bootstrap, operators, core-abstractions, implementations, boundary} !🔒.
+{?s a module; nested-in ?m} => {?s lives-in implementations-of ?m} !🔒.
+{?m invent custom-layer-type} mark 🚫.
+nesting-depth limit %0; gloss "infinite nesting via Implementations".
+#fap why {learn-once-apply-everywhere true. modules self-contained true. llm zoom-any-level true. path-notation shows-exact-location true}.
+path-notation demo "/Implementations/A/Implementations/D/Core Abstractions"; gloss "root -> module A -> sub-module D -> its Core layer".
+
+// ── the 5 layers ──
+#L-boot a layer; name bootstrap; duty "composition root, DI configuration"; contains "DI container, service registration, app config"; may-ref all-layers; gloss "wiring only".
+{#L-boot hold business-logic} mark 🚫.
+#L-ops a layer; name operators; duty "business orchestration, workflows"; contains "TGO, Coordinator, DTO<->Entity mapping"; may-ref boundary, core-abstractions; gloss "framework-agnostic: DTO in, DTO out".
+{#L-ops ref implementations} mark 🚫.
+{#L-ops import tech} mark 🚫.
+#L-core a layer; name core-abstractions; duty "internal abstractions, domain models, pure domain logic"; contains "Entities, Ports, Core Events, RuleSets, Checkpoints, Domain Helpers"; may-ref nothing; note "BCL counts as nothing; NuGet packages do not".
+#L-impl a layer; name implementations; duty "technology adapters, concrete implementations"; contains "Adapters, Providers, ACL, sub-modules"; may-ref core-abstractions.
+{#L-impl hold business-logic} mark 🚫.
+#L-bndry a layer; name boundary; duty "system ingress/egress, external contracts"; contains "DTOs, Boundary Events, input validation"; may-ref nothing.
+{#L-bndry hold logic} mark 🚫.
+
+// ── dependency matrix ──
+{operators ref implementations} mark 🚫.
+{implementations ref operators} mark 🚫.
+{core-abstractions ref ?any} mark 🚫.
+{boundary ref ?any} mark 🚫.
+{?d a circular-dependency} mark 🚨.
+{?d a upward-dependency} mark 🚨.
+// conditional: implementations -> boundary, system edge only
+system-edge-adapter sub api-client, webhook-handler, external-mq-consumer, external-event-subscriber.
+internal-adapter sub repository, in-memory-cache, file-storage.
+{?a a system-edge-adapter} => {?a may-ref boundary}.
+{?a a internal-adapter} => {?a may-ref boundary %0}.
+[implementations may-ref boundary] requires {?a talks-directly-to external-system. external-contract matches boundary-dto. conversion-cost gt isolation-benefit}.
+[implementations may-ref boundary] why {pragmatic-over-purist true. boundary-dto is single-source-of-truth. needless-mapping avoided. hexagonal outbound-edge-alignment true}.
+{?a may-ref boundary. semantic-difference exists} => {?a may-ref boundary %0}.
+{?r a repository} => {?r return entity !must}.
+{?r a repository; return boundary-dto} mark 🚫.
+
+// ── cross-module communication ──
+{?a a module. ?b a module. ?a message ?b} => {?a via port-call, core-event} !🔒.
+{operators-of ?a call operators-of ?b} mark 🚫.
+
+// ── events ──
+#boundary-event a event-type; in boundary; purpose "events crossing system boundary (webhooks, external MQ)"; versioned true; gloss "public contract".
+#core-event a event-type; in core-abstractions; purpose "internal coordination Operators <-> Implementations"; sub business-signal, technical-signal.
+business-signal gloss "reflects business state"; demo <Order.Created Payment.Completed>.
+technical-signal gloss "operational signals"; demo <Job.Retry Cache.Invalidated>.
+event-envelope field eventName, version, correlationId, causationId, occurredAt, payload, metadata.
+metadata field source, consistency.
+consistency one-of strong, eventual.
+event-name pattern "Domain.PastTenseAction" !must; demo <Order.Created Payment.Completed User.Registered>.
+{?e a event; named imperative-or-command} mark 🚫; demo <Order.Create CreateOrder>.
+
+// ── component types ──
+#dto a component; in boundary; purpose "external contracts"; contains-logic %0.
+#entity a component; in core-abstractions; purpose "domain models"; gloss "thin structure, validation only"; contains-business-logic %0.
+#port a component; in core-abstractions; purpose "abstract contracts"; demo <IUserRepository IPaymentGateway ITranslator>.
+#adapter a component; in implementations; purpose "concrete implementation of a Port"; demo "PostgresUserRepository implements IUserRepository".
+#operator a component; in operators; purpose "business orchestration"; sub tgo, coordinator.
+tgo name "Transaction Group Operator"; consistency strong; gloss "transaction boundary for a data group: runs Checkpoint before persisting, loads/saves via Repository Port through group root, decides commit/rollback".
+coordinator consistency eventual; gloss "multi-step flows orchestrated via Core Events (BusinessSignals); rollback via Compensators".
+#ruleset a component; in core-abstractions; gloss "pure function validating business rules"; returns "RuleReport(passed: bool, reasons: string[])".
+#checkpoint a component; in core-abstractions; gloss "pipeline combining RuleSets, executed before state changes in Operators".
+#domain-helper a component; in "Core Abstractions/Domain"; gloss "pure static algorithm/utility — no I/O, no state, BCL-only deps"; demo <keyword-matcher slug-normalizer pattern-evaluator>.
+{?h a domain-helper; needs nuget} => {?h move-to implementations} !must.
+[operators call domain-helper] legal true.
+[operators call domain-helper] why {no port needed — Domain depends on nothing; purity + BCL-only is the cause, accessibility the consequence}.
+#compensator a component; port-in core-abstractions; gloss "pure inverse action for eventual-consistency rollback, no side effects"; returns "CompensationResult(success: bool, reasons: string[])".
+#repository-port gloss "read/write data group via group root; used by TGO".
+#translator-port gloss "translate DTOs between modules; pure, bidirectional; part of Interaction Map".
+#acl a component; in implementations; name "Anti-Corruption Layer"; purpose "protect domain from external system complexity"; inbound "external payload -> clean DTO / Core Events"; outbound "internal calls -> external API format"; isolates "mapping, versioning, idempotency".
+scope-module gloss "self-contained module with full 5-layer structure; communicates via Ports + Core Events; direct cross-access forbidden".
+
+// ── code placement (quick reference) ──
+external-contract place boundary.
+interface-or-entity place core-abstractions.
+pure-bcl-logic place "Core Abstractions/Domain".
+pure-logic-needing-nuget place implementations; note "static helper, no port, never exposed public-static to Operators".
+orchestration place operators.
+tech-specific place implementations.
+di-wiring place bootstrap.
+domain-exception place "Core Abstractions/Exceptions".
+
+// ── LLM navigation in the fractal tree ──
+#nav a thinking-framework; steps <q-where q-duty q-refs q-context>.
+q-where ask "where am I in the tree?"; how "parse file path -> module + layer"; demo "implementations/database/operators/migrate.ts -> module Database, layer Operators".
+q-duty ask "my layer's responsibility?"; how "see the 5 layer rows".
+q-refs ask "what can I reference?"; how "see dependency matrix".
+q-context ask "what context do I need?"; levels <global root-module module-path layer siblings code>.
+#vertical a strategy; steps <read-path up-to-parent up-to-root down-stepwise read-siblings read-code-with-context>.
+#task-flow a workflow; gloss "given: implement feature X in module Y"; steps <locate-module read-module-context understand-5-layers pick-target-layer check-deps implement-fractal-aware>.
+read-module-context reads "README.md (purpose), shared-terms.md (ubiquitous language), Boundary DTOs (external contracts)".
+nav-err1 wrong "read code without determining position"; right "parse path first — /Implementations/X means X is a sub-module".
+nav-err2 wrong "assume flat structure"; right "modules nest infinitely via Implementations".
+nav-err3 wrong "Operators can call Implementations directly"; right "Operators -> Core Abstractions only, never Implementations".
+nav-err4 wrong "ignore parent context"; right "read parent README + shared-terms.md up the tree".
+
+// ── UI integration ──
+ui follows #fap !🔒; gloss "UI always has the same 5 layers, backend to presentation".
+#ui-separate a approach; when "frontend and backend are separate deployment units (SPA + REST, mobile + backend)"; shape "UI = independent root module".
+#ui-nested a approach; when "frontend embedded in backend (SSR, Blazor Server, monolith)"; shape "UI = sub-module inside root Implementations".
+#ui-boot a layer-instance; of ui; duty "router config, DI for components, theme init, global state setup".
+#ui-ops a layer-instance; of ui; duty "presentation orchestrators (flows, wizards), ViewModel composers (backend DTO -> ViewModel), navigation logic (guards, breadcrumbs), UI workflows"; may-ref ui-boundary, ui-core.
+{#ui-ops ref ui-implementations} mark 🚫; note "call via ports like INavigationService".
+#ui-core a layer-instance; of ui; duty "UI ports, ViewModels, UI events"; may-ref nothing.
+#ui-core port INavigationService, IDialogService, IToastService, IFormValidator, IApiClient, IStateStore.
+#ui-core viewmodel-gloss "rich display models: computed properties, formatting, defaults".
+#ui-core event Screen.Viewed, Form.Submitted, Navigation.Completed.
+#ui-impl a layer-instance; of ui; duty "component libraries (React/Vue/Blazor), state adapters (Redux/MobX/Zustand -> IStateStore), api clients (Axios/Fetch -> IApiClient), navigation adapters (-> INavigationService), sub-modules (chart library, rich text editor — own 5 layers)"; may-ref ui-core.
+#ui-bndry a layer-instance; of ui; duty "screen DTOs (props contracts), display/analytics events, accessibility contracts (ARIA)"; may-ref nothing.
+ui-flow-in steps <api-client-adapter IApiClient viewmodel-composer viewmodel components>; gloss "frontend fetches backend Boundary DTO, maps to ViewModel, renders".
+ui-flow-ssr steps <backend-operators core-events ui-operators viewmodels re-render>.
+ui benefit testability, swappable-technology, clear-boundaries, fractal-consistency, dependency-inversion, framework-independence.
+// UI placement
+screen-contract place ui-boundary.
+navigation-dialog-toast-abstraction place ui-core.
+viewmodel-formatting place ui-core; alt ui-operators.
+multi-step-flow place ui-operators.
+dto-to-viewmodel-mapping place ui-operators.
+framework-component place ui-implementations.
+state-or-router-adapter place ui-implementations.
+component-di-wiring place ui-boot.
+ui-pattern form-submit <component operator-validate-via-IFormValidator map-dto IApiClient-post backend-boundary>.
+ui-pattern navigation <component INavigationService navigation-adapter Navigation.Completed-event Screen.Viewed-analytics>.
+ui-pattern wizard <wizard-operator IStateStore-steps IFormValidator-per-step compose-viewmodel IApiClient-submit>.
+
+// ── web / REST API ──
+web-framework-code place implementations; as web-adapter !🔒; demo <aspnet-controllers minimal-api express-routes fastapi-routes>.
+{operators return framework-type} mark 🚫; demo <IResult IActionResult Response>.
+{operators touch http-context} mark 🚫; demo <HttpContext Request Response>.
+{web-adapter hold business-logic} mark 🚫; gloss "thin adapter; orchestration in Operators".
+{dto carry routing-attribute} mark 🚫; note "serialization + validation attributes OK; no [FromBody]/[Route]".
+{operators map exception-to-http} mark 🚫.
+[operators return framework-type] why {locks framework. breaks dependency rule. untestable without framework}.
+web-adapter duty <receive-http extract-dto call-operator-via-port map-result-to-http map-exceptions-to-status>.
+error-law law "Operators throw domain exceptions (Core Abstractions/Exceptions); Web Adapters or Bootstrap middleware map them to HTTP".
+http-map UserNotFoundException 404; ValidationException 400; UnauthorizedException 401; unexpected-exception 500.
+#inline-bootstrap a web-approach; when "simple mapping, thin http, no complex errors"; pro "less code, direct wiring"; con "hard to test http layer separately".
+#adapter-class a web-approach; when "complex error handling, transformations, reuse, separate http tests"; pro "testable, encapsulated, clear separation"; con "more files, more indirection".
+#controller-based a web-approach; when "MVC-familiar team, controller features (filters, model binding), large API surface"; pro "framework conventions, attribute routing"; con "more ceremony, framework-tied".
+web-approach law "all approaches share one shape: route -> extract DTO -> Operator port -> map result + exceptions"; frameworks <aspnet-minimal aspnet-controller express fastapi>.
+
+// ── common mistakes ──
+mis1 wrong "business logic in Implementations"; right "move to Operators".
+mis2 wrong "Operators calling concrete classes"; right "use Ports from Core Abstractions".
+mis3 wrong "SQL/HTTP details in Operators"; right "hide in Implementations behind Ports".
+mis4 wrong "heavy business logic in Entities"; right "keep thin, validation only".
+mis5 wrong "new layer types for sub-modules"; right "same 5 layers (fractal)".
+mis6 wrong "pure static helper in Implementations called from Operators"; right "extract to Core Abstractions/Domain if BCL-only; else keep private in Implementations".
+mis7 wrong "code goes in Domain because Operators can reach it"; right "purity + BCL-only is the cause; accessibility is a consequence".
+
+// ── new sub-module checklist ──
+new-sub-module steps <place-in-parent-implementations create-all-5-layers allow-deeper-nesting track-path-notation>.
+{new-sub-module invent custom-layer-type} mark 🚫; demo <Core' Providers'>.

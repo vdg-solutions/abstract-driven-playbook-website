@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contact" content="vu.minh.quang@outlook.com">
+    <title>Mathematical Grounding - Abstract Driven Development</title>
+    <meta name="description" content="A category-theoretic reading of A.D.D V3: the dependency poset, DIP as theory-vs-model, the fractal as a coinductive fixed point, and why the method's most pragmatic rules are theorems in disguise.">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier Prime', 'Courier New', monospace; background: #000; color: #fff; line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+        .traffic-lights { display: flex; gap: 6px; }
+        .traffic-light { width: 12px; height: 12px; border-radius: 50%; }
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
+        h1 { font-size: 1.8rem; margin: 3rem 0 0.5rem; }
+        h2 { font-size: 1.15rem; margin: 2.8rem 0 1rem; color: #27c93f; }
+        p { color: #bbb; margin-bottom: 1rem; }
+        .sub { color: #666; margin-bottom: 2rem; }
+        pre { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.2rem 1.5rem; overflow-x: auto; font-size: 0.85rem; color: #ddd; margin: 1rem 0 1.5rem; }
+        code { color: #27c93f; }
+        em { color: #ddd; }
+        strong { color: #fff; }
+        blockquote { border-left: 3px solid #27c93f; padding: 0.2rem 1.2rem; margin: 1.5rem 0; color: #ddd; }
+        a { color: #27c93f; }
+        footer { border-top: 1px solid #333; margin-top: 4rem; padding: 2rem 0; color: #666; font-size: 0.85rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 100;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="traffic-lights">
+                    <div class="traffic-light red"></div>
+                    <div class="traffic-light yellow"></div>
+                    <div class="traffic-light green"></div>
+                </div>
+                <span style="font-weight: bold; font-size: 1.1rem;">ABSTRACT DRIVEN</span>
+                <span style="color: #666; font-size: 0.85rem;">v3.2.1</span>
+            </div>
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <a href="index.html" style="color: #999; text-decoration: none;">Home</a>
+                <a href="fractal-pattern.html" style="color: #999; text-decoration: none;">Fractal Viewer</a>
+                <a href="examples.html" style="color: #999; text-decoration: none;">Examples</a>
+                <a href="xs3.html" style="color: #999; text-decoration: none;">XS3</a>
+                <a href="category-theory.html" style="color: #fff; text-decoration: none;">Math</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Mathematical grounding</h1>
+        <p class="sub">A category-theoretic reading of A.D.D V3 — and why its two most "pragmatic" rules are theorems in disguise.</p>
+
+        <p>A.D.D V3 was carved from engineering practice, not from a textbook. Read through the lens of category theory, though, it turns out to be an unusually well-formed object: every major rule of the method corresponds to a standard mathematical structure, and the two rules that look most like pragmatic compromises turn out to have exact proofs. This page states those correspondences.</p>
+
+        <h2>1. The dependency matrix is a poset — and Bootstrap is a colimit</h2>
+        <p>The five layers with their may-reference rules form a thin category (a poset). Its shape is telling: there are <strong>two independent minimal objects</strong> — Boundary and Core Abstractions both depend on nothing, with no arrow between them — Operators sits above both, Implementations above Core, and Bootstrap at the top.</p>
+        <p>Bootstrap's role is not "depends on the most things". It is the <strong>cocone</strong>: the composition root computes a colimit of the component diagram. And the rule <em>"Bootstrap must contain no business logic"</em> is precisely the universal property of a colimit — the gluing may only glue; it must not add data beyond what the diagram already contains. A folk rule turns out to be a universal property.</p>
+
+        <h2>2. Dependency inversion = separating a theory from its models</h2>
+        <p>Core Abstractions is a <strong>theory</strong> in the sense of Lawvere: Ports are operation signatures, Entities are its objects, RuleSets are its axioms. Each Adapter is a <strong>model</strong> of that theory in some technology category (Postgres, HTTP, Redis, ...) — a structure-preserving interpretation <code>T → Tech</code>.</p>
+        <p>Operators are written entirely in the <strong>internal language of the theory</strong>. That is why they are invariant under change of technology:</p>
+        <blockquote>"Swap technology without changing business logic" is not a slogan — it is a theorem. Logic that factors through the theory holds in every model of the theory.</blockquote>
+
+        <h2>3. The fractal is a coinductive fixed point</h2>
+        <p>Define the endofunctor</p>
+        <pre>F(X) = Bootstrap × Operators × CoreAbstractions × Implementations(X*) × Boundary</pre>
+        <p>The Fractal Architecture Pattern says: <strong>a module is the greatest fixed point of F</strong>. Greatest — coinductive — is what makes infinite nesting legal. "Learn once, apply everywhere" is the statement that the same coalgebra map operates at every node.</p>
+        <p>Two consequences fall out immediately. First, the rule that <em>only Implementations may contain sub-modules</em> is not a taste choice: <code>Implementations(X*)</code> is the unique recursive slot in the signature — moving it changes the functor, i.e. changes the species. Second, the system root is itself a module and obeys the same equation; top-level modules live inside the <em>root's</em> Implementations, never beside the root. A flat tree is the truncated least fixed point — a different, smaller object than the pattern demands.</p>
+
+        <h2>4. Why Operators do the DTO ↔ Entity mapping</h2>
+        <p>Boundary and Core Abstractions are two independent minimal theories with no morphism between them. Mapping between their vocabularies must therefore live in an object that has arrows to <strong>both</strong> — and in the dependency poset there is exactly one such working object: Operators. Categorically, Operators act as a <strong>profunctor (bimodule)</strong> connecting the two theories.</p>
+        <p>So "Operators own the mapping" is not a convention that could have gone another way. It is forced by the shape of the poset.</p>
+
+        <h2>5. The conditional Implementations → Boundary rule is iso-elision</h2>
+        <p>The method allows a system-edge adapter (API client, webhook handler, external consumer) to reference Boundary DTOs directly — but only when <em>"the external contract matches the Boundary DTO and no semantic difference exists"</em>. Translated: the mediating translation morphism is an <strong>isomorphism</strong>. Composing through an isomorphism adds nothing; coherence lets you elide it.</p>
+        <p>The rule purists call a compromise is exactly the theorem that identity arrows may be omitted. And the counter-condition — <em>"forbidden when a semantic difference exists"</em> — is the converse: if the arrow is not an iso, it must stay explicit. That is why internal adapters (repositories, caches) must map to Entities: their translation is never an iso.</p>
+
+        <h2>6. TGO and Coordinator are two different monads</h2>
+        <p>The Transaction Group Operator composes steps inside a <strong>transaction monad</strong>: all-or-nothing, strong consistency, a genuine inverse (rollback) available inside the commit window.</p>
+        <p>The Coordinator composes over events — a <strong>free monad</strong> over the event signature — and here the method makes an honest mathematical admission: <strong>Compensators are not inverses</strong>. A charged payment cannot be un-charged, only refunded. Compensation is a 2-cell — "undone up to compensation" — which is to say the business domain is not a groupoid. Most architecture methods pretend otherwise; A.D.D models the irreversibility explicitly, which is why eventual-consistency flows need Compensators declared up front rather than rollbacks assumed.</p>
+
+        <h2>7. Modules form a category whose morphisms factor through interfaces</h2>
+        <p>Modules are objects. The rule <em>"module A talks to module B only via Ports or Core Events; operators never call peer operators"</em> says that every morphism between modules must <strong>factor through the published interface</strong>. Encapsulation is not an implementation habit here — it is the definition of what a morphism between modules is allowed to be. The Anti-Corruption Layer is then a pair of translation functors between an external category and the internal one, keeping the round-trip controlled instead of letting the external category leak inward.</p>
+
+        <h2>8. What the lens says is still missing</h2>
+        <p>One boundary of the current model, visible only from this vantage point: <strong>versioning</strong>. Boundary Events are "versioned: yes", but the relation between two versions of a contract is left informal. The categorical shape of that relation exists: a valid migration is a <strong>natural transformation</strong> between the two models, and a breaking change is precisely a naturality square that fails to commute. Making that mechanical — checkable per contract change — is the natural next increment of the method.</p>
+
+        <h2>Summary</h2>
+        <pre>dependency matrix        = poset with two minimal theories; Bootstrap = colimit
+DIP / Ports & Adapters   = theory vs. models; Operators live in the internal language
+fractal (F.A.P)          = greatest fixed point of F(X) = B×O×C×I(X*)×By
+Operators do mapping     = the unique bimodule position between the two minimal theories
+edge-adapter exception   = iso-elision (coherence), with its converse as the guard
+TGO / Coordinator        = transaction monad / free monad; Compensators are 2-cells, not inverses
+module communication     = morphisms must factor through published interfaces
+future work              = contract versioning as natural transformations</pre>
+        <p>The overall verdict: the method's load-bearing rules coincide with universal properties, fixed points, and factorization theorems. That is usually the signature of a design carved along real joints.</p>
+
+        <footer>
+            Abstract Driven Development · <a href="llms.txt">llms.txt</a> · <a href="xs3.html">XS3 notation</a>
+        </footer>
+    </div>
+</body>
+</html>

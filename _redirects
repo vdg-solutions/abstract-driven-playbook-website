@@ -15,6 +15,12 @@
 /documention        /documentation.html    301
 /documentaton       /documentation.html    301
 
+# Notation and math pages
+/xs3                /xs3.html              301
+/notation           /xs3.html              301
+/math               /category-theory.html  301
+/category-theory    /category-theory.html  301
+
 # API or future endpoints (if needed)
 /api/*              /index.html            404
 

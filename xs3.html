@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contact" content="vu.minh.quang@outlook.com">
+    <title>XS3 Notation - Abstract Driven Development</title>
+    <meta name="description" content="XS3 — a graph-native, machine-to-machine notation. Every sentence is one labeled edge. Used by this site's llms.txt to enforce A.D.D V3 with maximum token efficiency.">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier Prime', 'Courier New', monospace; background: #000; color: #fff; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 2rem; }
+        .traffic-lights { display: flex; gap: 6px; }
+        .traffic-light { width: 12px; height: 12px; border-radius: 50%; }
+        .traffic-light.red { background: #ff5f56; }
+        .traffic-light.yellow { background: #ffbd2e; }
+        .traffic-light.green { background: #27c93f; }
+        h1 { font-size: 1.8rem; margin: 3rem 0 0.5rem; }
+        h2 { font-size: 1.2rem; margin: 2.5rem 0 1rem; color: #27c93f; }
+        p { color: #bbb; margin-bottom: 1rem; }
+        .sub { color: #666; margin-bottom: 2rem; }
+        pre.card { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: #ddd; white-space: pre; }
+        code { color: #27c93f; }
+        table { border-collapse: collapse; margin: 1rem 0 2rem; width: 100%; }
+        th, td { border: 1px solid #333; padding: 0.5rem 0.8rem; text-align: left; font-size: 0.9rem; }
+        th { color: #27c93f; }
+        td { color: #bbb; }
+        a { color: #27c93f; }
+        footer { border-top: 1px solid #333; margin-top: 4rem; padding: 2rem 0; color: #666; font-size: 0.85rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 100;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="traffic-lights">
+                    <div class="traffic-light red"></div>
+                    <div class="traffic-light yellow"></div>
+                    <div class="traffic-light green"></div>
+                </div>
+                <span style="font-weight: bold; font-size: 1.1rem;">ABSTRACT DRIVEN</span>
+                <span style="color: #666; font-size: 0.85rem;">v3.2.1</span>
+            </div>
+            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <a href="index.html" style="color: #999; text-decoration: none;">Home</a>
+                <a href="fractal-pattern.html" style="color: #999; text-decoration: none;">Fractal Viewer</a>
+                <a href="examples.html" style="color: #999; text-decoration: none;">Examples</a>
+                <a href="xs3.html" style="color: #fff; text-decoration: none;">XS3</a>
+                <a href="category-theory.html" style="color: #999; text-decoration: none;">Math</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>XS3 — machine-to-machine notation</h1>
+        <p class="sub">Every sentence is one labeled edge of a graph. A document is its edge set.</p>
+
+        <p>XS3 is the notation behind this site's <a href="llms.txt">llms.txt</a>: a compact, graph-native language for stating facts, rules, time, affect, and deontics — designed so that LLMs read it correctly <em>without any training</em>, and write it correctly given only the reference card below. Inject <a href="llms.txt">llms.txt</a> into an LLM's context to enforce A.D.D V3 with maximum token efficiency; the full encoded reference is <a href="llms-full.xs3.txt">llms-full.xs3.txt</a> (70% smaller than the prose original with the same rule content).</p>
+
+        <h2>Why a notation instead of prose?</h2>
+        <table>
+            <tr><th>Property</th><th>What it buys</th></tr>
+            <tr><td>One sentence = one edge</td><td>No filler tokens — every remaining token is load-bearing</td></tr>
+            <tr><td>A document = an edge set</td><td>Two documents mean the same thing ⇔ same canonical edge set; drift between versions is an exact set difference</td></tr>
+            <tr><td>Time, strength, deontics as suffixes</td><td><code>@2020..</code>, <code>%80</code>, <code>!must</code> cost a few bytes, so they actually get written</td></tr>
+            <tr><td>Patterns <code>{ }</code> + marks</td><td>Whole classes of actions can be forbidden or required: <code>{?x a deploy; at friday} mark 🚫.</code></td></tr>
+        </table>
+
+        <h2>The reference card</h2>
+        <p>This card is self-contained: it is everything a reader or writer gets. Every line is both a rule and a live example of itself.</p>
+
+        <pre class="card">// XS3 card — feed for LLM speakers. The ONLY reading key: every sentence is `subject predicate object .` — one labeled edge.
+// From here on, every line is both a rule and a live example of itself.
+
+#card a usage-card; for llm-speaker; teaches xs3; version "3.0"; self-contained true.
+#card law "a document IS its edge set; sentence order carries no meaning, except inside &lt; &gt;".
+
+// ── glyphs — one glyph, one meaning ──────────────────────────
+xs3 glyphs &lt;"." ";" "," "#" "?" "^" "{ }" "[ ]" "&lt; &gt;" quote-glyph "//"&gt;.
+"." gloss "ends the sentence".
+";" gloss "keep subject, switch predicate".
+"," gloss "keep subject and predicate, add object".
+"#" gloss "anchor — same name, same node, document-wide; #_x is document-local".
+"?" gloss "variable — legal only inside { }".
+"^" gloss "inverted predicate".
+"{ }" gloss "a subgraph as ONE node — a world, a belief, a plan, a question; may hold many sentences with different subjects, including rule bodies and consequents".
+"[ ]" gloss "mentions an edge WITHOUT asserting it — for false, uncertain, or meta statements".
+"&lt; &gt;" gloss "ordered sequence — the only ordered construct".
+quote-glyph gloss "wraps a string containing whitespace or special characters; simple names stay bare".
+"//" gloss "comment to end of line".
+
+// ── desugaring — each compressed form is a graph equation ────
+{an age 30; job dev}  = {an age 30. an job dev}.
+{an love bao, chi}    = {an love bao. an love chi}.
+{bao ^love an}        = {an love bao}.
+{an love bao @2020}   = {[an love bao] at 2020}.
+{an love bao %95}     = {[an love bao] deg 95}.
+{an love bao %0}      = {[an love bao] deg 0}.
+{an love bao !🚫}     = {[an love bao] mark 🚫}.
+{an love bao ~joy}    = {[an love bao] aff joy}.
+{an love bao ~joy%60} = {[an love bao] aff #_f. #_f a joy; deg 60}.
+{an love bao, chi @2020} = {[an love bao] at 2020. [an love chi] at 2020}.
+qualifier binds current-predicate-group; law "objects joined by , share the qualifier; to qualify edges separately, reopen the predicate with ;"; stacks true; demo {an love bao @2020.. %80 ~fear%90}; demo {an love bao ~joy; love chi ~pity}.
+
+// ── the four qualifiers ──────────────────────────────────────
+"@" a qualifier; gloss "time"; accepts &lt;2026-07-15 2026-07-15T09:30 2026-01..2026-06 2020.. +3d -2h past now future&gt;.
+"~" a qualifier; gloss "affect coloring the edge; intensity via %0..100".
+"%" a qualifier; gloss "strength of the RELATION itself, 0..100".
+"!" a qualifier; gloss "deontic or severity mark"; accepts &lt;must may 🚫 ⚠️ 🚨 🔒 📐&gt;.
+🚫 gloss "forbidden". ⚠️ gloss "warning, fragile". 🚨 gloss "critical, incident". 🔒 gloss "inviolable rule". 📐 gloss "contract, spec anchor".
+"!" law "never place a negative word after ! — a cold reader parses !ban as not-ban; prohibition is !🚫, always the emoji" !must.
+qualifier law "attaches ONLY after an object — never after ; and never to a bare subject" !🔒;
+          law "binds only the predicate group it directly follows — predicates after a later ; are NOT qualified";
+          law "never inside [ ] — qualify the mention itself: [s p o] mark 🚫".
+negation gloss "%0 — the relation does not hold".
+conf gloss "SPEAKER certainty — a separate axis, always explicit"; demo {[an love bao] conf 60}.
+edge-without-time gloss "tenseless — laws, definitions, structure".
+
+// ── lexical ──────────────────────────────────────────────────
+atom law "Unicode, case-sensitive; emoji are legal names".
+number law "must lead with a digit — write 0.8, never .8".
+quantity gloss "number fused with unit"; demo &lt;3d 80kg 2h 42m&gt;.
+"." law "ends a sentence only when followed by whitespace, end-of-file, or } — so v3.0 is a name".
+compare uses &lt;gt lt geq leq&gt; !must; gloss "never use angle brackets for comparison — they are the sequence glyph".
+
+// ── core vocabulary ──
+a gloss "instance-of". sub gloss "subclass-of". = gloss "same node, same meaning".
+part gloss "part-of". in gloss "containment, location". of gloss "belonging".
+=&gt; gloss "type-level rule, variables bind"; demo {{?x a person} =&gt; {?x can think}}.
+cause gloss "instance-level causation"; demo {#e1 cause #e2}.
+then gloss "next in chain". dur gloss "duration"; demo {#e1 dur 2h}.
+event a class; demo {#e1 a give; who an; what book; to bao @2026-07}.
+who what to from by with at where why how a role.
+become begin end a verb; gloss "state change".
+before after during meets starts ends a relation; gloss "interval-to-interval".
+past now future a coarse-time; law "now = timestamp of the carrying message".
+joy sad fear anger surprise disgust trust hope shame calm want a affect.
+😊 = joy. 😢 = sad. 😨 = fear. 😠 = anger. 😲 = surprise. 🤢 = disgust. 😌 = calm.
+affect law "where a standard emoji exists it is the canonical atom; word atoms cover the rest"; demo {an love bao ~😨%90}.
+val aro dom a dimension; range &lt;0 100&gt;; gloss "continuous affect coordinates when discrete labels fall short".
+feel demo {dev feel 😠 %80}. about demo {#f1 about {losing bao}}.
+
+// ── patterns — n-ary facts, rationale, structured deontics ───
+row law "an n-ary fact is ONE node typed by the relation, one edge per column — same shape as event+roles";
+    demo {#r1 a price-row; sku laptop-15; region vn; price 1200usd; since 2026-01}.
+why law "rationale attaches to an edge mention or an anchor — never spawn why-* predicates on a subject";
+    demo {[dev-3 merge pr-88] why {ci fail. coverage drop}}.
+structured-deontic law "to forbid or permit a PATTERN, use mark as a plain predicate on a graph term";
+    demo {{?x a deploy; at friday} mark 🚫}; demo {{?x a hotfix} mark may}.
+
+// ── writing rules ────────────────────────────────────────────
+#write steps &lt;w1 w2 w3 w4 w5 w6 w7 w8&gt;.
+w1 gloss "one subject, many properties -&gt; one sentence chained with ;".
+w2 gloss "many objects, one relation -&gt; chain with ,".
+w3 gloss "a long name used twice -&gt; anchor it once as #x, reuse the anchor".
+w4 gloss "time, affect, degree -&gt; qualifiers; never spend a separate sentence on them".
+w5 gloss "compressing prose: keep 100% of the meaning edges; target 30–50% of source bytes for ordinary prose — fact-dense or already-minified sources bottom out higher; meaning edges always beat the byte target".
+w6 gloss "paths, IDs, hashes, figures are data — copy verbatim, never paraphrase" !must.
+w7 gloss "source marks 🚨 ⚠️ 🔒 📐 🚫 must survive into the output" !must.
+w8 gloss "use ^ only to continue a chain; a standalone inverted sentence must be written direct — chi trust bao, never bao ^trust chi alone" !must.
+
+// ── common errors — first line WRONG, second line RIGHT ──────
+#errs a gallery !⚠️.
+err1 wrong "x a patch; !⚠️ ."; right "x a patch !⚠️ ."; why "qualifier follows an object; ; must introduce a predicate".
+err2 wrong "{{?x a deploy} =&gt; {?x delay true}}."; right "{?x a deploy} =&gt; {?x delay true}."; why "a rule A =&gt; B is already a full sentence — no extra braces around it".
+err3 wrong "[zeta ship]"; right "[zeta ship-by 2026-09]"; why "[ ] takes exactly three terms: subject predicate object".
+err4 wrong "?d &gt; 14"; right "?d gt 14"; why "angle brackets are only the sequence glyph".
+err5 wrong "minh manage zeta @2024-03.."; right "minh manage zeta @2024-03..."; why "the sentence period is still required after an open interval — three dots is legal: .. belongs to the time, . ends the sentence".
+
+// ── self-check before sending ────────────────────────────────
+#check steps &lt;c1 c2 c3 c4 c5 c6&gt;.
+c1 gloss "every sentence ends with a period; every bracket pair is closed".
+c2 gloss "? variables appear only inside { }".
+c3 gloss "one thing = one name, everywhere".
+c4 gloss "no source edge dropped, no invented edge added" !must.
+c5 gloss "assert with plain sentences; anything uncertain goes in [ ] or { } with conf".
+c6 gloss "every ; is followed by a predicate; every qualifier is preceded by an object; no rule is wrapped in extra braces" !must.</pre>
+
+        <h2>A taste of it</h2>
+        <pre class="card">an a engineer; age 30; love bao @2020.. %80 ~😨%90.
+#e1 a deploy; who dev-3; what api-v2; at 2026-07-15T09:30.
+#e2 a outage; in region-a; dur 42m. #e1 cause #e2 %85.
+{?s a service; error-rate ?r. ?r gt 5} =&gt; {?s rollback true !must}.
+#p1 a plan; steps &lt;freeze rollback verify postmortem&gt;; owner dev-3.</pre>
+        <p>One line: an engineer, 30, in love since 2020 at strength 80 — colored by fear at 90. Then a deploy, the outage it caused, a mandatory rollback rule, and an ordered recovery plan. Facts, time, emotion, causation, law, and sequence — all edges.</p>
+
+        <footer>
+            Abstract Driven Development · <a href="llms.txt">llms.txt</a> · <a href="llms-full.xs3.txt">llms-full.xs3.txt</a> · <a href="category-theory.html">Mathematical grounding</a>
+        </footer>
+    </div>
+</body>
+</html>
