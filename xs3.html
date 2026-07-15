@@ -48,14 +48,26 @@
         .hook { border: 1px dashed #4a9eff; border-radius: 10px; padding: 1.3rem 1.5rem; margin: 2.2rem 0; background: rgba(74, 158, 255, 0.05); }
         .hook h3 { color: #4a9eff; font-size: 1.05rem; margin-bottom: 0.6rem; }
         .hook p { margin-bottom: 0.8rem; }
-        .msg-flow { display: flex; flex-direction: column; gap: 0.9rem; margin: 1.5rem 0; }
-        .msg { max-width: 85%; border-radius: 10px; padding: 0.7rem 1rem; background: #0a0a0a; overflow-x: auto; }
-        .msg pre { margin: 0; font-size: 0.85rem; white-space: pre; color: #ddd; }
-        .msg.left { align-self: flex-start; border: 1px solid #4a9eff; border-bottom-left-radius: 2px; }
-        .msg.right { align-self: flex-end; border: 1px solid #27c93f; border-bottom-right-radius: 2px; }
-        .msg-head { font-size: 0.72rem; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
-        .msg.left .msg-head { color: #4a9eff; }
-        .msg.right .msg-head { color: #27c93f; }
+        .chat { display: flex; flex-direction: column; gap: 1.1rem; margin: 1.8rem 0; }
+        .chat-row { display: flex; gap: 0.7rem; align-items: flex-end; }
+        .chat-row.right { flex-direction: row-reverse; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex: 0 0 auto; }
+        .avatar.planner { background: rgba(74,158,255,0.15); border: 2px solid #4a9eff; }
+        .avatar.coder { background: rgba(39,201,63,0.15); border: 2px solid #27c93f; }
+        .chat-col { max-width: 82%; display: flex; flex-direction: column; }
+        .chat-row.right .chat-col { align-items: flex-end; }
+        .chat-name { font-weight: bold; font-size: 0.9rem; letter-spacing: 0.1em; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.55rem; }
+        .chat-name.planner-c { color: #4a9eff; }
+        .chat-name.coder-c { color: #27c93f; }
+        .act { font-size: 0.65rem; padding: 0.14rem 0.55rem; border-radius: 999px; color: #000; font-weight: bold; letter-spacing: 0.12em; }
+        .act.ask { background: #4a9eff; }
+        .act.tell { background: #27c93f; }
+        .act.confirm { background: #ffbd2e; }
+        .bubble { border-radius: 16px; padding: 0.8rem 1.05rem; overflow-x: auto; }
+        .bubble.left-b { background: rgba(74,158,255,0.10); border: 1px solid #4a9eff; border-bottom-left-radius: 3px; }
+        .bubble.right-b { background: rgba(39,201,63,0.10); border: 1px solid #27c93f; border-bottom-right-radius: 3px; }
+        .bubble pre { margin: 0; font-size: 0.85rem; white-space: pre; color: #eee; }
+        .reply-quote { border-left: 3px solid rgba(255,255,255,0.3); color: #888; font-size: 0.72rem; padding: 0.15rem 0.6rem; margin-bottom: 0.55rem; background: rgba(255,255,255,0.05); border-radius: 4px; }
         .hl-num { background: rgba(255, 189, 46, 0.2); color: #ffbd2e; padding: 0 0.2rem; border-radius: 3px; }
         .hl-hash { background: rgba(39, 201, 63, 0.15); color: #27c93f; padding: 0 0.2rem; border-radius: 3px; }
         .hl-var { color: #4a9eff; }
@@ -129,18 +141,35 @@
         <h2>A communication language for multi-agent systems</h2>
         <p><strong>AutoGen, CrewAI, LangGraph</strong> solved the <em>routing</em> of agent-to-agent messages. The message itself is still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no proof the meaning arrived intact. XS3 is that missing wire format. Watch two agents talk:</p>
 
-        <div class="msg-flow">
-            <div class="msg left">
-                <div class="msg-head">planner → coder · ASK</div>
-                <pre>#m1 a ask; body {<span class="hl-var">?f</span> a fail; in "router.rs"; gate <span class="hl-var">?g</span>}.</pre>
+        <div class="chat">
+            <div class="chat-row left">
+                <div class="avatar planner">🧠</div>
+                <div class="chat-col">
+                    <div class="chat-name planner-c">PLANNER <span class="act ask">ASK</span></div>
+                    <div class="bubble left-b">
+                        <pre>#m1 a ask; body {<span class="hl-var">?f</span> a fail; in "router.rs"; gate <span class="hl-var">?g</span>}.</pre>
+                    </div>
+                </div>
             </div>
-            <div class="msg right">
-                <div class="msg-head">coder → planner · TELL</div>
-                <pre>#m2 a tell; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 <span class="hl-num">%95</span>}.</pre>
+            <div class="chat-row right">
+                <div class="avatar coder">⌨️</div>
+                <div class="chat-col">
+                    <div class="chat-name coder-c"><span class="act tell">TELL</span> CODER</div>
+                    <div class="bubble right-b">
+                        <div class="reply-quote">↩ re #m1 — your question, variables now bound</div>
+                        <pre>#m2 a tell; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 <span class="hl-num">%95</span>}.</pre>
+                    </div>
+                </div>
             </div>
-            <div class="msg left">
-                <div class="msg-head">planner → coder · CONFIRM</div>
-                <pre>#m3 a confirm; re #m2; hash <span class="hl-hash">"9f3a"</span>.</pre>
+            <div class="chat-row left">
+                <div class="avatar planner">🧠</div>
+                <div class="chat-col">
+                    <div class="chat-name planner-c">PLANNER <span class="act confirm">CONFIRM</span></div>
+                    <div class="bubble left-b">
+                        <div class="reply-quote">↩ re #m2 — received, meaning verified</div>
+                        <pre>#m3 a confirm; re #m2; hash <span class="hl-hash">"9f3a"</span>.</pre>
+                    </div>
+                </div>
             </div>
         </div>
 
