@@ -238,23 +238,32 @@ const XS3Decode = (function () {
   function rTerm(t) {
     switch (t.t) {
       case 'name': return t.implicit ? '' : humanize(t.v);
-      case 'str': return `“${t.v}”`;
-      case 'anchor': return t.local ? 'that' : humanize(t.v);
+      case 'str': return `‘${t.v}’`; // string literal dùng ‘ ’ — “ ” dành riêng cho graph/edge để readback phân biệt được
+      case 'anchor': return t.local ? 'that' : '#' + t.v; // anchor phải nhìn thấy được — vô hình là mất ý; slot template tự hàm ý ([m1], replying to) thì dùng raw v
       case 'var': return `some ${t.v.replace(/^[?]/, '')}`;
       case 'phrase': return t.items.map(rTerm).join(' ');
       case 'seq': return t.items.map(rTerm).join(' → ') + ' (in order)';
       case 'graph': return '“' + rGraph(t.stmts) + '”';
-      case 'edge': return `“${rTerm(t.s)} ${rTerm(t.p)} ${rTerm(t.o)}”`.replace(/\s+”/, '”');
+      case 'edge': return `“${rTermRigid(t.s)} ${rTermRigid(t.p)} ${rTerm(t.o)}”`.replace(/\s+”/, '”');
     }
   }
 
+  // slot rigid: subject/predicate không humanize — humanize ở đây phá đơn ánh của readback
+  // (biên subject/pred không có marker để phục hồi). Faithfulness chứng trên từng generator.
+  const rTermRigid = t =>
+    t.t === 'name' ? (t.implicit ? '' : t.v)
+      : t.t === 'anchor' ? (t.local ? 'that' : '#' + t.v)
+        : rTerm(t);
+
+  // trả về CORE không ngoặc; ở vị trí tail của clause, caller bọc ngoặc — mọi qualifier tail
+  // đều có ngoặc để readback tách được khỏi object humanize (tránh time-marker cắn vào object)
   function rTime(v) {
     const s = v.t === 'name' ? v.v : rTerm(v);
     if (v.t === 'name') {
-      if (s === 'past') return '(in the past)';
-      if (s === 'now') return '(now)';
-      if (s === 'future') return '(in the future)';
-      if (s.endsWith('..')) return `since ${s.slice(0, -2)} (ongoing)`;
+      if (s === 'past') return 'in the past';
+      if (s === 'now') return 'right now';
+      if (s === 'future') return 'in the future';
+      if (s.endsWith('..')) return `since ${s.slice(0, -2)}, ongoing`;
       if (s.includes('..')) { const parts = s.split('..'); return `from ${parts[0]} to ${parts[1]}`; }
       if (s.startsWith('+')) return `in ${s.slice(1)}`;
       if (s.startsWith('-')) return `${s.slice(1)} ago`;
@@ -274,7 +283,7 @@ const XS3Decode = (function () {
       else if (q.k === 'aff') affs.push(q);
     }
     const oTxt = objs.map(rTerm).filter(Boolean).join(', ');
-    const predTxt = pred ? humanize(pred) : '';
+    const predTxt = pred || ''; // slot pred rigid — humanize pred phá đơn ánh (look-up vs look + up-*)
     let core;
     if (!pred) core = oTxt; // bare mention
     else if (pred === 'a') core = `is ${an(oTxt)} ${oTxt}`;
@@ -282,7 +291,7 @@ const XS3Decode = (function () {
     else core = `${predTxt}${oTxt ? ' ' + oTxt : ''}`;
     if (neg) core = `does NOT ${predTxt}${oTxt ? ' ' + oTxt : ''}`;
     const tail = [];
-    if (time) tail.push(time.t === 'name' || time.t === 'str' ? rTime(time) : 'at ' + rTerm(time));
+    if (time) tail.push(`(${time.t === 'name' || time.t === 'str' ? rTime(time) : 'at ' + rTerm(time)})`);
     if (deg != null) tail.push(`(strength ${deg}%)`);
     for (const a of affs) {
       // affect dạng tính từ, không cường độ -> trạng từ: ~relentless => "relentlessly"
@@ -290,8 +299,12 @@ const XS3Decode = (function () {
       if (a.deg == null && w && /(less|ful|ous|ish|ive|ent|ant)$/.test(w)) tail.push(`${w}ly`);
       else tail.push(`(mood: ${rTerm(a.v)}${a.deg != null ? ` ${a.deg}%` : ''})`);
     }
-    const out = core + (tail.length ? ' ' + tail.join(' ') : '');
-    return { text: out, marks };
+    // mark là tail của ĐÚNG clause mang nó — prefix cả câu làm mất thông tin mark thuộc chain nào
+    for (const m of marks) {
+      const mv = m.t === 'name' ? m.v : rTerm(m);
+      tail.push(`— ${MARK_EN[mv] || mv}`);
+    }
+    return core + (tail.length ? ' ' + tail.join(' ') : '');
   }
 
   function rEventStmt(st) {
@@ -304,14 +317,14 @@ const XS3Decode = (function () {
     const hasRole = st.chains.some(c => roles.includes(c.pred));
     const isMsg = !!SPEECH[typName];
     if (!hasRole && !isMsg) return null;
-    const idPrefix = st.subj.local ? '' : `[${rTerm(st.subj)}] `;
+    const idPrefix = st.subj.local ? '' : `[${st.subj.v}] `; // slot id: template tự hàm ý anchor, dùng raw v
     const used = new Set(['a']);
     let sent;
     if (isMsg) {
       const from = get('from'), to = get('to'), body = get('body'), re = get('re'), at = get('at'), hash = get('hash');
       ['from', 'to', 'body', 're', 'at', 'hash'].forEach(k => used.add(k));
-      sent = `${idPrefix}${from ? rTerm(from) : 'someone'} ${SPEECH[typName]}${to ? ' ' + rTerm(to) : ''}`;
-      if (re) sent += ` (replying to ${rTerm(re)})`;
+      sent = `${idPrefix}${from ? rTermRigid(from) : 'someone'} ${SPEECH[typName]}${to ? ' ' + rTermRigid(to) : ''}`;
+      if (re) sent += ` (replying to ${re.t === 'anchor' ? re.v : rTermRigid(re)})`;
       if (at) sent += `, ${rTime(at)}`;
       if (body) sent += `: ${rTerm(body)}`;
       if (hash) sent += ` — meaning receipt: hash ${rTerm(hash)}`;
@@ -328,18 +341,10 @@ const XS3Decode = (function () {
     const rest = [];
     for (const ch of st.chains) {
       if (used.has(ch.pred)) continue;
-      if (ch.pred === 'at') { rest.push(rTime(ch.objs[0])); continue; }
-      rest.push(rClause(ch.pred, ch.objs, ch.quals).text);
+      if (ch.pred === 'at') { rest.push(`(${rTime(ch.objs[0])})`); continue; }
+      rest.push(rClause(ch.pred, ch.objs, ch.quals));
     }
     return sent + (rest.length ? '; ' + rest.join('; ') : '') + '.';
-  }
-
-  function applyMarks(text, marks) {
-    for (const m of marks) {
-      const mv = m.t === 'name' ? m.v : rTerm(m);
-      text = `${MARK_EN[mv] || mv}: ${text}`;
-    }
-    return text;
   }
 
   // R = realize ∘ template: realize áp đồng nhất lên MỌI nhánh template, không chọn lọc
@@ -364,26 +369,22 @@ const XS3Decode = (function () {
     if (ev) return ev;
     // edge-term subject: statements ABOUT an edge
     if (st.subj.t === 'edge') {
-      const inner = `${rTerm(st.subj.s)} ${rTerm(st.subj.p)}${rTerm(st.subj.o) ? ' ' + rTerm(st.subj.o) : ''}`;
+      const inner = `${rTermRigid(st.subj.s)} ${rTermRigid(st.subj.p)}${rTerm(st.subj.o) ? ' ' + rTerm(st.subj.o) : ''}`;
       const parts = [];
       for (const ch of st.chains) {
         if (ch.pred === 'conf') { parts.push(`(speaker is ${rTerm(ch.objs[0])}% sure)`); continue; }
         if (ch.pred === 'why') { parts.push(`because ${ch.objs.map(rTerm).join(', ')}`); continue; }
-        if (ch.pred === 'at') { parts.push(rTime(ch.objs[0])); continue; }
+        if (ch.pred === 'at') { parts.push(`(${rTime(ch.objs[0])})`); continue; }
         if (ch.pred === 'after') { parts.push(`— and that happens after ${ch.objs.map(rTerm).join(', ')}`); continue; }
         if (ch.pred === 'before') { parts.push(`— and that happens before ${ch.objs.map(rTerm).join(', ')}`); continue; }
         if (ch.pred === 'deg' && Number(ch.objs[0] && ch.objs[0].v) === 0) { parts.push('— which is NOT the case'); continue; }
-        const c = rClause(ch.pred, ch.objs, ch.quals);
-        parts.push(applyMarks(c.text, c.marks));
+        parts.push(rClause(ch.pred, ch.objs, ch.quals));
       }
       return `“${inner}” ${parts.join(', ')}.`;
     }
-    const subjText = rTerm(st.subj);
+    const subjText = rTermRigid(st.subj);
     const clauses = st.chains.map(ch => rClause(ch.pred, ch.objs, ch.quals));
-    const allMarks = st.chains.flatMap(ch => ch.quals.filter(q => q.k === 'mark').map(q => q.v));
-    let out = (subjText + ' ' + clauses.map(c => c.text).filter(Boolean).join('; ')).trim();
-    if (allMarks.length) out = applyMarks(out, allMarks);
-    return out + '.';
+    return (subjText + ' ' + clauses.filter(Boolean).join('; ')).trim() + '.';
   }
 
   // ---- realize: TẦNG DUY NHẤT chứa luật ngữ pháp bề mặt tiếng Anh (agreement, spacing) ----
@@ -397,7 +398,165 @@ const XS3Decode = (function () {
   }
 
   function rGraph(stmts) {
-    return stmts.map(st => rStmt(st).replace(/\.$/, '')).join('; ');
+    // giữ '.' giữa các statement (biên statement phải phục hồi được); bỏ dấu chấm cuối cùng
+    return stmts.map(rStmt).join(' ').replace(/\.$/, '');
+  }
+
+  // ---- readback E0: nghịch đảo cơ khí của R trên ảnh Im(R) ----
+  // Im(R) là controlled language do template sinh ra nên có retraction: E0 ∘ R = Id trên canon.
+  // "Giữ toàn bộ ý" = decode(readback(R(d))).edges == decode(d).edges — kiểm bằng property test
+  // (roundtrip.js), đẳng thức trong thương q: relabel #_x, case chữ đầu câu, space<->hyphen slot humanize.
+  const MARK_BACK = Object.fromEntries(Object.entries(MARK_EN).map(([k, v]) => [v, k]));
+  const SPEECH_BACK = Object.fromEntries(Object.entries(SPEECH).map(([k, v]) => [v, k]));
+  const PRED_BACK = Object.entries(PRED_EN).map(([k, v]) => [v, k]).sort((a, b) => b[0].length - a[0].length);
+  const qJoin = s => s.trim().split(/\s+/).join('-');
+  const lowerFirst = s => s.replace(/\p{L}/u, c => c.toLowerCase());
+
+  // tách ngoài “ ” (graph, lồng được) và ‘ ’ (string)
+  function splitTop(s, sep) {
+    const out = [];
+    let depth = 0, instr = false, cur = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === '“') depth++;
+      else if (c === '”') depth--;
+      else if (c === '‘') instr = true;
+      else if (c === '’') instr = false;
+      if (!depth && !instr && s.startsWith(sep, i)) { out.push(cur); cur = ''; i += sep.length - 1; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  // string literal là term mờ đục — mask thành placeholder TRƯỚC mọi parse để tokenizer/
+  // time-regex không cắn vào trong chuỗi có khoảng trắng
+  let STRS = [];
+  const maskStrings = text => text.replace(/‘([^’]*)’/g, (m, x) => { STRS.push(x); return `⟦${STRS.length - 1}⟧`; });
+
+  function backTerm(s) {
+    s = s.trim();
+    const ph = s.match(/^⟦(\d+)⟧$/);
+    if (ph) return `"${STRS[+ph[1]]}"`;
+    if (s.startsWith('“') && s.endsWith('”')) return `{${backGraph(s.slice(1, -1))}}`;
+    const v = s.match(/^some (\S+)$/);
+    if (v) return '?' + v[1];
+    return qJoin(s);
+  }
+
+  const TIME_BACK = [
+    [/ \(in the past\)$/, () => '@past'],
+    [/ \(right now\)$/, () => '@now'],
+    [/ \(in the future\)$/, () => '@future'],
+    [/ \(since (\S+), ongoing\)$/, m => '@' + m[1] + '..'],
+    [/ \(from (\S+) to (\S+)\)$/, m => '@' + m[1] + '..' + m[2]],
+    [/ \((\S+) ago\)$/, m => '@-' + m[1]],
+    [/ \(on (\S+)\)$/, m => '@' + m[1]],
+    [/ \(in (\S+)\)$/, m => (/^\d{4}(-\d{2})?$/.test(m[1]) ? '@' + m[1] : '@+' + m[1])],
+    [/ \(at (\S+)\)$/, m => '@' + m[1]],
+  ];
+
+  // gỡ tail của clause từ cuối: mark, mood/adverb, strength, time — trả về [phần còn lại, quals]
+  function backTails(cl) {
+    let quals = '';
+    for (;;) {
+      let m;
+      if ((m = cl.match(/ — ([^—]+)$/)) && MARK_BACK[m[1]]) { quals = ' !' + MARK_BACK[m[1]] + quals; cl = cl.slice(0, m.index); continue; }
+      if ((m = cl.match(/ \(mood: ([^)]+?)(?: (\d+)%)?\)$/))) { quals = ' ~' + qJoin(m[1]) + (m[2] ? '%' + m[2] : '') + quals; cl = cl.slice(0, m.index); continue; }
+      if ((m = cl.match(/ (\S+?(?:less|ful|ous|ish|ive|ent|ant))ly$/))) { quals = ' ~' + m[1] + quals; cl = cl.slice(0, m.index); continue; }
+      if ((m = cl.match(/ \(strength (\d+)%\)$/))) { quals = ' %' + m[1] + quals; cl = cl.slice(0, m.index); continue; }
+      let hit = false;
+      for (const [re, fn] of TIME_BACK) {
+        const t = cl.match(re);
+        if (t) { quals = ' ' + fn(t) + quals; cl = cl.slice(0, t.index); hit = true; break; }
+      }
+      if (hit) continue;
+      break;
+    }
+    return [cl, quals];
+  }
+
+  function backClause(cl) {
+    let quals;
+    [cl, quals] = backTails(cl.trim());
+    let neg = '';
+    if (/^do(es)? NOT /.test(cl)) { neg = ' %0'; cl = cl.replace(/^do(es)? NOT /, ''); }
+    // inverse của realize (agreement) — E0 ∘ realize = E0: đưa dạng chia theo you về dạng gốc
+    cl = cl.replace(/^are\b/, 'is').replace(/^feel\b/, 'feels');
+    let pred = null, rest = '';
+    for (const [en, key] of PRED_BACK) {
+      if (cl === en) { pred = key; break; }
+      if (cl.startsWith(en + ' ')) { pred = key; rest = cl.slice(en.length + 1); break; }
+    }
+    if (!pred) {
+      const art = cl.match(/^is an? ([\s\S]+)$/);
+      if (art) { pred = 'a'; rest = art[1]; }
+    }
+    if (!pred) {
+      const m = cl.match(/^(\S+)(?: ([\s\S]+))?$/);
+      pred = m[1]; rest = m[2] || '';
+    }
+    const objs = rest ? splitTop(rest, ', ').map(backTerm) : [];
+    return pred + (objs.length ? ' ' + objs.join(', ') : '') + neg + quals;
+  }
+
+  function backStmt(line) {
+    line = line.trim().replace(/\.$/, '');
+    let m;
+    // rule
+    if ((m = line.match(/^[Rr]ule: whenever “([\s\S]+?)” then “([\s\S]+?)”([\s\S]*)$/))) {
+      const [, tq] = backTails('x' + m[3].replace(/ \(holds (\d+)% of the time\)/, ' (strength $1%)'));
+      return `{${backGraph(m[1])}} => {${backGraph(m[2])}}${tq}`;
+    }
+    // deontic trên pattern
+    if ((m = line.match(/^([\s\S]+?), in every matching case: “([\s\S]+)”$/))) {
+      const key = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+      const mk = MARK_BACK[key] || MARK_BACK[m[1]];
+      if (mk) return `{${backGraph(m[2])}} mark ${mk}`;
+    }
+    // message
+    if ((m = line.match(/^\[(\S+)\] (\S+) (asks|tells|confirms|demands|offers|promises)(?: (\S+))?(?: \(replying to (\S+)\))?(?:, (?:at|in|on) (\S+))?(?:: ([\s\S]+?))?(?: — meaning receipt: hash (\S+))?$/))) {
+      const [, id, from, verb, to, re, at, body, hash] = m;
+      let out = `#${id} a ${SPEECH_BACK[verb]}; from ${lowerFirst(from)}`;
+      if (to) out += `; to ${to}`;
+      if (re) out += `; re #${re}`;
+      if (at) out += `; at ${at}`;
+      if (body) out += `; body ${backTerm(body)}`;
+      if (hash) out += `; hash ${backTerm(hash)}`;
+      return out;
+    }
+    // statement về một cạnh: “s p o” ...
+    if ((m = line.match(/^“([\s\S]+?)” ([\s\S]+)$/))) {
+      const toks = m[1].trim().split(/\s+/);
+      const s = lowerFirst(toks[0]), p = toks[1] || '', o = toks.slice(2).length ? backTerm(toks.slice(2).join(' ')) : '';
+      const chains = splitTop(m[2], ', ').map(part => {
+        part = part.trim();
+        let mm;
+        if ((mm = part.match(/^\(speaker is (\d+)% sure\)$/))) return `conf ${mm[1]}`;
+        if ((mm = part.match(/^because ([\s\S]+)$/))) return `why ${backTerm(mm[1])}`;
+        if ((mm = part.match(/^— and that happens after ([\s\S]+)$/))) return `after ${backTerm(mm[1])}`;
+        if ((mm = part.match(/^— and that happens before ([\s\S]+)$/))) return `before ${backTerm(mm[1])}`;
+        if (part === '— which is NOT the case') return 'deg 0';
+        return backClause(part);
+      });
+      return `[${s} ${p}${o ? ' ' + o : ''}] ${chains.join('; ')}`;
+    }
+    // chain thường: subject = token đầu (rigid), các clause nối ';'
+    const segs = splitTop(line, '; ');
+    let head = segs[0].trim(), subj;
+    if ((m = head.match(/^some (\S+) ([\s\S]+)$/))) { subj = '?' + m[1]; head = m[2]; }
+    else { m = head.match(/^(\S+) ([\s\S]+)$/); subj = lowerFirst(m[1]); head = m[2]; }
+    const clauses = [head, ...segs.slice(1)].map(backClause);
+    return `${subj} ${clauses.join('; ')}`;
+  }
+
+  function backGraph(s) {
+    return splitTop(s.trim(), '. ').map(backStmt).join('. ');
+  }
+
+  function readback(text) {
+    STRS = [];
+    return maskStrings(text).split('\n').filter(l => l.trim()).map(l => backStmt(l) + '.').join('\n');
   }
 
   function decode(src, opts) {
@@ -425,7 +584,7 @@ const XS3Decode = (function () {
     };
   }
 
-  return { decode };
+  return { decode, readback };
 })();
 
 if (typeof module !== 'undefined') module.exports = XS3Decode;

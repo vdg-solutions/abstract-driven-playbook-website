@@ -217,7 +217,7 @@ a shared understanding.</pre>
                 </div>
                 <div class="duel-pane win">
                     <div class="duel-head"><span>the same skill in XS3</span></div>
-                    <pre>#you a interviewer; interview user ~relentless;
+                    <pre>you a interviewer; interview user ~relentless;
   until shared-understanding.
 walk decision-tree branch-by-branch;
   resolve dependency one-by-one.
@@ -411,24 +411,24 @@ decision owner user; put each; await answer.
         // ---- decode widget ----
         const DC_EXAMPLES = {
             baskerville: `// The Hound of the Baskervilles, briefed agent-to-agent
-#legend a curse; on house-baskerville; since 1742;
-    say {#beast a hound; size enormous; color coal-black;
+legend a curse; on house-baskerville; since 1742;
+    say {beast a hound; size enormous; color coal-black;
          breathe fire; haunt moor}.
 sir-charles a baskerville; own baskerville-hall;
     found dead @1889-06; in yew-alley.
 [sir-charles die-of heart-attack] conf 60.
-#track a footprint; near body; of {?h a hound; size gigantic}.
-{?p a baskerville; walk moor @night} => {#beast hunt ?p} %80 ~fear%90.
+track a footprint; near body; of {?h a hound; size gigantic}.
+{?p a baskerville; walk moor @night} => {beast hunt ?p} %80 ~fear%90.
 #m1 a tell; from mortimer; to holmes;
     body {sir-henry a heir; of house-baskerville; arrive london @+1d.
           {sir-henry walk moor @night} mark 🚫}.`,
             grilling: `// mattpocock/skills · grilling, in XS3
-#you a interviewer; interview user ~relentless; until shared-understanding.
-#you walk each-branch; resolve each-dependency.
+you a interviewer; interview user ~relentless; until shared-understanding.
+you walk each-branch; resolve each-dependency.
 each-question carry recommended-answer.
-#you ask one-at-a-time; await feedback.
-{#you ask many-at-once} mark 🚫.
-{?f a fact; in environment} => {#you look-up ?f; ask user %0}.
+you ask one-at-a-time; await feedback.
+{you ask many-at-once} mark 🚫.
+{?f a fact; in environment} => {you look-up ?f; ask user %0}.
 decision owner user; put each; await answer.
 {act before shared-understanding} mark 🚫.`,
             chat: `#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
@@ -456,7 +456,14 @@ decision owner user; put each; await answer.
             const out = document.getElementById('dc-out');
             out.classList.remove('err');
             out.textContent = (note ? note + '\n\n' : '') + r.text;
-            document.getElementById('dc-stats').textContent = r.stmts + ' statements · ' + r.edges.length + ' edges';
+            // chứng minh sống "không mất ý": readback bản dịch về XS3, so tập cạnh với input
+            let rt = '';
+            try {
+                const back = XS3Decode.decode(XS3Decode.readback(r.text), { strict: true });
+                const key = es => es.map(e => e.join('|')).sort().join(';');
+                if (key(back.edges) === key(r.edges)) rt = ' · meaning round-trip ✓';
+            } catch (e) { /* input lỏng nằm ngoài ảnh strict của renderer — không có badge */ }
+            document.getElementById('dc-stats').textContent = r.stmts + ' statements · ' + r.edges.length + ' edges' + rt;
             document.getElementById('dc-edges').innerHTML =
                 '<tr><th>subject</th><th>predicate</th><th>object</th></tr>' +
                 r.edges.map(e => '<tr><td>' + e.map(dcEsc).join('</td><td>') + '</td></tr>').join('');
