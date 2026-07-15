@@ -230,11 +230,16 @@ const XS3Decode = (function () {
     become: 'becomes', begin: 'begins', end: 'ends', await: 'then await', until: 'until',
   };
 
+  // ---- lexicalize: natural transformation trên lexeme, áp MỌI vị trí atom ----
+  // atom toàn chữ nối hyphen -> cụm từ space (shared-understanding -> shared understanding);
+  // định danh có số là rigid (dev-3, story-90) -> identity. Chỉ áp cho prose — bảng cạnh giữ atom thô.
+  const humanize = v => (/^[\p{L}]+(?:-[\p{L}]+)+$/u.test(v) ? v.replace(/-/g, ' ') : v);
+
   function rTerm(t) {
     switch (t.t) {
-      case 'name': return t.implicit ? '' : t.v;
+      case 'name': return t.implicit ? '' : humanize(t.v);
       case 'str': return `“${t.v}”`;
-      case 'anchor': return t.local ? 'that' : t.v;
+      case 'anchor': return t.local ? 'that' : humanize(t.v);
       case 'var': return `some ${t.v.replace(/^[?]/, '')}`;
       case 'phrase': return t.items.map(rTerm).join(' ');
       case 'seq': return t.items.map(rTerm).join(' → ') + ' (in order)';
@@ -266,16 +271,22 @@ const XS3Decode = (function () {
       else if (q.k === 'aff') affs.push(q);
     }
     const oTxt = objs.map(rTerm).filter(Boolean).join(', ');
+    const predTxt = pred ? humanize(pred) : '';
     let core;
     if (!pred) core = oTxt; // bare mention
     else if (pred === 'a') core = `is ${an(oTxt)} ${oTxt}`;
     else if (PRED_EN[pred]) core = `${PRED_EN[pred]}${oTxt ? ' ' + oTxt : ''}`;
-    else core = `${pred}${oTxt ? ' ' + oTxt : ''}`;
-    if (neg) core = `does NOT ${pred}${oTxt ? ' ' + oTxt : ''}`;
+    else core = `${predTxt}${oTxt ? ' ' + oTxt : ''}`;
+    if (neg) core = `does NOT ${predTxt}${oTxt ? ' ' + oTxt : ''}`;
     const tail = [];
     if (time) tail.push(time.t === 'name' || time.t === 'str' ? rTime(time) : 'at ' + rTerm(time));
     if (deg != null) tail.push(`(strength ${deg}%)`);
-    for (const a of affs) tail.push(`(mood: ${rTerm(a.v)}${a.deg != null ? ` ${a.deg}%` : ''})`);
+    for (const a of affs) {
+      // affect dạng tính từ, không cường độ -> trạng từ: ~relentless => "relentlessly"
+      const w = a.v.t === 'name' ? a.v.v : null;
+      if (a.deg == null && w && /(less|ful|ous|ish|ive|ent|ant)$/.test(w)) tail.push(`${w}ly`);
+      else tail.push(`(mood: ${rTerm(a.v)}${a.deg != null ? ` ${a.deg}%` : ''})`);
+    }
     const out = core + (tail.length ? ' ' + tail.join(' ') : '');
     return { text: out, marks };
   }
@@ -328,7 +339,10 @@ const XS3Decode = (function () {
     return text;
   }
 
-  function rStmt(st) {
+  // R = realize ∘ template: realize áp đồng nhất lên MỌI nhánh template, không chọn lọc
+  const rStmt = st => realize(rStmtTemplate(st));
+
+  function rStmtTemplate(st) {
     // rule {A} => {B}
     if (st.chains.length === 1 && st.chains[0].pred === '=>' && st.subj.t === 'graph') {
       const A = rGraph(st.subj.stmts);
@@ -366,11 +380,17 @@ const XS3Decode = (function () {
     const allMarks = st.chains.flatMap(ch => ch.quals.filter(q => q.k === 'mark').map(q => q.v));
     let out = (subjText + ' ' + clauses.map(c => c.text).filter(Boolean).join('; ')).trim();
     if (allMarks.length) out = applyMarks(out, allMarks);
-    return polish(out + '.');
+    return out + '.';
   }
 
-  function polish(s) {
-    return s.replace(/\byou is\b/g, 'you are').replace(/\byou feels\b/g, 'you feel').replace(/ {2,}/g, ' ');
+  // ---- realize: TẦNG DUY NHẤT chứa luật ngữ pháp bề mặt tiếng Anh (agreement, spacing) ----
+  // template không được vá luật tiếng đích; lỗi "đọc không tự nhiên" sửa ở đây, lỗi cạnh sửa ở template.
+  function realize(s) {
+    s = s.replace(/ {2,}/g, ' ');
+    // subject-verb agreement cho ngôi 2: mệnh đề trong câu chủ ngữ "you" chia theo you
+    s = s.replace(/\byou is\b/g, 'you are').replace(/\byou feels\b/g, 'you feel').replace(/\byou does\b/g, 'you do');
+    if (/^you /.test(s)) s = s.replace(/\bdoes NOT\b/g, 'do NOT');
+    return s;
   }
 
   function rGraph(stmts) {
