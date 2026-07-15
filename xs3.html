@@ -48,6 +48,20 @@
         .hook { border: 1px dashed #4a9eff; border-radius: 10px; padding: 1.3rem 1.5rem; margin: 2.2rem 0; background: rgba(74, 158, 255, 0.05); }
         .hook h3 { color: #4a9eff; font-size: 1.05rem; margin-bottom: 0.6rem; }
         .hook p { margin-bottom: 0.8rem; }
+        .msg-flow { display: flex; flex-direction: column; gap: 0.9rem; margin: 1.5rem 0; }
+        .msg { max-width: 85%; border-radius: 10px; padding: 0.7rem 1rem; background: #0a0a0a; overflow-x: auto; }
+        .msg pre { margin: 0; font-size: 0.85rem; white-space: pre; color: #ddd; }
+        .msg.left { align-self: flex-start; border: 1px solid #4a9eff; border-bottom-left-radius: 2px; }
+        .msg.right { align-self: flex-end; border: 1px solid #27c93f; border-bottom-right-radius: 2px; }
+        .msg-head { font-size: 0.72rem; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+        .msg.left .msg-head { color: #4a9eff; }
+        .msg.right .msg-head { color: #27c93f; }
+        .hl-num { background: rgba(255, 189, 46, 0.2); color: #ffbd2e; padding: 0 0.2rem; border-radius: 3px; }
+        .hl-hash { background: rgba(39, 201, 63, 0.15); color: #27c93f; padding: 0 0.2rem; border-radius: 3px; }
+        .hl-var { color: #4a9eff; }
+        .takeaways { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.2rem 0; }
+        .take { border: 1px solid #333; border-radius: 999px; background: #0a0a0a; color: #bbb; font-size: 0.82rem; padding: 0.45rem 1rem; }
+        .take b { color: #27c93f; }
         p { color: #bbb; margin-bottom: 1rem; }
         pre.card { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: #ddd; white-space: pre; }
         code { color: #27c93f; }
@@ -112,21 +126,30 @@
         <p>One line: an engineer, thirty, in love since 2020 and still, at strength 80 — shadowed by a fear of intensity 90. The prose version of that sentence is three times longer, and no machine can verify a paraphrase of it. The XS3 version is checkable: two documents mean the same thing exactly when they normalize to the same edge set. Fidelity stops being a feeling and becomes a comparison.</p>
         <blockquote>Compression you can audit: nothing lost — and "nothing" is machine-checkable.</blockquote>
 
-        <h2>Agent-centric, not human-centric</h2>
-        <table>
-            <tr><th>Designed for humans/compilers</th><th>Designed for agents (XS3)</th></tr>
-            <tr><td>Grammar must be learned, or parsed by machines built for it</td><td>Any LLM reads it <strong>cold</strong> — even small, cheap models parse it correctly with no schema handshake</td></tr>
-            <tr><td>Tone, emphasis, and uncertainty live in phrasing — invisible to tools</td><td><code>%80</code> strength, <code>conf 60</code> certainty, <code>~😨%90</code> affect, <code>!must / !🚫</code> law — explicit, on every edge</td></tr>
-            <tr><td>Diff means "lines changed"</td><td>Diff means "these exact facts appeared/disappeared" — a set difference over edges</td></tr>
-            <tr><td>Rules written as prose policies</td><td>Rules are data: <code>{?x a deploy; at friday} mark 🚫.</code> forbids a whole class of actions in one line</td></tr>
-        </table>
-
         <h2>A communication language for multi-agent systems</h2>
-        <p>AutoGen, CrewAI, LangGraph solved the <em>routing</em> of agent-to-agent messages. The messages themselves are still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no way to prove a message arrived with its meaning intact. XS3 is the wire format built for exactly that seat:</p>
-        <pre class="card">#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
-#m2 a tell; from coder; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 %95}.
-#m3 a confirm; from planner; re #m2; hash "9f3a".</pre>
-        <p>A question is a pattern with variables; the answer is the same graph with the variables bound; the receipt is a hash of the normalized edge set — agreement is checked by machine, not by re-reading. Uncertainty (<code>%95</code>, <code>conf</code>), deadlines (<code>@</code>), and law (<code>!must / !🚫</code>) travel <em>inside</em> the message. Any framework that passes strings between agents can carry XS3 today — no adapter, no SDK.</p>
+        <p><strong>AutoGen, CrewAI, LangGraph</strong> solved the <em>routing</em> of agent-to-agent messages. The message itself is still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no proof the meaning arrived intact. XS3 is that missing wire format. Watch two agents talk:</p>
+
+        <div class="msg-flow">
+            <div class="msg left">
+                <div class="msg-head">planner → coder · ASK</div>
+                <pre>#m1 a ask; body {<span class="hl-var">?f</span> a fail; in "router.rs"; gate <span class="hl-var">?g</span>}.</pre>
+            </div>
+            <div class="msg right">
+                <div class="msg-head">coder → planner · TELL</div>
+                <pre>#m2 a tell; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 <span class="hl-num">%95</span>}.</pre>
+            </div>
+            <div class="msg left">
+                <div class="msg-head">planner → coder · CONFIRM</div>
+                <pre>#m3 a confirm; re #m2; hash <span class="hl-hash">"9f3a"</span>.</pre>
+            </div>
+        </div>
+
+        <div class="takeaways">
+            <span class="take"><b>?f, ?g</b> — the question is a pattern; the answer binds its variables</span>
+            <span class="take"><b>%95</b> — uncertainty travels inside the message</span>
+            <span class="take"><b>"9f3a"</b> — the receipt is a hash of the meaning; agreement checked by machine</span>
+        </div>
+        <p>Any framework that passes strings between agents can carry XS3 today — no adapter, no SDK.</p>
 
         <h2>How it compares</h2>
         <p>Prompt compression today comes in two flavors — both lossy:</p>
