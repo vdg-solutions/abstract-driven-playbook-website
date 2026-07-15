@@ -85,7 +85,7 @@
         .chat-plain .p-name { color: #4a9eff; font-weight: bold; }
         .chat-plain .c-name { color: #27c93f; font-weight: bold; }
         .chat-plain code { color: #ddd; background: rgba(255,255,255,0.06); padding: 0 0.25rem; border-radius: 3px; }
-        .duel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .duel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; align-items: start; }
         .duel-pane { border: 1px solid #333; border-radius: 10px; background: #0a0a0a; overflow: hidden; }
         .duel-pane.win { border: 2px solid #27c93f; box-shadow: 0 0 24px rgba(39, 201, 63, 0.2); }
         .duel-head { padding: 0.6rem 1rem; font-size: 0.78rem; border-bottom: 1px solid #333; color: #999; display: flex; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
@@ -154,39 +154,51 @@
         </section>
 
         <h2>Compression without sacrifice</h2>
-        <p>XS3 is not summarization — it is <strong>re-encoding</strong>. Take one of the most-copied prompts on the internet — the <a href="https://github.com/f/awesome-chatgpt-prompts">awesome-chatgpt-prompts</a> "Linux terminal" — and rewrite it in XS3. The filler disappears; every instruction stays, now as a rule a machine can check.</p>
+        <p>XS3 is not summarization — it is <strong>re-encoding</strong>. Here is <a href="https://github.com/mattpocock/skills">Matt Pocock's <code>grilling</code> skill</a> — the interview primitive that stress-tests a plan before you build it — rewritten in XS3. Same instructions, every one intact:</p>
 
         <div class="duel">
             <div class="duel-pane before">
-                <div class="duel-head"><span>awesome-chatgpt-prompts · "Linux terminal" · plain English</span><span class="duel-bytes">427 B</span></div>
-                <pre>I want you to act as a Linux terminal. I will type
-commands and you will reply with what the terminal
-should show. I want you to only reply with the terminal
-output inside one unique code block, and nothing else.
-Do not write explanations. Do not type commands unless
-I instruct you to do so. When I need to tell you
-something in English, I will do so by putting text
-inside curly brackets {like this}. My first command
-is pwd.</pre>
+                <div class="duel-head"><span>mattpocock/skills · grilling · SKILL.md · plain English</span></div>
+                <pre>Interview me relentlessly about every aspect of
+this until we reach a shared understanding. Walk
+down each branch of the decision tree, resolving
+dependencies between decisions one-by-one. For
+each question, provide your recommended answer.
+
+Ask the questions one at a time, waiting for
+feedback on each question before continuing.
+Asking multiple questions at once is bewildering.
+
+If a *fact* can be found by exploring the
+environment (filesystem, tools, etc.), look it up
+rather than asking me. The *decisions*, though,
+are mine — put each one to me and wait for my
+answer.
+
+Do not act on it until I confirm we have reached
+a shared understanding.</pre>
             </div>
             <div class="duel-pane win">
-                <div class="duel-head"><span>the same instructions in XS3</span><span class="duel-bytes">258 B · −40%</span></div>
-                <pre>#t a role; act "linux terminal".
-<span class="hl-rule">{user type command} => {#t reply {terminal-output of command}}.</span>
-#t reply-in "one code block", only.
-<span class="hl-rule">{#t write explanation} mark 🚫.</span>
-<span class="hl-rule">{#t type command, not instructed} mark 🚫.</span>
-english-aside wrap "{ }".
-first-command "pwd".</pre>
+                <div class="duel-head"><span>the same skill in XS3</span></div>
+                <pre>#you a interviewer; interview user ~relentless;
+  until shared-understanding.
+walk decision-tree branch-by-branch;
+  resolve dependency one-by-one.
+each question carry recommended-answer.
+ask one-at-a-time; await feedback.
+<span class="hl-rule">{ask many-at-once} mark 🚫.</span>
+<span class="hl-rule">{fact in environment} => {look-up; not ask}.</span>
+decision owner user; put each; await answer.
+<span class="hl-rule">{act, ~shared-understanding} mark 🚫.</span></pre>
             </div>
         </div>
 
         <div class="takeaways">
-            <span class="take"><b>427 B → 258 B</b> — −40%, and the prompt was already terse</span>
-            <span class="take">every <b>"do not…"</b> becomes a checkable rule: <b>mark 🚫</b></span>
-            <span class="take"><b>100%</b> of the instruction survives — verifiable, not paraphrased</span>
+            <span class="take">the <b>fact vs decision</b> split — just emphasis in the prose — becomes structure: facts get looked up, decisions get put to you</span>
+            <span class="take">"one question at a time" stops being a plea and becomes a rule a machine enforces: <b>mark 🚫</b></span>
+            <span class="take">nothing dropped — the whole primitive survives, now <b>checkable and reusable</b></span>
         </div>
-        <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your favorite prompt.</p>
+        <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your favorite prompt or skill.</p>
 
         <h2>A communication language for multi-agent systems</h2>
         <div class="fw-tags">
