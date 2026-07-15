@@ -134,6 +134,25 @@
         .dot:hover { background: #888; }
         .dot.active { background: #27c93f; box-shadow: 0 0 10px rgba(39,201,63,0.7); transform: scale(1.3); }
         .present-hint { position: fixed; bottom: 1rem; right: 1.6rem; color: #555; font-size: 0.78rem; z-index: 200; letter-spacing: 0.03em; }
+        /* decode widget */
+        .decode-tease { text-align: right; margin: 0.3rem 0 0.6rem; font-size: 0.85rem; color: #888; line-height: 1.55; }
+        .decode-tease a { color: #27c93f; text-decoration: none; border-bottom: 1px dashed #27c93f; }
+        .decode-tease a:hover { background: rgba(39, 201, 63, 0.12); }
+        .decode-duel textarea { display: block; width: 100%; min-height: 270px; background: transparent; border: none; outline: none; resize: vertical; color: #ddd; font-family: inherit; font-size: 0.75rem; line-height: 1.5; padding: 1rem; white-space: pre; }
+        .decode-out { margin: 0; padding: 1rem; min-height: 270px; font-size: 0.82rem; line-height: 1.7; white-space: pre-wrap; color: #ddd; }
+        .decode-out.err { color: #ff5f56; }
+        .ex-chips { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0.6rem 0 1rem; align-items: center; }
+        .ex-chip { border: 1px solid #555; border-radius: 999px; background: #0a0a0a; color: #bbb; font-size: 0.78rem; padding: 0.3rem 0.85rem; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .ex-chip:hover { border-color: #27c93f; color: #27c93f; }
+        .decode-btn { background: #27c93f; border: none; color: #000; font-weight: bold; font-family: inherit; font-size: 0.9rem; padding: 0.5rem 1.5rem; border-radius: 6px; cursor: pointer; }
+        .decode-btn:hover { opacity: 0.85; }
+        .edge-details { margin-top: 1rem; }
+        .edge-details summary { color: #666; cursor: pointer; font-size: 0.82rem; }
+        .edge-table { margin: 0.8rem 0 0; }
+        .edge-table td, .edge-table th { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+        @media (max-height: 820px) {
+            .decode-duel textarea, .decode-out { min-height: 34vh; }
+        }
         @media (max-height: 820px) {
             .slide { padding-top: 4rem; padding-bottom: 2rem; }
             .duel-pane pre { max-height: 44vh; font-size: 0.68rem; }
@@ -209,6 +228,7 @@ decision owner user; put each; await answer.
 <span class="hl-rule">{act, ~shared-understanding} mark 🚫.</span></pre>
                 </div>
             </div>
+            <p class="decode-tease">Looks like alien runes? Don't worry — nothing is locked in there.<br>XS3 is a graph, and graphs decode back to words, mechanically. <a href="#decode" onclick="dcExample('grilling')">▶ Decode this into plain English</a></p>
 
             <blockquote><strong>Try it yourself:</strong> point any LLM at <a href="llms-language.txt">llms-language.txt</a>, hand it your favorite prompt or skill, and watch it come back as XS3. Paste this:</blockquote>
             <div class="prompt-line" style="margin-top: 0.8rem;">
@@ -330,6 +350,36 @@ decision owner user; put each; await answer.
             <p>Any framework that passes strings between agents can carry XS3 today — no adapter, no SDK.</p>
         </div></section>
 
+        <section class="slide" id="decode"><div class="slide-inner">
+            <h2>Worried it's write-only? Decode it back — no LLM required</h2>
+            <p>XS3 ships with a one-way render layer: a small deterministic function (loaded on this page — <a href="js/xs3-decode.js">read the source</a>) that turns XS3 back into plain words. It is not an AI. It is a template over the graph, so the same document decodes to the same words, every time, in ~0&nbsp;ms, offline.</p>
+            <div class="ex-chips">
+                <span style="color:#666; font-size:0.8rem;">try:</span>
+                <button class="ex-chip" onclick="dcExample('baskerville')">the Hound of the Baskervilles</button>
+                <button class="ex-chip" onclick="dcExample('grilling')">the grilling skill</button>
+                <button class="ex-chip" onclick="dcExample('chat')">planner ⇄ coder chat</button>
+                <button class="ex-chip" onclick="dcExample('negotiate')">two agents negotiating</button>
+            </div>
+            <div class="duel decode-duel">
+                <div class="duel-pane before">
+                    <div class="duel-head"><span>XS3 in</span><span class="duel-bytes" id="dc-bytes"></span></div>
+                    <textarea id="dc-in" spellcheck="false" placeholder="paste any XS3 here…"></textarea>
+                </div>
+                <div class="duel-pane win">
+                    <div class="duel-head"><span>human words out</span><span class="duel-bytes" id="dc-stats"></span></div>
+                    <pre class="decode-out" id="dc-out"></pre>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:0.9rem;">
+                <button class="decode-btn" onclick="dcRun()">▶ decode to words</button>
+            </div>
+            <details class="edge-details">
+                <summary>…or see what the machine sees: the (subject, predicate, object) edge table</summary>
+                <table class="edge-table" id="dc-edges"></table>
+            </details>
+            <blockquote>The wire stays XS3 — hashable, diffable, machine-checked. Words are just a window for humans; they never travel back.</blockquote>
+        </div></section>
+
         <section class="slide"><div class="slide-inner">
             <h2>Looking for a lossless LLMLingua alternative?</h2>
             <div class="hook">
@@ -350,10 +400,75 @@ decision owner user; put each; await answer.
         <button class="dot" title="How it compares"></button>
         <button class="dot" title="What XS3 is"></button>
         <button class="dot" title="Multi-agent"></button>
+        <button class="dot" title="Decode it back"></button>
         <button class="dot" title="Try it"></button>
     </div>
-    <div class="present-hint">↑ ↓ / PgUp PgDn to present · 5 screens</div>
+    <div class="present-hint">↑ ↓ / PgUp PgDn to present · 6 screens</div>
 
+    <script src="js/xs3-decode.js"></script>
+    <script>
+        // ---- decode widget ----
+        const DC_EXAMPLES = {
+            baskerville: `// The Hound of the Baskervilles, briefed agent-to-agent
+#legend a curse; on house-baskerville; since 1742;
+    say {#beast a hound; size enormous; color coal-black;
+         breathe fire; haunt moor}.
+sir-charles a baskerville; own baskerville-hall;
+    die @1889-06; in yew-alley.
+[sir-charles die by heart-attack] conf 60.
+#print a footprint; near body; of {?h a hound; size gigantic}.
+{?p a baskerville; walk moor @night} => {#beast hunt ?p} %80 ~fear%90.
+#m1 a tell; from mortimer; to holmes;
+    body {sir-henry a heir; of house-baskerville; arrive london @+1d.
+          {sir-henry walk moor @night} mark 🚫}.`,
+            grilling: `// mattpocock/skills · grilling, in XS3
+#you a interviewer; interview user ~relentless; until shared-understanding.
+#you walk decision-tree branch-by-branch; resolve dependency one-by-one.
+each-question carry recommended-answer.
+#you ask one-at-a-time; await feedback.
+{#you ask many-at-once} mark 🚫.
+{?f a fact; in environment} => {#you look-up ?f; ask user %0}.
+decision owner user; put each; await answer.
+{#you act before shared-understanding} mark 🚫.`,
+            chat: `#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
+#m2 a tell; from coder; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 %95}.
+#m3 a confirm; from planner; re #m2; hash "9f3a".`,
+            negotiate: `#m1 a ask; from pm-2; to ta-5; body {?d a design; for story-90; cost ?c}.
+#m2 a tell; from ta-5; re #m1;
+    body {#d7 a design; for story-90; cost 3d %90.
+          #d7 risk {api v2 break} ~fear%40.
+          [#d7 ship before 2026-08] conf 70}.
+#m3 a tell; from pm-2; re #m2; body {#d7 approved true !must. #d7 deadline 2026-08-01}.
+#m4 a confirm; from ta-5; re #m3; hash "c41b".`,
+        };
+        const dcEsc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        function dcRun() {
+            const src = document.getElementById('dc-in').value;
+            const out = document.getElementById('dc-out');
+            const table = document.getElementById('dc-edges');
+            const stats = document.getElementById('dc-stats');
+            document.getElementById('dc-bytes').textContent = new Blob([src]).size + ' bytes';
+            try {
+                const r = XS3Decode.decode(src);
+                out.classList.remove('err');
+                out.textContent = r.text;
+                stats.textContent = r.stmts + ' statements · ' + r.edges.length + ' edges';
+                table.innerHTML = '<tr><th>subject</th><th>predicate</th><th>object</th></tr>' +
+                    r.edges.map(e => '<tr><td>' + e.map(dcEsc).join('</td><td>') + '</td></tr>').join('');
+            } catch (err) {
+                out.classList.add('err');
+                out.textContent = "didn't parse: " + err.message;
+                stats.textContent = '';
+                table.innerHTML = '';
+            }
+        }
+        function dcExample(k) {
+            document.getElementById('dc-in').value = DC_EXAMPLES[k];
+            dcRun();
+        }
+        dcExample('baskerville');
+        document.getElementById('dc-in').addEventListener('input', dcRun);
+    </script>
     <script>
         function copyPrompt(el) {
             navigator.clipboard.writeText(el.textContent).then(() => {
@@ -388,6 +503,7 @@ decision owner user; put each; await answer.
             slides.forEach((s) => io.observe(s));
 
             window.addEventListener('keydown', (e) => {
+                if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) return;
                 if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(current + 1); }
                 else if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(current - 1); }
                 else if (e.key === 'Home') { e.preventDefault(); go(0); }
