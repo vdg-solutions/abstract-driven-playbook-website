@@ -74,6 +74,13 @@
         .takeaways { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.2rem 0; }
         .take { border: 1px solid #333; border-radius: 999px; background: #0a0a0a; color: #bbb; font-size: 0.82rem; padding: 0.45rem 1rem; }
         .take b { color: #27c93f; }
+        .fw-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 1.2rem 0 0.9rem; }
+        .fw-tag { border: 1px solid #666; border-radius: 6px; padding: 0.18rem 0.65rem; color: #fff; font-weight: bold; font-size: 0.92rem; background: #111; }
+        .gap-line { font-size: 1.02rem; }
+        .gap-line .missing { color: #ff5f56; }
+        .wire-line { color: #27c93f; font-weight: bold; margin: 0.9rem 0 0.2rem; }
+        .notes { border-left: 2px dashed #555; padding-left: 1.1rem; margin: 1.6rem 0; }
+        .notes-label { color: #666; font-size: 0.78rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
         .duel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
         .duel-pane { border: 1px solid #333; border-radius: 10px; background: #0a0a0a; overflow: hidden; }
         .duel-pane.win { border: 2px solid #27c93f; box-shadow: 0 0 24px rgba(39, 201, 63, 0.2); }
@@ -314,7 +321,14 @@ class TripTasks:
         <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your own agent definitions.</p>
 
         <h2>A communication language for multi-agent systems</h2>
-        <p><strong>AutoGen, CrewAI, LangGraph</strong> solved the <em>routing</em> of agent-to-agent messages. The message itself is still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no proof the meaning arrived intact. XS3 is that missing wire format. Watch two agents talk:</p>
+        <div class="fw-tags">
+            <span class="fw-tag">AutoGen</span>
+            <span class="fw-tag">CrewAI</span>
+            <span class="fw-tag">LangGraph</span>
+            <span style="color: #bbb;">solved the <em>routing</em> of agent-to-agent messages.</span>
+        </div>
+        <p class="gap-line">The message itself is still ad-hoc JSON and free prose — <span class="missing">no seat for uncertainty, no seat for law, no proof the meaning arrived intact</span>.</p>
+        <p class="wire-line">XS3 is that missing wire format. Watch two agents talk ↓</p>
 
         <div class="chat">
             <div class="chat-row left">
@@ -348,10 +362,13 @@ class TripTasks:
             </div>
         </div>
 
-        <div class="takeaways">
-            <span class="take"><b>?f, ?g</b> — the question is a pattern; the answer binds its variables</span>
-            <span class="take"><b>%95</b> — uncertainty travels inside the message</span>
-            <span class="take"><b>"9f3a"</b> — the receipt is a hash of the meaning; agreement checked by machine</span>
+        <div class="notes">
+            <div class="notes-label">// what just happened</div>
+            <div class="takeaways" style="margin: 0;">
+                <span class="take"><b>?f, ?g</b> — the question is a pattern; the answer binds its variables</span>
+                <span class="take"><b>%95</b> — uncertainty travels inside the message</span>
+                <span class="take"><b>"9f3a"</b> — the receipt is a hash of the meaning; agreement checked by machine</span>
+            </div>
         </div>
         <p>Any framework that passes strings between agents can carry XS3 today — no adapter, no SDK.</p>
 
