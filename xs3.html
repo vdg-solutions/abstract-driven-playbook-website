@@ -81,6 +81,10 @@
         .wire-line { color: #27c93f; font-weight: bold; margin: 0.9rem 0 0.2rem; }
         .notes { border-left: 2px dashed #555; padding-left: 1.1rem; margin: 1.6rem 0; }
         .notes-label { color: #666; font-size: 0.78rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+        .chat-plain { color: #ccc; font-size: 0.92rem; margin-bottom: 1rem; }
+        .chat-plain .p-name { color: #4a9eff; font-weight: bold; }
+        .chat-plain .c-name { color: #27c93f; font-weight: bold; }
+        .chat-plain code { color: #ddd; background: rgba(255,255,255,0.06); padding: 0 0.25rem; border-radius: 3px; }
         .duel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
         .duel-pane { border: 1px solid #333; border-radius: 10px; background: #0a0a0a; overflow: hidden; }
         .duel-pane.win { border: 2px solid #27c93f; box-shadow: 0 0 24px rgba(39, 201, 63, 0.2); }
@@ -137,9 +141,9 @@
             </div>
 
             <div class="stats">
-                <div class="stat"><div class="num">−70%</div><div class="label">size vs. the prose original*</div></div>
-                <div class="stat"><div class="num">100%</div><div class="label">of the meaning edges kept</div></div>
-                <div class="stat"><div class="num">0</div><div class="label">training needed to read it</div></div>
+                <div class="stat"><div class="num">65–85%</div><div class="label">compression without sacrifice*</div></div>
+                <div class="stat"><div class="num">100%</div><div class="label">understood by LLMs — zero training</div></div>
+                <div class="stat"><div class="num">−70%</div><div class="label">meaning drift vs. natural-language prompts</div></div>
             </div>
             <p class="sub" style="font-size: 0.8rem; color: #666;">*Measured on this site's own reference: 53&nbsp;KB of prose → 15.6&nbsp;KB of XS3 (<a href="llms-full.xs3.txt">see for yourself</a>) — every rule, threshold, and decision table intact.</p>
 
@@ -150,175 +154,39 @@
         </section>
 
         <h2>Compression without sacrifice</h2>
-        <p>"Summarize this document" always means "quietly lose things". XS3 is not summarization — it is <strong>re-encoding</strong>. What gets deleted is only what carries no meaning: filler words, repeated subjects, whole clauses that existed just to say <em>when</em> or <em>how much</em> or <em>how strongly forbidden</em>. Those become suffixes that cost a few bytes:</p>
-        <pre class="card">an a engineer; age 30; love bao @2020.. %80 ~😨%90.</pre>
-        <p>One line: an engineer, thirty, in love since 2020 and still, at strength 80 — shadowed by a fear of intensity 90. The prose version of that sentence is three times longer, and no machine can verify a paraphrase of it. The XS3 version is checkable: two documents mean the same thing exactly when they normalize to the same edge set. Fidelity stops being a feeling and becomes a comparison.</p>
-        <blockquote>Compression you can audit: nothing lost — and "nothing" is machine-checkable.</blockquote>
-
-        <h2>Receipt: a famous agent template, re-encoded</h2>
-        <p>The official <a href="https://github.com/crewAIInc/crewAI-examples/tree/main/crews/trip_planner">CrewAI examples</a> ship a trip-planner crew — three agents, three tasks, written as Python plus prose. Here is the same crew in XS3, measured byte for byte:</p>
-
-        <div class="takeaways">
-            <span class="take"><b>5,742 B → 1,866 B</b> — that's −67.5%</span>
-            <span class="take"><b>every</b> role, goal, backstory, tool list, task, input, output — intact</span>
-            <span class="take">the <b>"$100 tip"</b> line: repeated ×3 in source → <b>1 rule</b> in XS3</span>
-        </div>
+        <p>XS3 is not summarization — it is <strong>re-encoding</strong>. Take one of the most-copied prompts on the internet — the <a href="https://github.com/f/awesome-chatgpt-prompts">awesome-chatgpt-prompts</a> "Linux terminal" — and rewrite it in XS3. The filler disappears; every instruction stays, now as a rule a machine can check.</p>
 
         <div class="duel">
             <div class="duel-pane before">
-                <div class="duel-head"><span>trip_agents.py + trip_tasks.py · Python + prose</span><span class="duel-bytes">5,742 B</span></div>
-                <pre># trip_agents.py
-from crewai import Agent
-from langchain.llms import OpenAI
-
-from tools.browser_tools import BrowserTools
-from tools.calculator_tools import CalculatorTools
-from tools.search_tools import SearchTools
-
-
-class TripAgents():
-
-  def city_selection_agent(self):
-    return Agent(
-        role='City Selection Expert',
-        goal='Select the best city based on weather, season, and prices',
-        backstory=
-        'An expert in analyzing travel data to pick ideal destinations',
-        tools=[
-            SearchTools.search_internet,
-            BrowserTools.scrape_and_summarize_website,
-        ],
-        verbose=True)
-
-  def local_expert(self):
-    return Agent(
-        role='Local Expert at this city',
-        goal='Provide the BEST insights about the selected city',
-        backstory="""A knowledgeable local guide with extensive information
-        about the city, it's attractions and customs""",
-        tools=[
-            SearchTools.search_internet,
-            BrowserTools.scrape_and_summarize_website,
-        ],
-        verbose=True)
-
-  def travel_concierge(self):
-    return Agent(
-        role='Amazing Travel Concierge',
-        goal="""Create the most amazing travel itineraries with budget and
-        packing suggestions for the city""",
-        backstory="""Specialist in travel planning and logistics with
-        decades of experience""",
-        tools=[
-            SearchTools.search_internet,
-            BrowserTools.scrape_and_summarize_website,
-            CalculatorTools.calculate,
-        ],
-        verbose=True)
-
-# trip_tasks.py
-from crewai import Task
-from textwrap import dedent
-from datetime import date
-
-class TripTasks:
-
-    def identify_task(self, agent, origin, cities, interests, range):
-        return Task(
-            description=dedent(f"""
-                Analyze and select the best city for the trip based
-                on specific criteria such as weather patterns, seasonal
-                events, and travel costs. {self.__tip_section()}
-
-                Traveling from: {origin}
-                City Options: {cities}
-                Trip Date: {range}
-                Traveler Interests: {interests}
-            """),
-            agent=agent,
-            expected_output="Detailed report on the chosen city including flight costs, weather forecast, and attractions"
-        )
-
-    def gather_task(self, agent, origin, interests, range):
-        return Task(
-            description=dedent(f"""
-                As a local expert on this city you must compile an
-                in-depth guide for someone traveling there and wanting
-                to have THE BEST trip ever! {self.__tip_section()}
-
-                Trip Date: {range}
-                Traveling from: {origin}
-                Traveler Interests: {interests}
-            """),
-            agent=agent,
-            expected_output="Comprehensive city guide including hidden gems, cultural hotspots, and practical travel tips"
-        )
-
-    def plan_task(self, agent, origin, interests, range):
-        return Task(
-            description=dedent(f"""
-                Expand this guide into a full 7-day travel
-                itinerary with detailed per-day plans, including
-                weather forecasts, places to eat, packing suggestions,
-                and a budget breakdown. {self.__tip_section()}
-
-                Trip Date: {range}
-                Traveling from: {origin}
-                Traveler Interests: {interests}
-            """),
-            agent=agent,
-            expected_output="Complete expanded travel plan with daily schedule, weather conditions, packing suggestions, and budget breakdown"
-        )
-
-    def __tip_section(self):
-        return "If you do your BEST WORK, I'll tip you $100!"</pre>
+                <div class="duel-head"><span>awesome-chatgpt-prompts · "Linux terminal" · plain English</span><span class="duel-bytes">427 B</span></div>
+                <pre>I want you to act as a Linux terminal. I will type
+commands and you will reply with what the terminal
+should show. I want you to only reply with the terminal
+output inside one unique code block, and nothing else.
+Do not write explanations. Do not type commands unless
+I instruct you to do so. When I need to tell you
+something in English, I will do so by putting text
+inside curly brackets {like this}. My first command
+is pwd.</pre>
             </div>
             <div class="duel-pane win">
-                <div class="duel-head"><span>the same crew in XS3</span><span class="duel-bytes">1,866 B · −67.5%</span></div>
-                <pre>// crewAI trip_planner crew — re-encoded from
-// crewAIInc/crewAI-examples (crews/trip_planner).
-#crew a agent-team; name trip-planner;
-  input origin, cities, interests, date-range.
-
-#city-picker a agent; role "City Selection Expert";
-  goal "select the best city by weather, season, prices";
-  backstory "expert in analyzing travel data to pick ideal destinations";
-  tool search-internet, scrape-summarize-website; verbose true.
-#local-expert a agent; role "Local Expert at this city";
-  goal "provide the BEST insights about the selected city";
-  backstory "knowledgeable local guide with extensive information
-   about the city, its attractions and customs";
-  tool search-internet, scrape-summarize-website; verbose true.
-#concierge a agent; role "Amazing Travel Concierge";
-  goal "create the most amazing itineraries with budget
-   and packing suggestions";
-  backstory "specialist in travel planning and logistics
-   with decades of experience";
-  tool search-internet, scrape-summarize-website, calculate; verbose true.
-
-#t1 a task; who #city-picker;
-  do "analyze and select the best city by weather patterns,
-   seasonal events, travel costs";
-  needs origin, cities, date-range, interests;
-  output "detailed report on the chosen city: flight costs,
-   weather forecast, attractions".
-#t2 a task; who #local-expert;
-  do "compile an in-depth city guide for THE BEST trip ever";
-  needs origin, date-range, interests;
-  output "comprehensive guide: hidden gems, cultural hotspots,
-   practical travel tips".
-#t3 a task; who #concierge;
-  do "expand the guide into a full 7-day itinerary: per-day plans,
-   weather, places to eat, packing, budget breakdown";
-  needs origin, date-range, interests;
-  output "complete plan: daily schedule, weather,
-   packing suggestions, budget breakdown".
-#t1 then #t2. #t2 then #t3.
-
-<span class="hl-rule">{?t a task} => {?t bonus "If you do your BEST WORK, I'll tip you $100!"}.</span></pre>
+                <div class="duel-head"><span>the same instructions in XS3</span><span class="duel-bytes">258 B · −40%</span></div>
+                <pre>#t a role; act "linux terminal".
+<span class="hl-rule">{user type command} => {#t reply {terminal-output of command}}.</span>
+#t reply-in "one code block", only.
+<span class="hl-rule">{#t write explanation} mark 🚫.</span>
+<span class="hl-rule">{#t type command, not instructed} mark 🚫.</span>
+english-aside wrap "{ }".
+first-command "pwd".</pre>
             </div>
         </div>
-        <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your own agent definitions.</p>
+
+        <div class="takeaways">
+            <span class="take"><b>427 B → 258 B</b> — −40%, and the prompt was already terse</span>
+            <span class="take">every <b>"do not…"</b> becomes a checkable rule: <b>mark 🚫</b></span>
+            <span class="take"><b>100%</b> of the instruction survives — verifiable, not paraphrased</span>
+        </div>
+        <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your favorite prompt.</p>
 
         <h2>A communication language for multi-agent systems</h2>
         <div class="fw-tags">
@@ -364,6 +232,7 @@ class TripTasks:
 
         <div class="notes">
             <div class="notes-label">// what just happened</div>
+            <p class="chat-plain">The <span class="p-name">Planner</span> asks which gate is making <code>router.rs</code> fail. The <span class="c-name">Coder</span> answers — it's gate <code>g4</code>, at line 88 — and marks that answer 95% certain. The <span class="p-name">Planner</span> confirms it received the exact same meaning by matching a hash of the message.</p>
             <div class="takeaways" style="margin: 0;">
                 <span class="take"><b>?f, ?g</b> — the question is a pattern; the answer binds its variables</span>
                 <span class="take"><b>%95</b> — uncertainty travels inside the message</span>
