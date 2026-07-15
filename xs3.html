@@ -74,6 +74,16 @@
         .takeaways { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1.2rem 0; }
         .take { border: 1px solid #333; border-radius: 999px; background: #0a0a0a; color: #bbb; font-size: 0.82rem; padding: 0.45rem 1rem; }
         .take b { color: #27c93f; }
+        .duel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .duel-pane { border: 1px solid #333; border-radius: 10px; background: #0a0a0a; overflow: hidden; }
+        .duel-pane.win { border: 2px solid #27c93f; box-shadow: 0 0 24px rgba(39, 201, 63, 0.2); }
+        .duel-head { padding: 0.6rem 1rem; font-size: 0.78rem; border-bottom: 1px solid #333; color: #999; display: flex; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
+        .duel-pane.win .duel-head { color: #27c93f; border-bottom-color: #27c93f; }
+        .duel-bytes { font-weight: bold; }
+        .duel-pane pre { margin: 0; padding: 1rem; max-height: 380px; overflow: auto; font-size: 0.72rem; line-height: 1.45; white-space: pre; }
+        .duel-pane.before pre { color: #888; }
+        .duel-pane.win pre { color: #ddd; }
+        .hl-rule { background: rgba(39, 201, 63, 0.12); display: inline-block; border-radius: 3px; }
         p { color: #bbb; margin-bottom: 1rem; }
         pre.card { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: #ddd; white-space: pre; }
         code { color: #27c93f; }
@@ -137,6 +147,171 @@
         <pre class="card">an a engineer; age 30; love bao @2020.. %80 ~😨%90.</pre>
         <p>One line: an engineer, thirty, in love since 2020 and still, at strength 80 — shadowed by a fear of intensity 90. The prose version of that sentence is three times longer, and no machine can verify a paraphrase of it. The XS3 version is checkable: two documents mean the same thing exactly when they normalize to the same edge set. Fidelity stops being a feeling and becomes a comparison.</p>
         <blockquote>Compression you can audit: nothing lost — and "nothing" is machine-checkable.</blockquote>
+
+        <h2>Receipt: a famous agent template, re-encoded</h2>
+        <p>The official <a href="https://github.com/crewAIInc/crewAI-examples/tree/main/crews/trip_planner">CrewAI examples</a> ship a trip-planner crew — three agents, three tasks, written as Python plus prose. Here is the same crew in XS3, measured byte for byte:</p>
+
+        <div class="takeaways">
+            <span class="take"><b>5,742 B → 1,866 B</b> — that's −67.5%</span>
+            <span class="take"><b>every</b> role, goal, backstory, tool list, task, input, output — intact</span>
+            <span class="take">the <b>"$100 tip"</b> line: repeated ×3 in source → <b>1 rule</b> in XS3</span>
+        </div>
+
+        <div class="duel">
+            <div class="duel-pane before">
+                <div class="duel-head"><span>trip_agents.py + trip_tasks.py · Python + prose</span><span class="duel-bytes">5,742 B</span></div>
+                <pre># trip_agents.py
+from crewai import Agent
+from langchain.llms import OpenAI
+
+from tools.browser_tools import BrowserTools
+from tools.calculator_tools import CalculatorTools
+from tools.search_tools import SearchTools
+
+
+class TripAgents():
+
+  def city_selection_agent(self):
+    return Agent(
+        role='City Selection Expert',
+        goal='Select the best city based on weather, season, and prices',
+        backstory=
+        'An expert in analyzing travel data to pick ideal destinations',
+        tools=[
+            SearchTools.search_internet,
+            BrowserTools.scrape_and_summarize_website,
+        ],
+        verbose=True)
+
+  def local_expert(self):
+    return Agent(
+        role='Local Expert at this city',
+        goal='Provide the BEST insights about the selected city',
+        backstory="""A knowledgeable local guide with extensive information
+        about the city, it's attractions and customs""",
+        tools=[
+            SearchTools.search_internet,
+            BrowserTools.scrape_and_summarize_website,
+        ],
+        verbose=True)
+
+  def travel_concierge(self):
+    return Agent(
+        role='Amazing Travel Concierge',
+        goal="""Create the most amazing travel itineraries with budget and
+        packing suggestions for the city""",
+        backstory="""Specialist in travel planning and logistics with
+        decades of experience""",
+        tools=[
+            SearchTools.search_internet,
+            BrowserTools.scrape_and_summarize_website,
+            CalculatorTools.calculate,
+        ],
+        verbose=True)
+
+# trip_tasks.py
+from crewai import Task
+from textwrap import dedent
+from datetime import date
+
+class TripTasks:
+
+    def identify_task(self, agent, origin, cities, interests, range):
+        return Task(
+            description=dedent(f"""
+                Analyze and select the best city for the trip based
+                on specific criteria such as weather patterns, seasonal
+                events, and travel costs. {self.__tip_section()}
+
+                Traveling from: {origin}
+                City Options: {cities}
+                Trip Date: {range}
+                Traveler Interests: {interests}
+            """),
+            agent=agent,
+            expected_output="Detailed report on the chosen city including flight costs, weather forecast, and attractions"
+        )
+
+    def gather_task(self, agent, origin, interests, range):
+        return Task(
+            description=dedent(f"""
+                As a local expert on this city you must compile an
+                in-depth guide for someone traveling there and wanting
+                to have THE BEST trip ever! {self.__tip_section()}
+
+                Trip Date: {range}
+                Traveling from: {origin}
+                Traveler Interests: {interests}
+            """),
+            agent=agent,
+            expected_output="Comprehensive city guide including hidden gems, cultural hotspots, and practical travel tips"
+        )
+
+    def plan_task(self, agent, origin, interests, range):
+        return Task(
+            description=dedent(f"""
+                Expand this guide into a full 7-day travel
+                itinerary with detailed per-day plans, including
+                weather forecasts, places to eat, packing suggestions,
+                and a budget breakdown. {self.__tip_section()}
+
+                Trip Date: {range}
+                Traveling from: {origin}
+                Traveler Interests: {interests}
+            """),
+            agent=agent,
+            expected_output="Complete expanded travel plan with daily schedule, weather conditions, packing suggestions, and budget breakdown"
+        )
+
+    def __tip_section(self):
+        return "If you do your BEST WORK, I'll tip you $100!"</pre>
+            </div>
+            <div class="duel-pane win">
+                <div class="duel-head"><span>the same crew in XS3</span><span class="duel-bytes">1,866 B · −67.5%</span></div>
+                <pre>// crewAI trip_planner crew — re-encoded from
+// crewAIInc/crewAI-examples (crews/trip_planner).
+#crew a agent-team; name trip-planner;
+  input origin, cities, interests, date-range.
+
+#city-picker a agent; role "City Selection Expert";
+  goal "select the best city by weather, season, prices";
+  backstory "expert in analyzing travel data to pick ideal destinations";
+  tool search-internet, scrape-summarize-website; verbose true.
+#local-expert a agent; role "Local Expert at this city";
+  goal "provide the BEST insights about the selected city";
+  backstory "knowledgeable local guide with extensive information
+   about the city, its attractions and customs";
+  tool search-internet, scrape-summarize-website; verbose true.
+#concierge a agent; role "Amazing Travel Concierge";
+  goal "create the most amazing itineraries with budget
+   and packing suggestions";
+  backstory "specialist in travel planning and logistics
+   with decades of experience";
+  tool search-internet, scrape-summarize-website, calculate; verbose true.
+
+#t1 a task; who #city-picker;
+  do "analyze and select the best city by weather patterns,
+   seasonal events, travel costs";
+  needs origin, cities, date-range, interests;
+  output "detailed report on the chosen city: flight costs,
+   weather forecast, attractions".
+#t2 a task; who #local-expert;
+  do "compile an in-depth city guide for THE BEST trip ever";
+  needs origin, date-range, interests;
+  output "comprehensive guide: hidden gems, cultural hotspots,
+   practical travel tips".
+#t3 a task; who #concierge;
+  do "expand the guide into a full 7-day itinerary: per-day plans,
+   weather, places to eat, packing, budget breakdown";
+  needs origin, date-range, interests;
+  output "complete plan: daily schedule, weather,
+   packing suggestions, budget breakdown".
+#t1 then #t2. #t2 then #t3.
+
+<span class="hl-rule">{?t a task} => {?t bonus "If you do your BEST WORK, I'll tip you $100!"}.</span></pre>
+            </div>
+        </div>
+        <p style="font-size: 0.85rem; color: #666;">Try it yourself: point any LLM at <a href="llms-language.txt">llms-language.txt</a> and hand it your own agent definitions.</p>
 
         <h2>A communication language for multi-agent systems</h2>
         <p><strong>AutoGen, CrewAI, LangGraph</strong> solved the <em>routing</em> of agent-to-agent messages. The message itself is still ad-hoc JSON and free prose — no seat for uncertainty, no seat for law, no proof the meaning arrived intact. XS3 is that missing wire format. Watch two agents talk:</p>
