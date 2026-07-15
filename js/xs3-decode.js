@@ -226,7 +226,7 @@ const XS3Decode = (function () {
   const an = w => (/^([aeiou]|heir|hour|honest|honou?r)/i.test(w) ? 'an' : 'a');
   const PRED_EN = {
     '=': 'is the same as', sub: 'is a kind of', in: 'is in', part: 'is part of',
-    of: 'belongs to', feel: 'feels', dur: 'lasts', then: 'then comes', cause: 'causes',
+    of: 'of', feel: 'feels', dur: 'lasts', then: 'then comes', cause: 'causes',
     become: 'becomes', begin: 'begins', end: 'ends', await: 'then await', until: 'until',
   };
 
@@ -258,6 +258,9 @@ const XS3Decode = (function () {
       if (s.includes('..')) { const parts = s.split('..'); return `from ${parts[0]} to ${parts[1]}`; }
       if (s.startsWith('+')) return `in ${s.slice(1)}`;
       if (s.startsWith('-')) return `${s.slice(1)} ago`;
+      // giới từ theo độ mịn thời gian: năm/tháng -> in, ngày -> on, có giờ -> at
+      if (/^\d{4}(-\d{2})?$/.test(s)) return `in ${s}`;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return `on ${s}`;
     }
     return `at ${s}`;
   }
@@ -408,8 +411,14 @@ const XS3Decode = (function () {
       if (ch.pred === null) loose++;
       else if (ch.objs.some(o => o.t === 'phrase')) loose++;
     }
+    // typography: câu (statement top-level) viết hoa đầu; statement trong { } là mệnh đề, không áp;
+    // tag định danh [m1] đầu câu là rigid — nhảy qua, viết hoa chữ đầu sau tag
+    const capFirst = s => {
+      const start = s.startsWith('[') ? s.indexOf(']') + 1 : 0;
+      return s.slice(0, start) + s.slice(start).replace(/\p{L}/u, c => c.toUpperCase());
+    };
     return {
-      text: doc.map(rStmt).join('\n'),
+      text: doc.map(st => capFirst(rStmt(st))).join('\n'),
       edges: edges.map(e => [termKey(e.s), e.p, termKey(e.o)]),
       stmts: doc.length,
       looseness: chains ? loose / chains : 1,
