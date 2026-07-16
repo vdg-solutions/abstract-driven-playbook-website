@@ -184,6 +184,21 @@ const XS3Decode = (function () {
     ).join('; ') + '.';
   }
 
+  // có biến ? bên trong không -> phân biệt PATTERN (luật phổ quát) với INSTANCE (sự việc cụ thể)
+  function termHasVar(t) {
+    if (!t || typeof t !== 'object') return false;
+    if (t.t === 'var') return true;
+    if (t.t === 'phrase' || t.t === 'seq') return t.items.some(termHasVar);
+    if (t.t === 'graph') return t.stmts.some(stmtHasVar);
+    if (t.t === 'edge') return termHasVar(t.s) || termHasVar(t.p) || termHasVar(t.o);
+    return false;
+  }
+  function stmtHasVar(st) {
+    if (termHasVar(st.subj)) return true;
+    return st.chains.some(c => c.objs.some(termHasVar)
+      || c.quals.some(q => q.v && typeof q.v === 'object' && termHasVar(q.v)));
+  }
+
   function desugar(doc) {
     const edges = [];
     let blank = 0;
@@ -229,6 +244,8 @@ const XS3Decode = (function () {
     of: 'of', feel: 'feels', dur: 'lasts', then: 'then comes', cause: 'causes',
     become: 'becomes', begin: 'begins', end: 'ends', await: 'then await', until: 'until',
   };
+  // predicate quan hệ/cấu trúc: không lên được mệnh lệnh ("must NOT before X" gãy) -> dùng frame FORBIDDEN
+  const REL_PRED = new Set(['a', 'sub', '=', 'of', 'in', 'part', 'before', 'after', 'during', 'meets', 'starts', 'ends', 'then', 'dur', 'until']);
 
   // ---- lexicalize: natural transformation trên lexeme, áp MỌI vị trí atom ----
   // atom toàn chữ nối hyphen -> cụm từ space (shared-understanding -> shared understanding);
@@ -360,10 +377,22 @@ const XS3Decode = (function () {
         .map(a => ` (mood: ${rTerm(a.v)}${a.deg != null ? ` ${a.deg}%` : ''})`).join('');
       return `Rule: whenever “${A}” then “${B}”${q ? ` (holds ${q.v}% of the time)` : ''}${af}.`;
     }
-    // deontic on a pattern: {P} mark 🚫
+    // deontic trên graph term: {G} mark <m>. PATTERN (có ?) -> luật phổ quát;
+    // INSTANCE một-cạnh -> mệnh lệnh cụ thể (sir-henry must NOT walk moor …); còn lại -> frame FORBIDDEN: “…”
     if (st.subj.t === 'graph' && st.chains.length === 1 && st.chains[0].pred === 'mark') {
-      const m = st.chains[0].objs.map(t => (t.t === 'name' && MARK_EN[t.v]) || rTerm(t)).join(', ');
-      return `${m}, in every matching case: “${rGraph(st.subj.stmts)}”.`;
+      const marks = st.chains[0].objs;
+      const m = marks.map(t => (t.t === 'name' && MARK_EN[t.v]) || rTerm(t)).join(', ');
+      const stmts = st.subj.stmts;
+      if (stmts.some(stmtHasVar)) return `${m}, in every matching case: “${rGraph(stmts)}”.`;
+      const single = stmts.length === 1 && stmts[0].chains.length === 1 ? stmts[0] : null;
+      const markName = marks.length === 1 && marks[0].t === 'name' ? marks[0].v : null;
+      const IMP = { '🚫': 'must NOT', must: 'MUST', may: 'MAY' };
+      if (single && IMP[markName] && single.subj.t === 'name' && !single.subj.implicit
+          && single.chains[0].pred && !REL_PRED.has(single.chains[0].pred)) {
+        const ch = single.chains[0];
+        return `${rTermRigid(single.subj)} ${IMP[markName]} ${rClause(ch.pred, ch.objs, ch.quals)}.`;
+      }
+      return `${m}: “${rGraph(stmts)}”.`;
     }
     const ev = rEventStmt(st);
     if (ev) return ev;
@@ -514,6 +543,11 @@ const XS3Decode = (function () {
       const mk = MARK_BACK[key] || MARK_BACK[m[1]];
       if (mk) return `{${backGraph(m[2])}} mark ${mk}`;
     }
+    // deontic instance một cạnh, đọc như mệnh lệnh: "s must NOT / MUST / MAY <clause>"
+    const IMP_BACK = [[/^(\S+) must NOT ([\s\S]+)$/, '🚫'], [/^(\S+) MUST ([\s\S]+)$/, 'must'], [/^(\S+) MAY ([\s\S]+)$/, 'may']];
+    for (const [re, mk] of IMP_BACK) {
+      if ((m = line.match(re))) return `{${lowerFirst(m[1])} ${backClause(m[2])}} mark ${mk}`;
+    }
     // message
     if ((m = line.match(/^\[(\S+)\] (\S+) (asks|tells|confirms|demands|offers|promises)(?: (\S+))?(?: \(replying to (\S+)\))?(?:, (?:at|in|on) (\S+))?(?:: ([\s\S]+?))?(?: — meaning receipt: hash (\S+))?$/))) {
       const [, id, from, verb, to, re, at, body, hash] = m;
@@ -524,6 +558,11 @@ const XS3Decode = (function () {
       if (body) out += `; body ${backTerm(body)}`;
       if (hash) out += `; hash ${backTerm(hash)}`;
       return out;
+    }
+    // deontic instance nhiều mệnh đề: "<MARK>: “…”"
+    if ((m = line.match(/^([\s\S]+?): “([\s\S]+)”$/))) {
+      const mk = MARK_BACK[m[1]] || MARK_BACK[m[1].charAt(0).toUpperCase() + m[1].slice(1)];
+      if (mk) return `{${backGraph(m[2])}} mark ${mk}`;
     }
     // statement về một cạnh: “s p o” ...
     if ((m = line.match(/^“([\s\S]+?)” ([\s\S]+)$/))) {
