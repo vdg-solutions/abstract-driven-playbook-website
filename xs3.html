@@ -162,12 +162,41 @@
             .chat { gap: 0.7rem; margin: 1rem 0; }
             .slide .stats { margin-top: 1.1rem; }
         }
-        @media (max-width: 600px) { .dots, .present-hint { display: none; } }
+        @media (max-width: 600px) {
+            .dots, .present-hint { display: none; }
+            /* the scroll-snap presentation deck becomes a normal scrolling page on phones */
+            html, body { height: auto; }
+            body { overflow-y: auto; overflow-x: hidden; }
+            .deck { height: auto; overflow: visible; scroll-snap-type: none; }
+            .slide { min-height: 0; scroll-snap-align: none; justify-content: flex-start; padding: 5.4rem 1.1rem 2.6rem; scroll-margin-top: 4.6rem; }
+            .slide + .slide { border-top: 1px solid #1a1a1a; }
+            /* headings + hero scale down; no huge centered empty space */
+            .slide-title { font-size: 1.3rem; }
+            h2 { font-size: 1.08rem; margin: 1.8rem 0 0.9rem; }
+            .hero h1 { font-size: 1.45rem; }
+            .hero .tagline { font-size: 0.95rem; }
+            .hero .sub, .slide p { font-size: 0.85rem; }
+            /* single column — kills the 260/320px min-width side-by-side overflow */
+            .duel, .vs-grid { grid-template-columns: 1fr; }
+            .duel-pane pre { max-height: 60vh; font-size: 0.7rem; }
+            .bubble pre, pre.card { font-size: 0.7rem; }
+            .info-chip { font-size: 0.86rem; padding: 0.4rem 0.6rem; }
+            .decode-tease { text-align: left; }
+            .decode-duel textarea, .decode-out { min-height: 190px; }
+            .stats { gap: 0.6rem; }
+            .stat { min-width: 0; flex: 1 1 45%; padding: 0.8rem 0.9rem; }
+            /* wide tables scroll horizontally instead of stretching the page */
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            /* condensed nav */
+            .nav-inner { padding: 0 1rem !important; }
+            .nav-links { gap: 0.85rem !important; font-size: 0.8rem; }
+            .nav-links a { white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
     <nav style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: fixed; top: 0; left: 0; right: 0; z-index: 150;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div class="nav-inner" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div class="traffic-lights">
                     <div class="traffic-light red"></div>
@@ -177,7 +206,7 @@
                 <span style="font-weight: bold; font-size: 1.1rem;">ABSTRACT DRIVEN</span>
                 <span style="color: #666; font-size: 0.85rem;">v3.2.1</span>
             </div>
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div class="nav-links" style="display: flex; gap: 2rem; flex-wrap: wrap;">
                 <a href="index.html" style="color: #999; text-decoration: none;">Home</a>
                 <a href="fractal-pattern.html" style="color: #999; text-decoration: none;">Fractal Viewer</a>
                 <a href="examples.html" style="color: #999; text-decoration: none;">Examples</a>
