@@ -16,7 +16,7 @@ keywords:
   - agent communication
   - large language models
 repository-code: "https://github.com/vdg-solutions/abstract-driven-playbook-website"
-url: "https://huggingface.co/mrbrao/xs3-flan-base-onnx"
+url: "https://doi.org/10.5281/zenodo.21425813"
 abstract: >-
   XS3 is a controlled language for machine-to-machine communication in which one
   sentence is exactly one labeled graph edge (subject predicate object .). A
