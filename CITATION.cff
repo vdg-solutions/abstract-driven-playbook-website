@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use XS3, please cite it as below."
+title: "XS3: a machine-to-machine triple-graph language (v3.0 language card + E₀ reference decoder)"
+version: "3.0.0"
+type: software
+license: CC-BY-4.0
+authors:
+  - family-names: "Vũ"
+    given-names: "Văn Minh Quang"
+    affiliation: "VDG Solutions"
+keywords:
+  - controlled natural language
+  - knowledge representation
+  - graph serialization
+  - triple graph
+  - agent communication
+  - large language models
+repository-code: "https://github.com/vdg-solutions/abstract-driven-playbook-website"
+url: "https://huggingface.co/mrbrao/xs3-flan-base-onnx"
+abstract: >-
+  XS3 is a controlled language for machine-to-machine communication in which one
+  sentence is exactly one labeled graph edge (subject predicate object .). A
+  document is its edge set; sentence order carries no meaning except inside
+  ordered sequences. This record archives the public language card and the E0
+  reference decoder (readback), exact on controlled-language input.
+doi: "10.5281/zenodo.21425813"
