@@ -1,7 +1,7 @@
 // XS3 card — feed for LLM speakers. The ONLY reading key: every sentence is `subject predicate object .` — one labeled edge.
 // From here on, every line is both a rule and a live example of itself.
 
-#card a usage-card; for llm-speaker; teaches xs3; version "3.0"; self-contained true.
+#card a usage-card; for llm-speaker; teaches xs3; version "3.2"; self-contained true.
 #card law "a document IS its edge set; sentence order carries no meaning, except inside < >".
 
 // ── glyphs — one glyph, one meaning ──────────────────────────
@@ -22,22 +22,23 @@ quote-glyph gloss "wraps a string containing whitespace or special characters; s
 {an age 30; job dev}  = {an age 30. an job dev}.
 {an love bao, chi}    = {an love bao. an love chi}.
 {bao ^love an}        = {an love bao}.
-{an love bao @2020}   = {[an love bao] at 2020}.
-{an love bao %95}     = {[an love bao] deg 95}.
-{an love bao %0}      = {[an love bao] deg 0}.
-{an love bao !🚫}     = {[an love bao] mark 🚫}.
-{an love bao ~joy}    = {[an love bao] aff joy}.
-{an love bao ~joy%60} = {[an love bao] aff #_f. #_f a joy; deg 60}.
-{an love bao, chi @2020} = {[an love bao] at 2020. [an love chi] at 2020}.
+{an love bao @2020}    = {{an love bao} at 2020}.
+{an love bao %95}      = {{an love bao} deg 95}.
+{an love bao %0}       = {{an love bao} deg 0}.
+{an love bao !physics} = {{an love bao} pragma physics}.
+{an love bao ~joy}     = {{an love bao} affect joy}.
+{an love bao ~joy %60} = {{an love bao} affect joy; deg 60}.
+{an love bao, chi @2020} = {{an love bao} at 2020. {an love chi} at 2020}.
 qualifier binds current-predicate-group; law "objects joined by , share the qualifier; to qualify edges separately, reopen the predicate with ;"; stacks true; demo {an love bao @2020.. %80 ~fear%90}; demo {an love bao ~joy; love chi ~pity}.
 
 // ── the four qualifiers ──────────────────────────────────────
-"@" a qualifier; gloss "time"; accepts <2026-07-15 2026-07-15T09:30 2026-01..2026-06 2020.. +3d -2h past now future>.
-"~" a qualifier; gloss "affect coloring the edge; intensity via %0..100".
-"%" a qualifier; gloss "strength of the RELATION itself, 0..100".
-"!" a qualifier; gloss "deontic or severity mark"; accepts <must may 🚫 ⚠️ 🚨 🔒 📐>.
+// every qualifier is an ATTENTION ANCHOR — it surfaces salient metadata for the model; sugar over reification, so the doc always decodes to one graph.
+"@" a qualifier; gloss "time — attention anchor"; accepts <2026-07-15 2026-07-15T09:30 2026-01..2026-06 2020.. now past future>.
+"~" a qualifier; gloss "affect — attention anchor; intensity via a following %0..100".
+"%" a qualifier; gloss "degree — strength of the RELATION, 0..100; speaker certainty is separate: conf".
+"!" a qualifier; gloss "engine pragma"; accepts <must may physics strictly no-explanation 🚫 ⚠️ 🚨 🔒 📐>.
 🚫 gloss "forbidden". ⚠️ gloss "warning, fragile". 🚨 gloss "critical, incident". 🔒 gloss "inviolable rule". 📐 gloss "contract, spec anchor".
-"!" law "never place a negative word after ! — a cold reader parses !ban as not-ban; prohibition is !🚫, always the emoji" !must.
+qualifier desugar "@ → {s p o} at t · ~ → affect e · % → deg n · ! → pragma m; the model reads the anchor natively, the graph decode is the machine's job".
 qualifier law "attaches ONLY after an object — never after ; and never to a bare subject" !🔒;
           law "binds only the predicate group it directly follows — predicates after a later ; are NOT qualified";
           law "never inside [ ] — qualify the mention itself: [s p o] mark 🚫".
@@ -49,7 +50,7 @@ edge-without-time gloss "tenseless — laws, definitions, structure".
 atom law "Unicode, case-sensitive; emoji are legal names".
 number law "must lead with a digit — write 0.8, never .8".
 quantity gloss "number fused with unit"; demo <3d 80kg 2h 42m>.
-"." law "ends a sentence only when followed by whitespace, end-of-file, or } — so v3.0 is a name".
+"." law "ends a sentence only when followed by whitespace, end-of-file, or } — so v3.2 is a name".
 compare uses <gt lt geq leq> !must; gloss "never use angle brackets for comparison — they are the sequence glyph".
 
 // ── core vocabulary (beyond it, vocabulary is open — same name, same meaning; given a registry, use only registry names and declare any new one) ──
