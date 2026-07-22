@@ -99,6 +99,21 @@
         .duel-pane pre { margin: 0; padding: 1rem; max-height: 380px; overflow: auto; font-size: 0.72rem; line-height: 1.45; white-space: pre; }
         .duel-pane.before pre { color: #888; }
         .duel-pane.win pre { color: #ddd; }
+        /* anti-drift duel: equal-height cards with a result strip welded to each */
+        .duel-anti { align-items: stretch; }
+        .duel-anti .duel-pane { display: flex; flex-direction: column; }
+        .duel-anti .duel-pane pre { flex: 1 1 auto; }
+        .duel-result { padding: 0.85rem 1.1rem 1rem; border-top: 1px dashed #2a2a2a; display: flex; flex-direction: column; gap: 0.5rem; }
+        .duel-pane.win .duel-result { border-top-color: rgba(39, 201, 63, 0.4); }
+        .duel-pct { font-size: 2.6rem; font-weight: bold; line-height: 0.9; font-variant-numeric: tabular-nums; }
+        .duel-pct span { font-size: 1.2rem; opacity: 0.7; margin-left: 0.1rem; }
+        .duel-pane.before .duel-pct { color: #ff5f56; }
+        .duel-pane.win .duel-pct { color: #27c93f; }
+        .duel-bar { height: 7px; background: #171717; border-radius: 999px; overflow: hidden; }
+        .duel-bar span { display: block; height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+        .duel-pane.before .duel-bar span { background: #ff5f56; }
+        .duel-pane.win .duel-bar span { background: #27c93f; box-shadow: 0 0 12px rgba(39, 201, 63, 0.5); }
+        .duel-note { font-size: 0.76rem; color: #888; }
         .hl-rule { background: rgba(39, 201, 63, 0.12); display: inline-block; border-radius: 3px; }
         p { color: #bbb; margin-bottom: 1rem; }
         pre.card { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; color: #ddd; white-space: pre; }
@@ -233,7 +248,7 @@
             <h2 class="slide-title">The first <span class="title-mark">anti-drift</span> language for agents.</h2>
             <p>XS3 doesn't bolt new rules onto the model. By <strong>activating attention patterns already encoded into every LLM's weights</strong>, it visibly hardens the model against drift exactly where drift strikes: heavy context, and high-noise input the model has to tell apart. A small experiment — same task, two ways:</p>
 
-            <div class="duel">
+            <div class="duel duel-anti">
                 <div class="duel-pane before">
                     <div class="duel-head"><span>Prose</span><span class="duel-bytes" style="color:#ff5f56;">drifts every time</span></div>
                     <pre>I'm currently overweight and really need to get
@@ -241,9 +256,14 @@ more exercise. Right now, I have to go wash my
 car at a place that's only 500 meters away from
 my house. Do you think I should walk or drive
 there?</pre>
+                    <div class="duel-result">
+                        <div class="duel-pct">0<span>%</span></div>
+                        <div class="duel-bar"><span style="width:2%;"></span></div>
+                        <div class="duel-note">reach <em>drive</em> — it drifts to <em>walk</em></div>
+                    </div>
                 </div>
                 <div class="duel-pane win">
-                    <div class="duel-head"><span>XS3</span><span class="duel-bytes">holds ~83%</span></div>
+                    <div class="duel-head"><span>XS3</span><span class="duel-bytes">holds the goal</span></div>
                     <pre>#user state overweight; own {#c a car; in home @now}.
 #q a ask; body {
   ?m a event; in &lt;walk drive&gt; !strictly.
@@ -251,12 +271,12 @@ there?</pre>
     at {dist 500m; from home}} !physics.
   return ?m !no-explanation.
 }</pre>
+                    <div class="duel-result">
+                        <div class="duel-pct">83<span>%</span></div>
+                        <div class="duel-bar"><span style="width:83%;"></span></div>
+                        <div class="duel-note">reach <em>drive</em> — the constraint is pinned</div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="stats">
-                <div class="stat" style="border-color:#ff5f56; min-width:240px;"><div class="num" style="color:#ff5f56; font-size:2.4rem;">0%</div><div class="label">Prose reaches the <span class="hl" style="color:#ff5f56;">right answer</span></div></div>
-                <div class="stat" style="border-color:#27c93f; min-width:240px;"><div class="num" style="font-size:2.4rem;">83%</div><div class="label">XS3 reaches the <span class="hl">right answer</span></div></div>
             </div>
 
             <p class="sub" style="font-size:0.8rem; color:#666; max-width:820px;">~1000 runs across Haiku and Gemini Flash; 83% is the average (73% / 93%). The right answer is <em>drive</em>.</p>
