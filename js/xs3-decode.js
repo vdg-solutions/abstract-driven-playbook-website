@@ -202,6 +202,41 @@ const XS3Decode = (function () {
     ).join('; ') + '.';
   }
 
+  // ---- serialize: AST -> canonical XS3. The EXACT structural inverse of decode. ----
+  // Machine round-trip / exactness rides this, not the human English render:
+  //   decode(serialize(decode(src).doc)).edges === decode(src).edges, for every construct.
+  // A document is a graph; its unambiguous serialization is XS3 itself (subject predicate object .),
+  // so no natural-language parsing is involved — nothing to disambiguate.
+  function qXS3(quals) {
+    return (quals || []).map(q =>
+      q.k === 'at' ? ' @' + tXS3(q.v)
+        : q.k === 'deg' ? ' %' + q.v
+          : q.k === 'mark' ? ' !' + tXS3(q.v)
+            : q.k === 'aff' ? ' ~' + tXS3(q.v) + (q.deg != null ? '%' + q.deg : '')
+              : ''
+    ).join('');
+  }
+  function tXS3(t) {
+    switch (t.t) {
+      case 'name': return t.v;
+      case 'str': return `"${t.v}"`;
+      case 'anchor': return '#' + t.v;
+      case 'var': return '?' + t.v;
+      case 'phrase': return t.items.map(tXS3).join(' ');
+      case 'seq': return '<' + t.items.map(tXS3).join(' ') + '>';
+      case 'graph': return '{' + t.stmts.map(sXS3).join(' ') + '}';
+      case 'edge': return `[${tXS3(t.s)} ${tXS3(t.p)} ${tXS3(t.o)}]`;
+    }
+  }
+  function sXS3(st) {
+    // subject once, chains joined by ';' (the ';' keeps the subject — never repeat it)
+    const chains = st.chains.map(c =>
+      `${c.pred ? `${c.rev ? '^' : ''}${c.pred}` : ''}${c.objs.length ? ' ' + c.objs.map(tXS3).join(', ') : ''}${qXS3(c.quals)}`
+    );
+    return `${tXS3(st.subj)} ${chains.join('; ')}.`;
+  }
+  function serialize(doc) { return doc.map(sXS3).join('\n'); }
+
   // có biến ? bên trong không -> phân biệt PATTERN (luật phổ quát) với INSTANCE (sự việc cụ thể)
   function termHasVar(t) {
     if (!t || typeof t !== 'object') return false;
@@ -643,6 +678,7 @@ const XS3Decode = (function () {
       return s.slice(0, start) + s.slice(start).replace(/\p{L}/u, c => c.toUpperCase());
     };
     return {
+      doc,
       text: doc.map(st => capFirst(rStmt(st))).join('\n'),
       edges: edges.map(e => [termKey(e.s), e.p, termKey(e.o)]),
       stmts: doc.length,
@@ -650,7 +686,10 @@ const XS3Decode = (function () {
     };
   }
 
-  return { decode, readback };
+  // canon: XS3 -> canonical XS3 (parse then re-serialize). Idempotent normal form for the graph.
+  function canon(src, opts) { return serialize(decode(src, opts).doc); }
+
+  return { decode, readback, serialize, canon };
 })();
 
 if (typeof module !== 'undefined') module.exports = XS3Decode;
