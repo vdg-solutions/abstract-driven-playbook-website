@@ -120,8 +120,12 @@ const XS3Decode = (function () {
       return { term, quals: parseQuals() };
     }
 
-    function parseStmt(inGraph) {
-      const subj = parseTerm();
+    function parseStmt(inGraph, elide) {
+      const start = p;
+      // elide: Subject Elision (card w5) — inside a subgraph acting as an object, a statement may omit
+      // its subject; it refers to the subgraph node itself. Retried below when the first token, read as
+      // the subject, leaves the first predicate with no object.
+      const subj = elide ? { t: 'name', v: '', implicit: true } : parseTerm();
       const subjQuals = strict ? [] : parseQuals(); // tolerant: quals right after a bare subject
       const coMentions = [];
       while (!strict && peek() && peek().t === ',') { // tolerant: "{act, ~x}" — bare mention list
@@ -130,24 +134,36 @@ const XS3Decode = (function () {
         subjQuals.push(...parseQuals());
       }
       const chains = [];
-      while (peek() && !['end', '}'].includes(peek().t)) {
-        if (peek().t === ';') { next(); continue; }
-        let rev = false;
-        if (peek().t === '^') { next(); rev = true; }
-        const pk = next();
-        if (!pk || (pk.t !== 'atom' && pk.t !== 'str')) throw new Error(`expected a predicate, got '${pk ? (pk.v || pk.t) : 'end of input'}'`);
-        const objs = [];
-        if (!atDelim()) {
-          do { objs.push(parseObj()); } while (peek() && peek().t === ',' && next());
-        } else if (!strict) {
-          objs.push({ term: { t: 'name', v: '', implicit: true }, quals: parseQuals() }); // bare "s p."
-        } else {
-          throw new Error(`predicate '${pk.v}' has no object`);
+      try {
+        while (peek() && !['end', '}'].includes(peek().t)) {
+          if (peek().t === ';') { next(); continue; }
+          let rev = false;
+          if (peek().t === '^') { next(); rev = true; }
+          const pk = next();
+          if (!pk || (pk.t !== 'atom' && pk.t !== 'str')) throw new Error(`expected a predicate, got '${pk ? (pk.v || pk.t) : 'end of input'}'`);
+          const objs = [];
+          if (!atDelim()) {
+            do { objs.push(parseObj()); } while (peek() && peek().t === ',' && next());
+          } else if (!strict) {
+            objs.push({ term: { t: 'name', v: '', implicit: true }, quals: parseQuals() }); // bare "s p."
+          } else {
+            throw new Error(`predicate '${pk.v}' has no object`);
+          }
+          const groupQuals = objs.flatMap(o => o.quals); // qualifier distributes over the , group
+          chains.push({ pred: pk.v, rev, objs: objs.map(o => o.term), quals: groupQuals });
+          if (peek() && peek().t === ';') { next(); continue; }
+          break;
         }
-        const groupQuals = objs.flatMap(o => o.quals); // qualifier distributes over the , group
-        chains.push({ pred: pk.v, rev, objs: objs.map(o => o.term), quals: groupQuals });
-        if (peek() && peek().t === ';') { next(); continue; }
-        break;
+      } catch (e) {
+        // first token (read as subject) leaves the predicate dangling — no object, or the next token
+        // is itself an object not a predicate (?var, #anchor, { ...). Inside a { } that means the
+        // subject was elided (it is the subgraph node); backtrack and reparse with an implicit one.
+        if (!elide && strict && inGraph && chains.length === 0 && subj.t === 'name' && !subj.implicit
+          && (/ has no object$/.test(e.message) || /^expected a predicate/.test(e.message))) {
+          p = start;
+          return parseStmt(inGraph, true);
+        }
+        throw e;
       }
       if (chains.length === 0) {
         if (strict) throw new Error(`statement about '${peekTermName(subj)}' has no predicate`);
