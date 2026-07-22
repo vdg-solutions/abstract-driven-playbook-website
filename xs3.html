@@ -124,6 +124,12 @@
         td { color: #bbb; }
         a { color: #27c93f; }
         blockquote { border-left: 3px solid #27c93f; padding: 0.2rem 1.2rem; margin: 1.5rem 0; color: #ddd; }
+        .lang-cta { border-left: 3px solid #27c93f; background: rgba(39, 201, 63, 0.05); padding: 0.75rem 1.2rem; border-radius: 0 8px 8px 0; cursor: pointer; transition: background 0.2s; margin-top: 0.8rem; }
+        .lang-cta:hover { background: rgba(39, 201, 63, 0.11); }
+        .lang-cta-main { color: #ddd; font-size: 0.95rem; }
+        .lang-cta-main .url { color: #4a9eff; word-break: break-all; }
+        .lang-cta-hint { color: #888; font-size: 0.78rem; margin-top: 0.4rem; }
+        .lang-cta-hint code { color: #27c93f; }
         footer { border-top: 1px solid #333; margin-top: 4rem; padding: 2rem 0; color: #666; font-size: 0.85rem; text-align: center; }
 
         /* presentation deck */
@@ -327,8 +333,9 @@ decision owner user; put each; await answer.
             </div>
             <p class="decode-tease">Looks like alien runes? Don't worry — nothing is locked in there.<br>XS3 is a graph, and graphs decode back to words, mechanically. <a href="#decode" onclick="dcExample('grilling')">▶ Decode this into plain English</a></p>
 
-            <div class="prompt-line" style="margin-top: 0.8rem;">
-                <span class="info-chip">The whole language lives at https://abstractdriven.com/llms-language.txt — one card, self-contained. Go read it and use it: point any LLM there, hand it your favorite prompt or skill, and watch it come back as XS3.</span>
+            <div class="lang-cta" onclick="copyLangPrompt(this)" data-copy="Read XS3 language @https://abstractdriven.com/llms-language.txt and use it to " title="Click to copy the starter prompt">
+                <div class="lang-cta-main">Give the language to your LLM: <span class="url">https://abstractdriven.com/llms-language.txt</span></div>
+                <div class="lang-cta-hint">↗ click to copy: <code>Read XS3 language @…/llms-language.txt and use it to …</code></div>
             </div>
         </div></section>
 
@@ -562,6 +569,14 @@ decision owner user; put each; await answer.
                 const original = el.textContent;
                 el.textContent = 'Copied!';
                 setTimeout(() => { el.textContent = original; }, 1200);
+            });
+        }
+        function copyLangPrompt(el) {
+            const hint = el.querySelector('.lang-cta-hint');
+            navigator.clipboard.writeText(el.dataset.copy).then(() => {
+                const original = hint.innerHTML;
+                hint.textContent = '✓ Copied — now tell it what to do';
+                setTimeout(() => { hint.innerHTML = original; }, 1400);
             });
         }
 
