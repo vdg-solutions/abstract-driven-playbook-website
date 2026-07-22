@@ -393,6 +393,20 @@
                 font-size: 12px;
             }
         }
+        .nav-links { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+        .nav-burger { display: none; background: none; border: 0; color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; padding: 0 0.3rem; }
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .nav-burger { display: block; }
+            #nav .nav-links {
+                position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; gap: 0; align-items: stretch; flex-wrap: nowrap;
+                background: rgba(0,0,0,0.98); border-bottom: 1px solid #333;
+                padding: 0.3rem 0; display: none;
+            }
+            #nav.open .nav-links { display: flex; }
+            #nav .nav-links a { padding: 0.85rem 1.3rem; border-top: 1px solid #1a1a1a; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -400,7 +414,7 @@
     <div class="matrix-bg" id="matrix"></div>
 
     <!-- Navigation -->
-    <nav style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 100;">
+    <nav id="nav" style="border-bottom: 1px solid #333; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 100;">
         <div style="max-width: 1800px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div class="traffic-lights">
@@ -411,12 +425,13 @@
                 <span style="font-weight: bold; font-size: 1.1rem;">ABSTRACT DRIVEN</span>
                 <span style="color: #666; font-size: 0.85rem;">v3.2.1</span>
             </div>
-            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div class="nav-links" onclick="document.getElementById('nav').classList.remove('open')">
                 <a href="index.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Home</a>
                 <a href="fractal-pattern.html" style="color: #fff; text-decoration: none; transition: color 0.2s;">Fractal Viewer</a>
                 <a href="examples.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Examples</a>
                 <a href="xs3.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Agent Language</a>                <a href="category-theory.html" style="color: #999; text-decoration: none; transition: color 0.2s;">Math</a>
             </div>
+            <button class="nav-burger" aria-label="Menu" onclick="var n=document.getElementById('nav');n.classList.toggle('open');this.textContent=n.classList.contains('open')?'✕':'☰';">☰</button>
         </div>
     </nav>
 

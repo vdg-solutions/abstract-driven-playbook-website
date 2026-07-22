@@ -637,6 +637,20 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #606060;
         }
+        .nav-burger { display: none; background: none; border: 0; color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; padding: 0 0.3rem; }
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .nav-burger { display: block; }
+            #nav .nav-container { justify-content: space-between; align-items: center; }
+            #nav .link-list {
+                position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; gap: 0; align-items: stretch; flex-wrap: nowrap;
+                background: rgba(0,0,0,0.98); border-bottom: 1px solid #333;
+                padding: 0.3rem 0; margin: 0; display: none;
+            }
+            #nav.open .link-list { display: flex; }
+            #nav .link-list a { padding: 0.85rem 1.3rem; border-top: 1px solid #1a1a1a; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -644,7 +658,7 @@
     <div class="matrix-bg" id="matrix"></div>
 
     <!-- Navigation -->
-    <nav>
+    <nav id="nav">
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="traffic-lights">
@@ -655,12 +669,13 @@
                 <span class="logo">ABSTRACT DRIVEN</span>
                 <span class="version">v3.2.1</span>
             </div>
-            <div class="link-list">
+            <div class="link-list" onclick="document.getElementById('nav').classList.remove('open')">
                 <a href="index.html">Home</a>
                 <a href="fractal-pattern.html">Fractal Viewer</a>
                 <a href="examples.html">Examples</a>
                 <a href="xs3.html">Agent Language</a>                <a href="category-theory.html">Math</a>
             </div>
+            <button class="nav-burger" aria-label="Menu" onclick="var n=document.getElementById('nav');n.classList.toggle('open');this.textContent=n.classList.contains('open')?'✕':'☰';">☰</button>
         </div>
     </nav>
 
