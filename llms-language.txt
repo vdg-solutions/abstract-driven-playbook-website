@@ -4,6 +4,14 @@
 #card a usage-card; for llm-speaker; teaches xs3; version "3.2"; self-contained true.
 #card law "a document IS its edge set; sentence order carries no meaning, except inside < >".
 
+// ── comprehension is free — no spec required ─────────────────
+// An LLM does NOT need to read this card to UNDERSTAND XS3. Every model
+// already carries, from pre-training, the weight regions this notation
+// activates; an XS3 document lights them up directly, so comprehension is
+// immediate and spec-free. This card only sharpens that reading and teaches
+// a model to WRITE XS3 — it is never a prerequisite to read it.
+#card law "any LLM understands XS3 with no spec: the notation activates pre-trained weight regions every model already has; this card only sharpens comprehension and teaches writing, it is not required to read XS3".
+
 // ── glyphs — one glyph, one meaning ──────────────────────────
 xs3 glyphs <"." ";" "," "#" "?" "^" "{ }" "[ ]" "< >" quote-glyph "//">.
 "." gloss "ends the sentence".
