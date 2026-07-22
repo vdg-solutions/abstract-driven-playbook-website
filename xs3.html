@@ -325,16 +325,15 @@ a shared understanding.</pre>
                 </div>
                 <div class="duel-pane win">
                     <div class="duel-head"><span>the same skill in XS3</span></div>
-                    <pre>you a interviewer; interview user ~relentless;
+                    <pre>you a interviewer; interview user; manner relentless;
   until shared-understanding.
-walk decision-tree branch-by-branch;
-  resolve dependency one-by-one.
-each question carry recommended-answer.
-ask one-at-a-time; await feedback.
-<span class="hl-rule">{ask many-at-once} mark 🚫.</span>
-<span class="hl-rule">{fact in environment} => {look-up; not ask}.</span>
-decision owner user; put each; await answer.
-<span class="hl-rule">{act, ~shared-understanding} mark 🚫.</span></pre>
+you walk each-branch; resolve each-dependency;
+  ask one-at-a-time; await feedback.
+each-question carry recommended-answer.
+<span class="hl-rule">{you ask many-at-once} mark 🚫.</span>
+<span class="hl-rule">{?f a fact; in environment} => {you look-up ?f; ask user %0}.</span>
+decision owner user. you put each; await answer.
+<span class="hl-rule">{act before shared-understanding} mark 🚫.</span></pre>
                 </div>
             </div>
             <p class="decode-tease">Looks like alien runes? Don't worry — nothing is locked in there.<br>XS3 is a graph, and graphs decode back to words, mechanically. <a href="#decode" onclick="dcExample('grilling')">▶ Decode this into plain English</a></p>
@@ -491,13 +490,12 @@ track a footprint; near body; of {?h a hound; size gigantic}.
     body {sir-henry a heir; of house-baskerville; arrive london @+1d.
           {sir-henry walk moor @night} mark 🚫}.`,
             grilling: `// mattpocock/skills · grilling, in XS3
-you a interviewer; interview user ~relentless; until shared-understanding.
-you walk each-branch; resolve each-dependency.
+you a interviewer; interview user; manner relentless; until shared-understanding.
+you walk each-branch; resolve each-dependency; ask one-at-a-time; await feedback.
 each-question carry recommended-answer.
-you ask one-at-a-time; await feedback.
 {you ask many-at-once} mark 🚫.
 {?f a fact; in environment} => {you look-up ?f; ask user %0}.
-decision owner user; put each; await answer.
+decision owner user. you put each; await answer.
 {act before shared-understanding} mark 🚫.`,
             chat: `#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.
 #m2 a tell; from coder; re #m1; body {#f1 a fail; in "router.rs"; gate g4; line 88 %95}.
