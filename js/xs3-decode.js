@@ -45,6 +45,7 @@ const XS3Decode = (function () {
   // ---- parse ----
   function parse(toks, strict) {
     let p = 0;
+    let elideN = 0; // fresh variable id for elided subjects (card w5: {dist 500m} = {?loc dist 500m})
     const peek = () => toks[p];
     const next = () => toks[p++];
     const expect = t => {
@@ -123,9 +124,10 @@ const XS3Decode = (function () {
     function parseStmt(inGraph, elide) {
       const start = p;
       // elide: Subject Elision (card w5) — inside a subgraph acting as an object, a statement may omit
-      // its subject; it refers to the subgraph node itself. Retried below when the first token, read as
-      // the subject, leaves the first predicate with no object.
-      const subj = elide ? { t: 'name', v: '', implicit: true } : parseTerm();
+      // its subject; it refers to the subgraph node itself, which the card equates to a variable
+      // ({dist 500m} = {?loc dist 500m}). Desugar to a fresh variable so every downstream layer
+      // (render, readback, edge compare) handles it through ordinary variable machinery — no special case.
+      const subj = elide ? { t: 'var', v: '_e' + (++elideN) } : parseTerm();
       const subjQuals = strict ? [] : parseQuals(); // tolerant: quals right after a bare subject
       const coMentions = [];
       while (!strict && peek() && peek().t === ',') { // tolerant: "{act, ~x}" — bare mention list
@@ -377,7 +379,11 @@ const XS3Decode = (function () {
       if (ch.pred === 'at') { rest.push(`(${rTime(ch.objs[0])})`); continue; }
       rest.push(rClause(ch.pred, ch.objs, ch.quals));
     }
-    return sent + (rest.length ? '; ' + rest.join('; ') : '') + '.';
+    // marks on chains folded into the sentence (speech act `a`, roles) would otherwise be dropped —
+    // render them as a trailing tail so the pragma survives the round-trip
+    const marks = st.chains.filter(ch => used.has(ch.pred)).flatMap(ch => (ch.quals || []).filter(q => q.k === 'mark'));
+    const markTail = marks.map(q => ` — ${q.v.t === 'name' ? (MARK_EN[q.v.v] || q.v.v) : rTerm(q.v)}`).join('');
+    return sent + (rest.length ? '; ' + rest.join('; ') : '') + markTail + '.';
   }
 
   // R = realize ∘ template: realize áp đồng nhất lên MỌI nhánh template, không chọn lọc
@@ -484,6 +490,8 @@ const XS3Decode = (function () {
     const ph = s.match(/^⟦(\d+)⟧$/);
     if (ph) return `"${STRS[+ph[1]]}"`;
     if (s.startsWith('“') && s.endsWith('”')) return `{${backGraph(s.slice(1, -1))}}`;
+    const seqm = s.match(/^([\s\S]+) \(in order\)$/); // ordered sequence: "a → b → c (in order)"
+    if (seqm) return '<' + splitTop(seqm[1], ' → ').map(backTerm).join(' ') + '>';
     const v = s.match(/^some (\S+)$/);
     if (v) return '?' + v[1];
     return qJoin(s);
@@ -497,7 +505,7 @@ const XS3Decode = (function () {
     [/ \(from (\S+) to (\S+)\)$/, m => '@' + m[1] + '..' + m[2]],
     [/ \((\S+) ago\)$/, m => '@-' + m[1]],
     [/ \(on (\S+)\)$/, m => '@' + m[1]],
-    [/ \(in (\S+)\)$/, m => (/^\d{4}(-\d{2})?$/.test(m[1]) ? '@' + m[1] : '@+' + m[1])],
+    [/ \(in (\d\S*)\)$/, m => (/^\d{4}(-\d{2})?$/.test(m[1]) ? '@' + m[1] : '@+' + m[1])], // digit-led only — "(in order)" belongs to a sequence, not time
     [/ \(at (\S+)\)$/, m => '@' + m[1]],
   ];
 
@@ -506,7 +514,9 @@ const XS3Decode = (function () {
     let quals = '';
     for (;;) {
       let m;
-      if ((m = cl.match(/ — ([^—]+)$/)) && MARK_BACK[m[1]]) { quals = ' !' + MARK_BACK[m[1]] + quals; cl = cl.slice(0, m.index); continue; }
+      // trailing mark(s) — must / physics / strictly / FORBIDDEN(🚫) … ; exclude ” so a mark rendered
+      // INSIDE a graph object (…— physics”) is left for that subgraph's own readback, not stripped here.
+      if ((m = cl.match(/ — ([^—”]+)$/))) { quals = ' !' + (MARK_BACK[m[1]] || m[1]) + quals; cl = cl.slice(0, m.index); continue; }
       if ((m = cl.match(/ \(mood: ([^)]+?)(?: (\d+)%)?\)$/))) { quals = ' ~' + qJoin(m[1]) + (m[2] ? '%' + m[2] : '') + quals; cl = cl.slice(0, m.index); continue; }
       if ((m = cl.match(/ (\S+?(?:less|ful|ous|ish|ive|ent|ant))ly$/))) { quals = ' ~' + m[1] + quals; cl = cl.slice(0, m.index); continue; }
       if ((m = cl.match(/ \(strength (\d+)%\)$/))) { quals = ' %' + m[1] + quals; cl = cl.slice(0, m.index); continue; }
@@ -565,9 +575,10 @@ const XS3Decode = (function () {
       if ((m = line.match(re))) return `{${lowerFirst(m[1])} ${backClause(m[2])}} mark ${mk}`;
     }
     // message
-    if ((m = line.match(/^\[(\S+)\] (\S+) (asks|tells|confirms|demands|offers|promises)(?: (\S+))?(?: \(replying to (\S+)\))?(?:, (?:at|in|on) (\S+))?(?:: ([\s\S]+?))?(?: — meaning receipt: hash (\S+))?$/))) {
-      const [, id, from, verb, to, re, at, body, hash] = m;
-      let out = `#${id} a ${SPEECH_BACK[verb]}; from ${lowerFirst(from)}`;
+    if ((m = line.match(/^\[(\S+)\] (\S+) (asks|tells|confirms|demands|offers|promises)(?: (\S+))?(?: \(replying to (\S+)\))?(?:, (?:at|in|on) (\S+))?(?:: ([\s\S]+?))?(?: — meaning receipt: hash (\S+))?(?: — ([^—”]+))?$/))) {
+      const [, id, from, verb, to, re, at, body, hash, mk] = m;
+      let out = `#${id} a ${SPEECH_BACK[verb]}${mk ? ' !' + (MARK_BACK[mk] || mk) : ''}`; // trailing pragma on the speech act
+      if (from && from.toLowerCase() !== 'someone') out += `; from ${lowerFirst(from)}`; // "someone" = the no-from placeholder, carries no edge
       if (to) out += `; to ${to}`;
       if (re) out += `; re #${re}`;
       if (at) out += `; at ${at}`;
@@ -599,7 +610,7 @@ const XS3Decode = (function () {
     // chain thường: subject = token đầu (rigid), các clause nối ';'
     const segs = splitTop(line, '; ');
     let head = segs[0].trim(), subj;
-    if ((m = head.match(/^some (\S+) ([\s\S]+)$/))) { subj = '?' + m[1]; head = m[2]; }
+    if ((m = head.match(/^[Ss]ome (\S+) ([\s\S]+)$/))) { subj = '?' + m[1]; head = m[2]; }
     else { m = head.match(/^(\S+) ([\s\S]+)$/); subj = lowerFirst(m[1]); head = m[2]; }
     const clauses = [head, ...segs.slice(1)].map(backClause);
     return `${subj} ${clauses.join('; ')}`;
