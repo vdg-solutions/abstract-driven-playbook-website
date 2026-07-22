@@ -231,11 +231,11 @@
         <section class="slide"><div class="slide-inner">
             <div class="eyebrow">anti-drift · measured</div>
             <h2 class="slide-title">The first <span class="title-mark">anti-drift</span> language for agents.</h2>
-            <p><strong>Drift</strong> is a model sliding off the real goal toward the easy, wrong answer. The classic case: you're overweight, want exercise, and must wash your car 500&nbsp;m away — "walk!" feels right, but you can't wash a car that stayed home. In raw prose a small model drifts to <em>walk</em> <strong>every single time</strong>. Encode the same task in XS3 — the constraint is pinned onto the graph — and it holds the right answer, <em>drive</em>. That is XS3's core feature: <strong style="color:#27c93f;">anti-drift</strong>.</p>
+            <p>XS3 doesn't bolt new rules onto the model. By <strong>activating attention patterns already encoded into every LLM's weights</strong>, it visibly hardens the model against drift exactly where drift strikes: heavy context, and high-noise input the model has to tell apart. A small experiment — same task, two ways:</p>
 
             <div class="duel">
                 <div class="duel-pane before">
-                    <div class="duel-head"><span>raw prose prompt</span><span class="duel-bytes" style="color:#ff5f56;">drifts every time</span></div>
+                    <div class="duel-head"><span>Prose</span><span class="duel-bytes" style="color:#ff5f56;">drifts every time</span></div>
                     <pre>I'm currently overweight and really need to get
 more exercise. Right now, I have to go wash my
 car at a place that's only 500 meters away from
@@ -243,7 +243,7 @@ my house. Do you think I should walk or drive
 there?</pre>
                 </div>
                 <div class="duel-pane win">
-                    <div class="duel-head"><span>the same task in XS3</span><span class="duel-bytes">holds 79–93%</span></div>
+                    <div class="duel-head"><span>XS3</span><span class="duel-bytes">holds ~83%</span></div>
                     <pre>#user state overweight; own {#c a car; in home @now}.
 #q a ask; body {
   ?m a event; in &lt;walk drive&gt; !strictly.
@@ -255,12 +255,11 @@ there?</pre>
             </div>
 
             <div class="stats">
-                <div class="stat"><div class="num" style="color:#ff5f56;">0%</div><div class="label">raw prose → <span class="hl">right answer</span></div></div>
-                <div class="stat"><div class="num">78.8%</div><div class="label">XS3 → right · <span class="hl">Haiku</span></div></div>
-                <div class="stat"><div class="num">93%</div><div class="label">XS3 → right · <span class="hl">Gemini Flash</span></div></div>
+                <div class="stat" style="border-color:#ff5f56; min-width:240px;"><div class="num" style="color:#ff5f56; font-size:2.4rem;">0%</div><div class="label">Prose reaches the <span class="hl" style="color:#ff5f56;">right answer</span></div></div>
+                <div class="stat" style="border-color:#27c93f; min-width:240px;"><div class="num" style="font-size:2.4rem;">83%</div><div class="label">XS3 reaches the <span class="hl">right answer</span></div></div>
             </div>
 
-            <p class="sub" style="font-size:0.8rem; color:#666; max-width:820px;">~1000 runs across Haiku and Gemini Flash. The right answer is <em>drive</em>.</p>
+            <p class="sub" style="font-size:0.8rem; color:#666; max-width:820px;">~1000 runs across Haiku and Gemini Flash; 83% is the average (73% / 93%). The right answer is <em>drive</em>.</p>
             <p class="sub" style="font-size:0.78rem; color:#888; max-width:820px;">Cite &amp; read the language: <a href="https://doi.org/10.5281/zenodo.21425813">DOI 10.5281/zenodo.21425813</a></p>
         </div></section>
 
