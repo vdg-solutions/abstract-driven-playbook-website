@@ -1,33 +1,33 @@
-// A.D.D V3 manifesto — XS3. Reading key: `subject predicate object .` = one edge; ; keeps subject; , keeps subject+predicate; {} = pattern; !mark = deontic.
-#add a architecture-method; name "A.D.D V3"; mark 📐; tone strict-dip-first, absolute-layer-isolation.
+// A.D.D V3 manifesto — XS3. Reading key: `subject predicate object .` = one edge; ; keeps subject; , keeps subject+predicate; {} = pattern; !🚫 forbidden · !🚨 alarm · !🔒 locked = salient deontic markers riding !.
+#add a architecture-method !📐; name "A.D.D V3"; tone strict-dip-first, absolute-layer-isolation.
 contract-is-law law "contract defines truth; implementations adhere strictly" !🔒.
-{?x change contract-silently} mark 🚨.
+{?x change contract-silently} !🚨.
 
 // F.A.P
 {?m a module} => {?m layer bootstrap, operators, core-abstractions, implementations, boundary} !🔒.
 {?s a module; nested-in ?m} => {?s lives-in implementations-of ?m} !🔒.
-{?m invent custom-layer-type} mark 🚫.
+{?m invent custom-layer-type} !🚫.
 system-root a module !🔒; gloss "root obeys the same law — top-level modules live in the ROOT's implementations, never beside the root"; path-demo "/Implementations/OrderModule/Implementations/PayFastAdapter".
 
 // layers + purity
 bootstrap duty "composition root, DI"; may-ref all-layers.
-{bootstrap hold business-logic} mark 🚫.
+{bootstrap hold business-logic} !🚫.
 operators duty "business orchestration: TGO (strong), Coordinator (eventual)"; may-ref boundary, core-abstractions; gloss "framework-agnostic: DTO in, DTO out".
-{operators ref implementations} mark 🚫.
-{operators import tech} mark 🚫.
+{operators ref implementations} !🚫.
+{operators import tech} !🚫.
 core-abstractions duty "Ports, Entities, Core Events, RuleSets"; may-ref nothing.
-{core-abstractions hold tech-or-logic} mark 🚫.
+{core-abstractions hold tech-or-logic} !🚫.
 implementations duty "adapters, ACL, UI/web frameworks, sub-modules"; may-ref core-abstractions.
-{implementations hold business-logic} mark 🚫.
+{implementations hold business-logic} !🚫.
 {?a a system-edge-adapter} => {?a may-ref boundary}; demo <api-client webhook-handler external-mq-consumer>.
 boundary duty "DTOs, Boundary Events"; may-ref nothing.
-{boundary hold logic} mark 🚫.
+{boundary hold logic} !🚫.
 
 // communication + enforcement
 {?a a module. ?b a module. ?a message ?b} => {?a via port-call, core-event} !🔒.
-{operators-of ?a call operators-of ?b} mark 🚫.
+{operators-of ?a call operators-of ?b} !🚫.
 {dto in boundary} handled-by operators.
 {?ad a adapter} => {?ad implement port-in-core-abstractions}.
-{?d a circular-dependency} mark 🚨.
-{?d a upward-dependency} mark 🚨.
+{?d a circular-dependency} !🚨.
+{?d a upward-dependency} !🚨.
 on-violation halt "CONTRACT IS LAW! ARCHITECTURE VIOLATION DETECTED. REVERTING." !🚨.
