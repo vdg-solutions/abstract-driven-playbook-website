@@ -32,7 +32,7 @@ quote-glyph gloss "wraps a string containing whitespace or special characters; s
 {bao ^love an}        = {an love bao}.
 {an love bao @2020}    = {{an love bao} at 2020}.
 {an love bao %95}      = {{an love bao} deg 95}.
-{an love bao %0}       = {{an love bao} deg 0}.
+{an love bao !not}     = {[an love bao] mark not}.
 {an love bao !physics} = {{an love bao} pragma physics}.
 {an love bao ~joy}     = {{an love bao} affect joy}.
 {an love bao ~joy %60} = {{an love bao} affect joy; deg 60}.
@@ -43,14 +43,15 @@ qualifier binds current-predicate-group; law "objects joined by , share the qual
 // every qualifier is an ATTENTION ANCHOR — it surfaces salient metadata for the model; sugar over reification, so the doc always decodes to one graph.
 "@" a qualifier; gloss "time — attention anchor"; accepts <2026-07-15 2026-07-15T09:30 2026-01..2026-06 2020.. now past future>.
 "~" a qualifier; gloss "affect — attention anchor; intensity via a following %0..100".
-"%" a qualifier; gloss "degree — strength of the RELATION, 0..100; speaker certainty is separate: conf".
-"!" a qualifier; gloss "engine pragma"; accepts <must may physics strictly no-explanation 🚫 ⚠️ 🚨 🔒 📐>.
+"%" a qualifier; gloss "degree — strength of the RELATION, 0..100; %0 is a LITERAL degree, NOT negation; speaker certainty is separate: conf".
+"!" a qualifier; gloss "salient operator marker — the LLM must not miss it: engine pragma, prohibition, negation"; accepts <not must may physics strictly no-explanation 🚫 ⚠️ 🚨 🔒 📐>.
+not gloss "negation — the relation does NOT hold; emits ONLY [s p o] mark not, the positive edge is ABSENT".
 🚫 gloss "forbidden". ⚠️ gloss "warning, fragile". 🚨 gloss "critical, incident". 🔒 gloss "inviolable rule". 📐 gloss "contract, spec anchor".
-qualifier desugar "@ → {s p o} at t · ~ → affect e · % → deg n · ! → pragma m; the model reads the anchor natively, the graph decode is the machine's job".
+qualifier desugar "@ → {s p o} at t · ~ → affect e · % → deg n · ! → [s p o] mark m (and !not drops the positive edge, leaving only [s p o] mark not); the model reads the anchor natively, the graph decode is the machine's job".
 qualifier law "attaches ONLY after an object — never after ; and never to a bare subject" !🔒;
           law "binds only the predicate group it directly follows — predicates after a later ; are NOT qualified";
           law "never inside [ ] — qualify the mention itself: [s p o] mark 🚫".
-negation gloss "%0 — the relation does not hold".
+negation gloss "!not — the relation does NOT hold; only [s p o] mark not is emitted, the positive edge is ABSENT (a non-existent edge). %0 is a literal degree 0, not negation".
 conf gloss "SPEAKER certainty — a separate axis, always explicit"; demo {[an love bao] conf 60}.
 edge-without-time gloss "tenseless — laws, definitions, structure".
 

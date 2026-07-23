@@ -331,7 +331,7 @@ you walk each-branch; resolve each-dependency;
   ask one-at-a-time; await feedback.
 each-question carry recommended-answer.
 <span class="hl-rule">you ask many-at-once !🚫.</span>
-<span class="hl-rule">{?f a fact; in environment} => {you look-up ?f; ask user %0}.</span>
+<span class="hl-rule">{?f a fact; findable-in environment} => {you look-up ?f; ask user !not}.</span>
 decision owner user. you put each; await answer.
 <span class="hl-rule">act before shared-understanding !🚫.</span></pre>
                 </div>
@@ -495,7 +495,7 @@ you a interviewer; interview user; manner relentless; until shared-understanding
 you walk each-branch; resolve each-dependency; ask one-at-a-time; await feedback.
 each-question carry recommended-answer.
 you ask many-at-once !🚫.
-{?f a fact; in environment} => {you look-up ?f; ask user %0}.
+{?f a fact; findable-in environment} => {you look-up ?f; ask user !not}.
 decision owner user. you put each; await answer.
 act before shared-understanding !🚫.`,
             chat: `#m1 a ask; from planner; to coder; body {?f a fail; in "router.rs"; gate ?g}.

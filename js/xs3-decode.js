@@ -259,11 +259,14 @@ const XS3Decode = (function () {
     for (const st of doc) {
       for (const ch of st.chains) {
         const objs = ch.objs.length ? ch.objs : [{ t: 'name', v: '', implicit: true }];
+        // !not = logical negation: the positive edge does NOT exist in the asserted graph — emit only
+        // the negation meta-edge ([s p o] mark not), never the plain (s p o) triple.
+        const isNeg = ch.quals.some(q => q.k === 'mark' && q.v.t === 'name' && q.v.v === 'not');
         for (const objTerm of objs) {
           let s = st.subj, o = objTerm;
           if (ch.rev) { const tmp = s; s = o; o = tmp; } // ^p flips the edge
           const pred = ch.pred || '—';
-          emit(s, pred, o);
+          if (!isNeg) emit(s, pred, o);
           const ref = { t: 'edge', s, p: { t: 'name', v: pred }, o };
           for (const q of ch.quals) {
             if (q.k === 'at') emit(ref, 'at', q.v);
@@ -345,13 +348,15 @@ const XS3Decode = (function () {
   }
 
   function rClause(pred, objs, quals) {
-    let neg = false; const marks = []; let time = null; const affs = []; let deg = null;
+    const marks = []; let time = null; const affs = []; let deg = null;
     for (const q of quals || []) {
-      if (q.k === 'deg') { if (Number(q.v) === 0) neg = true; else deg = q.v; }
+      if (q.k === 'deg') deg = q.v; // %n is a literal degree 0..100 — negation is the !not mark, not %0
       else if (q.k === 'mark') marks.push(q.v);
       else if (q.k === 'at') time = q.v;
       else if (q.k === 'aff') affs.push(q);
     }
+    const neg = marks.some(m => m.t === 'name' && m.v === 'not'); // !not: the relation does not hold
+    const tailMarks = marks.filter(m => !(m.t === 'name' && m.v === 'not'));
     const oTxt = objs.map(rTerm).filter(Boolean).join(', ');
     const predTxt = pred || ''; // slot pred rigid — humanize pred phá đơn ánh (look-up vs look + up-*)
     let core;
@@ -370,7 +375,7 @@ const XS3Decode = (function () {
       else tail.push(`(mood: ${rTerm(a.v)}${a.deg != null ? ` ${a.deg}%` : ''})`);
     }
     // mark là tail của ĐÚNG clause mang nó — prefix cả câu làm mất thông tin mark thuộc chain nào
-    for (const m of marks) {
+    for (const m of tailMarks) {
       const mv = m.t === 'name' ? m.v : rTerm(m);
       tail.push(`— ${MARK_EN[mv] || mv}`);
     }
@@ -463,7 +468,8 @@ const XS3Decode = (function () {
         if (ch.pred === 'at') { parts.push(`(${rTime(ch.objs[0])})`); continue; }
         if (ch.pred === 'after') { parts.push(`— and that happens after ${ch.objs.map(rTerm).join(', ')}`); continue; }
         if (ch.pred === 'before') { parts.push(`— and that happens before ${ch.objs.map(rTerm).join(', ')}`); continue; }
-        if (ch.pred === 'deg' && Number(ch.objs[0] && ch.objs[0].v) === 0) { parts.push('— which is NOT the case'); continue; }
+        if (ch.pred === 'deg') { parts.push(`(strength ${rTerm(ch.objs[0])}%)`); continue; } // literal degree; negation is the !not mark
+        if (ch.pred === 'mark' && ch.objs[0] && ch.objs[0].t === 'name' && ch.objs[0].v === 'not') { parts.push('— which is NOT the case'); continue; } // [s p o] mark not = the edge does not hold
         parts.push(rClause(ch.pred, ch.objs, ch.quals));
       }
       return `“${inner}” ${parts.join(', ')}.`;
@@ -570,7 +576,7 @@ const XS3Decode = (function () {
     let quals;
     [cl, quals] = backTails(cl.trim());
     let neg = '';
-    if (/^do(es)? NOT /.test(cl)) { neg = ' %0'; cl = cl.replace(/^do(es)? NOT /, ''); }
+    if (/^do(es)? NOT /.test(cl)) { neg = ' !not'; cl = cl.replace(/^do(es)? NOT /, ''); }
     // inverse của realize (agreement) — E0 ∘ realize = E0: đưa dạng chia theo you về dạng gốc
     cl = cl.replace(/^are\b/, 'is').replace(/^feel\b/, 'feels');
     let pred = null, rest = '';
@@ -637,7 +643,7 @@ const XS3Decode = (function () {
         if ((mm = part.match(/^because ([\s\S]+)$/))) return `why ${backTerm(mm[1])}`;
         if ((mm = part.match(/^— and that happens after ([\s\S]+)$/))) return `after ${backTerm(mm[1])}`;
         if ((mm = part.match(/^— and that happens before ([\s\S]+)$/))) return `before ${backTerm(mm[1])}`;
-        if (part === '— which is NOT the case') return 'deg 0';
+        if (part === '— which is NOT the case') return 'mark not';
         return backClause(part);
       });
       return `[${s} ${p}${o ? ' ' + o : ''}] ${chains.join('; ')}`;
