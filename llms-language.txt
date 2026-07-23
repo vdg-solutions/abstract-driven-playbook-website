@@ -89,7 +89,7 @@ confirm law "echoes the hash of what was received"; demo {#m3 a confirm; re #m2;
 demand law "body = target-state graph + !must".
 
 // ── writing rules ────────────────────────────────────────────
-#write steps <w1 w2 w3 w4 w5 w6 w7 w8 w9>.
+#write steps <w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11>.
 w1 gloss "one subject, many properties -> one sentence chained with ;".
 w2 gloss "many objects, one relation -> chain with ,".
 w3 gloss "a long name used twice -> anchor it once as #x, reuse the anchor".
@@ -100,6 +100,8 @@ w7 gloss "source marks 🚨 ⚠️ 🔒 📐 🚫 must survive into the output" 
 w8 gloss "use ^ only to continue a chain; a standalone inverted sentence must be written direct — chi trust bao, never bao ^trust chi alone" !must.
 w9 gloss "a quoted string is opaque to graph traversal — readers follow edges, not prose; if a string mentions a concept that has its own node elsewhere, the same sentence must also carry an explicit edge to that node (defined-by, detail, see)" !must;
    demo {alert-rule a nfr; req "the URGENT channel is a closed list"; defined-by urgent-tier}.
+w10 gloss "deontic (!must / !🚫) binds a VERB-anchored clause (agent-verb-object), never a bare noun — a bare noun leaks its polarity" !must; demo {you force dom !🚫}; demo {you run-every-check !must}.
+w11 gloss "a clause ABOUT XS3's own glyphs (self-reference / meta) is commentary, not a domain fact — prefer a // comment (native, zero collision) or plain prose; if it MUST be a queryable fact write it EXPLICITLY as [s p o] mark not, never the !not sugar (bare !not beside an abstract object reads as 'the !not-flavored X', and quoting the name does NOT rescue it)" !must; demo {[%0 a negation] mark not}.
 
 // ── canonical examples ───────────────────────────────────────
 an a engineer; age 30; love bao @2020.. %80 ~😨%90.
