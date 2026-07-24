@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use XS3, please cite it as below."
 title: "XS3: a machine-to-machine triple-graph language (v3.2 language card + E₀ reference decoder)"
-version: "3.2.2"
+version: "3.2.3"
 type: software
 license: CC-BY-4.0
 authors:
