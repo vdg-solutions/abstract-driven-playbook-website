@@ -13,13 +13,14 @@
 #card law "any LLM understands XS3 with no spec: the notation activates pre-trained weight regions every model already has; this card only sharpens comprehension and teaches writing, it is not required to read XS3".
 
 // ── glyphs — one glyph, one meaning ──────────────────────────
-xs3 glyphs <"." ";" "," "#" "?" "^" "{ }" "[ ]" "< >" quote-glyph "//">.
+xs3 glyphs <"." ";" "," "#" "?" "^" "¬" "{ }" "[ ]" "< >" quote-glyph "//">.
 "." gloss "ends the sentence".
 ";" gloss "keep subject, switch predicate".
 "," gloss "keep subject and predicate, add object".
 "#" gloss "anchor — same name, same node, document-wide; #_x is document-local".
 "?" gloss "variable — legal only inside { }".
 "^" gloss "inverted predicate".
+"¬" gloss "negation (universal math NOT) — PREFIX on a predicate (s ¬p o) or an edge-term (¬[s p o]); the relation does NOT hold".
 "{ }" gloss "a subgraph as ONE node — a world, a belief, a plan, a question; may hold many sentences with different subjects, including rule bodies and consequents".
 "[ ]" gloss "mentions an edge WITHOUT asserting it — for false, uncertain, or meta statements".
 "< >" gloss "ordered sequence — the only ordered construct".
@@ -32,26 +33,26 @@ quote-glyph gloss "wraps a string containing whitespace or special characters; s
 {bao ^love an}        = {an love bao}.
 {an love bao @2020}    = {{an love bao} at 2020}.
 {an love bao %95}      = {{an love bao} deg 95}.
-{an love bao !not}     = {[an love bao] mark not}.
+{an ¬love bao}         = {[an love bao] mark not}.
 {an love bao !physics} = {{an love bao} pragma physics}.
-{an love bao ~joy}     = {{an love bao} affect joy}.
-{an love bao ~joy %60} = {{an love bao} affect joy; deg 60}.
 {an love bao, chi @2020} = {{an love bao} at 2020. {an love chi} at 2020}.
-qualifier binds current-predicate-group; law "objects joined by , share the qualifier; to qualify edges separately, reopen the predicate with ;"; stacks true; demo {an love bao @2020.. %80 ~fear%90}; demo {an love bao ~joy; love chi ~pity}.
+qualifier binds current-predicate-group; law "objects joined by , share the qualifier; to qualify edges separately, reopen the predicate with ;"; stacks true; demo {an love bao @2020.. %80}; demo {an feel 😨 %90}.
 
-// ── the four qualifiers ──────────────────────────────────────
+// ── the qualifiers (@ % !) + negation ¬ ──────────────────────
 // every qualifier is an ATTENTION ANCHOR — it surfaces salient metadata for the model; sugar over reification, so the doc always decodes to one graph.
 "@" a qualifier; gloss "time — attention anchor"; accepts <2026-07-15 2026-07-15T09:30 2026-01..2026-06 2020.. now past future>.
-"~" a qualifier; gloss "affect — attention anchor; intensity via a following %0..100".
-"%" a qualifier; gloss "degree — strength of the RELATION, 0..100; %0 is a LITERAL degree, NOT negation; speaker certainty is separate: conf".
-"!" a qualifier; gloss "salient operator marker — the LLM must not miss it: engine pragma, prohibition, negation"; accepts <not must may physics strictly no-explanation 🚫 ⚠️ 🚨 🔒 📐>.
-not gloss "negation — the relation does NOT hold; emits ONLY [s p o] mark not, the positive edge is ABSENT".
+"%" a qualifier; gloss "degree — strength of the RELATION, 0..100; %0 is a LITERAL degree, NOT negation (negation is ¬); speaker certainty is separate: conf".
+"!" a qualifier; gloss "salient operator marker — engine pragma and prohibition, the LLM must not miss it"; accepts <must may physics strictly no-explanation 🚫 ⚠️ 🚨 🔒 📐>.
 🚫 gloss "forbidden". ⚠️ gloss "warning, fragile". 🚨 gloss "critical, incident". 🔒 gloss "inviolable rule". 📐 gloss "contract, spec anchor".
-qualifier desugar "@ → {s p o} at t · ~ → affect e · % → deg n · ! → [s p o] mark m (and !not drops the positive edge, leaving only [s p o] mark not); the model reads the anchor natively, the graph decode is the machine's job".
+qualifier desugar "@ → {s p o} at t · % → deg n · ! → [s p o] mark m; the model reads the anchor natively, the graph decode is the machine's job".
 qualifier law "attaches ONLY after an object — never after ; and never to a bare subject" !🔒;
           law "binds only the predicate group it directly follows — predicates after a later ; are NOT qualified";
           law "never inside [ ] — qualify the mention itself: [s p o] mark 🚫".
-negation gloss "!not — the relation does NOT hold; only [s p o] mark not is emitted, the positive edge is ABSENT (a non-existent edge). %0 is a literal degree 0, not negation".
+"¬" negation; gloss "the relation does NOT hold — PREFIX on ONE predicate (s ¬p o) or ONE edge-term (¬[s p o]); emits ONLY [s p o] mark not, the positive edge is ABSENT (a non-existent edge); ¬ is universal math negation, read spec-free";
+   law "negate ONE edge only — to deny several, negate each; never ¬{…} (a negated conjunction hides an ∨ and no longer decodes to a plain edge set)" !🔒.
+"!not" a obsolete; gloss "the OLD spelling of negation, kept for back-compat (the decoder still reads it) — WRITE ¬ instead: !not overloaded ! and was misread under self-reference".
+"~" a obsolete; gloss "the OLD affect qualifier (~joy = {s p o} affect joy), kept for back-compat (the decoder still reads it) — WRITE the affect/feel predicate instead".
+affect gloss "emotion is a PLAIN predicate — write 'x feel joy' or '[s p o] affect fear'; the ~ qualifier is legacy".
 conf gloss "SPEAKER certainty — a separate axis, always explicit"; demo {[an love bao] conf 60}.
 edge-without-time gloss "tenseless — laws, definitions, structure".
 
@@ -75,7 +76,7 @@ before after during meets starts ends a relation; gloss "interval-to-interval".
 past now future a coarse-time; law "now = timestamp of the carrying message".
 joy sad fear anger surprise disgust trust hope shame calm want a affect.
 😊 = joy. 😢 = sad. 😨 = fear. 😠 = anger. 😲 = surprise. 🤢 = disgust. 😌 = calm.
-affect law "where a standard emoji exists it is the canonical atom; word atoms cover the rest"; demo {an love bao ~😨%90}.
+affect law "where a standard emoji exists it is the canonical atom; word atoms cover the rest"; demo {[an love bao] affect 😨 %90}.
 val aro dom a dimension; range <0 100>; gloss "continuous affect coordinates when discrete labels fall short".
 feel demo {dev feel 😠 %80}. about demo {#f1 about {losing bao}}.
 
@@ -101,10 +102,10 @@ w8 gloss "use ^ only to continue a chain; a standalone inverted sentence must be
 w9 gloss "a quoted string is opaque to graph traversal — readers follow edges, not prose; if a string mentions a concept that has its own node elsewhere, the same sentence must also carry an explicit edge to that node (defined-by, detail, see)" !must;
    demo {alert-rule a nfr; req "the URGENT channel is a closed list"; defined-by urgent-tier}.
 w10 gloss "deontic (!must / !🚫) binds a VERB-anchored clause (agent-verb-object), never a bare noun — a bare noun leaks its polarity" !must; demo {you force dom !🚫}; demo {you run-every-check !must}.
-w11 gloss "a clause ABOUT XS3's own glyphs (self-reference / meta) is commentary, not a domain fact — prefer a // comment (native, zero collision) or plain prose; if it MUST be a queryable fact write it EXPLICITLY as [s p o] mark not, never the !not sugar (bare !not beside an abstract object reads as 'the !not-flavored X', and quoting the name does NOT rescue it)" !must; demo {[%0 a negation] mark not}.
+w11 gloss "a clause ABOUT XS3's own glyphs (self-reference / meta) is commentary, not a domain fact — prefer a // comment (native, zero collision) or plain prose; if it MUST be a queryable fact, quote the glyph and negate with ¬ — \"%0\" ¬a negation, or ¬[\"%0\" a negation]" !must; demo {"%0" ¬a negation}.
 
 // ── canonical examples ───────────────────────────────────────
-an a engineer; age 30; love bao @2020.. %80 ~😨%90.
+an a engineer; age 30; love bao @2020.. %80. [an love bao] affect 😨 %90.
 #e1 a deploy; who dev-3; what api-v2; at 2026-07-15T09:30.
 #e2 a outage; in region-a; dur 42m. #e1 cause #e2 %85.
 [dev-3 feel shame] after #e2.

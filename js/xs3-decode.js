@@ -3,7 +3,7 @@
 // Tolerant where real-world XS3 is loose: bare mentions, uncomma'd object phrases, n-term [ ].
 
 const XS3Decode = (function () {
-  const GLYPHS = new Set([';', ',', '{', '}', '[', ']', '<', '>', '"', '#', '?', '^', '@', '~', '%', '!']);
+  const GLYPHS = new Set([';', ',', '{', '}', '[', ']', '<', '>', '"', '#', '?', '^', '@', '~', '%', '!', '¬']);
 
   function lex(src) {
     const toks = [];
@@ -89,6 +89,12 @@ const XS3Decode = (function () {
           expect('>');
           return { t: 'seq', items };
         }
+        case '¬': { // ¬ before an edge-term: the mentioned edge does NOT hold (self-reference/meta negation)
+          const inner = parseTerm();
+          if (inner.t !== 'edge') throw new Error('¬ before a term must precede an edge [s p o]');
+          inner.neg = true;
+          return inner;
+        }
         default: throw new Error(`unexpected '${k.v || k.t}'`);
       }
     }
@@ -139,8 +145,11 @@ const XS3Decode = (function () {
       try {
         while (peek() && !['end', '}'].includes(peek().t)) {
           if (peek().t === ';') { next(); continue; }
-          let rev = false;
-          if (peek().t === '^') { next(); rev = true; }
+          let rev = false, neg = false; // ^p reverses the edge; ¬p negates it (relation does NOT hold)
+          while (peek() && (peek().t === '^' || peek().t === '¬')) {
+            if (peek().t === '^') rev = true; else neg = true;
+            next();
+          }
           const pk = next();
           if (!pk || (pk.t !== 'atom' && pk.t !== 'str')) throw new Error(`expected a predicate, got '${pk ? (pk.v || pk.t) : 'end of input'}'`);
           const objs = [];
@@ -152,7 +161,7 @@ const XS3Decode = (function () {
             throw new Error(`predicate '${pk.v}' has no object`);
           }
           const groupQuals = objs.flatMap(o => o.quals); // qualifier distributes over the , group
-          chains.push({ pred: pk.v, rev, objs: objs.map(o => o.term), quals: groupQuals });
+          chains.push({ pred: pk.v, rev, neg, objs: objs.map(o => o.term), quals: groupQuals });
           if (peek() && peek().t === ';') { next(); continue; }
           break;
         }
@@ -193,12 +202,12 @@ const XS3Decode = (function () {
       case 'phrase': return t.items.map(termKey).join(' ');
       case 'seq': return '<' + t.items.map(termKey).join(' ') + '>';
       case 'graph': return '{' + t.stmts.map(stmtKey).join(' ') + '}';
-      case 'edge': return `[${termKey(t.s)} ${termKey(t.p)} ${termKey(t.o)}]`;
+      case 'edge': return `${t.neg ? '¬' : ''}[${termKey(t.s)} ${termKey(t.p)} ${termKey(t.o)}]`;
     }
   }
   function stmtKey(st) {
     return st.chains.map(c =>
-      `${termKey(st.subj)}${c.pred ? ` ${c.rev ? '^' : ''}${c.pred}` : ''}${c.objs.length ? ' ' + c.objs.map(termKey).join(', ') : ''}`
+      `${termKey(st.subj)}${c.pred ? ` ${c.neg ? '¬' : ''}${c.rev ? '^' : ''}${c.pred}` : ''}${c.objs.length ? ' ' + c.objs.map(termKey).join(', ') : ''}`
     ).join('; ') + '.';
   }
 
@@ -225,13 +234,13 @@ const XS3Decode = (function () {
       case 'phrase': return t.items.map(tXS3).join(' ');
       case 'seq': return '<' + t.items.map(tXS3).join(' ') + '>';
       case 'graph': return '{' + t.stmts.map(sXS3).join(' ') + '}';
-      case 'edge': return `[${tXS3(t.s)} ${tXS3(t.p)} ${tXS3(t.o)}]`;
+      case 'edge': return `${t.neg ? '¬' : ''}[${tXS3(t.s)} ${tXS3(t.p)} ${tXS3(t.o)}]`;
     }
   }
   function sXS3(st) {
     // subject once, chains joined by ';' (the ';' keeps the subject — never repeat it)
     const chains = st.chains.map(c =>
-      `${c.pred ? `${c.rev ? '^' : ''}${c.pred}` : ''}${c.objs.length ? ' ' + c.objs.map(tXS3).join(', ') : ''}${qXS3(c.quals)}`
+      `${c.pred ? `${c.neg ? '¬' : ''}${c.rev ? '^' : ''}${c.pred}` : ''}${c.objs.length ? ' ' + c.objs.map(tXS3).join(', ') : ''}${qXS3(c.quals)}`
     );
     return `${tXS3(st.subj)} ${chains.join('; ')}.`;
   }
@@ -257,17 +266,23 @@ const XS3Decode = (function () {
     let blank = 0;
     const emit = (s, p, o) => edges.push({ s, p, o });
     for (const st of doc) {
+      // ¬[s p o] as a subject: the mentioned edge does NOT hold — emit only the negation meta-edge.
+      if (st.subj.t === 'edge' && st.subj.neg) {
+        emit({ t: 'edge', s: st.subj.s, p: st.subj.p, o: st.subj.o }, 'mark', { t: 'name', v: 'not' });
+        continue;
+      }
       for (const ch of st.chains) {
         const objs = ch.objs.length ? ch.objs : [{ t: 'name', v: '', implicit: true }];
-        // !not = logical negation: the positive edge does NOT exist in the asserted graph — emit only
-        // the negation meta-edge ([s p o] mark not), never the plain (s p o) triple.
-        const isNeg = ch.quals.some(q => q.k === 'mark' && q.v.t === 'name' && q.v.v === 'not');
+        // negation (¬p, or legacy !not mark): the positive edge does NOT exist in the asserted graph —
+        // emit only the negation meta-edge ([s p o] mark not), never the plain (s p o) triple.
+        const isNeg = ch.neg || ch.quals.some(q => q.k === 'mark' && q.v.t === 'name' && q.v.v === 'not');
         for (const objTerm of objs) {
           let s = st.subj, o = objTerm;
           if (ch.rev) { const tmp = s; s = o; o = tmp; } // ^p flips the edge
           const pred = ch.pred || '—';
           if (!isNeg) emit(s, pred, o);
           const ref = { t: 'edge', s, p: { t: 'name', v: pred }, o };
+          if (ch.neg) emit(ref, 'mark', { t: 'name', v: 'not' }); // ¬p -> [s p o] mark not
           for (const q of ch.quals) {
             if (q.k === 'at') emit(ref, 'at', q.v);
             else if (q.k === 'deg') emit(ref, 'deg', { t: 'name', v: q.v });
@@ -347,15 +362,15 @@ const XS3Decode = (function () {
     return `at ${s}`;
   }
 
-  function rClause(pred, objs, quals) {
+  function rClause(pred, objs, quals, chNeg) {
     const marks = []; let time = null; const affs = []; let deg = null;
     for (const q of quals || []) {
-      if (q.k === 'deg') deg = q.v; // %n is a literal degree 0..100 — negation is the !not mark, not %0
+      if (q.k === 'deg') deg = q.v; // %n is a literal degree 0..100 — negation is ¬, not %0
       else if (q.k === 'mark') marks.push(q.v);
       else if (q.k === 'at') time = q.v;
       else if (q.k === 'aff') affs.push(q);
     }
-    const neg = marks.some(m => m.t === 'name' && m.v === 'not'); // !not: the relation does not hold
+    const neg = chNeg || marks.some(m => m.t === 'name' && m.v === 'not'); // ¬p (or legacy !not): relation does not hold
     const tailMarks = marks.filter(m => !(m.t === 'name' && m.v === 'not'));
     const oTxt = objs.map(rTerm).filter(Boolean).join(', ');
     const predTxt = pred || ''; // slot pred rigid — humanize pred phá đơn ánh (look-up vs look + up-*)
@@ -364,7 +379,7 @@ const XS3Decode = (function () {
     else if (pred === 'a') core = `is ${an(oTxt)} ${oTxt}`;
     else if (PRED_EN[pred]) core = `${PRED_EN[pred]}${oTxt ? ' ' + oTxt : ''}`;
     else core = `${predTxt}${oTxt ? ' ' + oTxt : ''}`;
-    if (neg) core = `does NOT ${predTxt}${oTxt ? ' ' + oTxt : ''}`;
+    if (neg) core = pred === 'a' ? `is NOT ${an(oTxt)} ${oTxt}` : `does NOT ${predTxt}${oTxt ? ' ' + oTxt : ''}`;
     const tail = [];
     if (time) tail.push(`(${time.t === 'name' || time.t === 'str' ? rTime(time) : 'at ' + rTerm(time)})`);
     if (deg != null) tail.push(`(strength ${deg}%)`);
@@ -417,7 +432,7 @@ const XS3Decode = (function () {
     for (const ch of st.chains) {
       if (used.has(ch.pred)) continue;
       if (ch.pred === 'at') { rest.push(`(${rTime(ch.objs[0])})`); continue; }
-      rest.push(rClause(ch.pred, ch.objs, ch.quals));
+      rest.push(rClause(ch.pred, ch.objs, ch.quals, ch.neg));
     }
     // marks on chains folded into the sentence (speech act `a`, roles) would otherwise be dropped —
     // render them as a trailing tail so the pragma survives the round-trip
@@ -452,7 +467,7 @@ const XS3Decode = (function () {
       if (single && IMP[markName] && single.subj.t === 'name' && !single.subj.implicit
           && single.chains[0].pred && !REL_PRED.has(single.chains[0].pred)) {
         const ch = single.chains[0];
-        return `${rTermRigid(single.subj)} ${IMP[markName]} ${rClause(ch.pred, ch.objs, ch.quals)}.`;
+        return `${rTermRigid(single.subj)} ${IMP[markName]} ${rClause(ch.pred, ch.objs, ch.quals, ch.neg)}.`;
       }
       return `${m}: “${rGraph(stmts)}”.`;
     }
@@ -470,12 +485,12 @@ const XS3Decode = (function () {
         if (ch.pred === 'before') { parts.push(`— and that happens before ${ch.objs.map(rTerm).join(', ')}`); continue; }
         if (ch.pred === 'deg') { parts.push(`(strength ${rTerm(ch.objs[0])}%)`); continue; } // literal degree; negation is the !not mark
         if (ch.pred === 'mark' && ch.objs[0] && ch.objs[0].t === 'name' && ch.objs[0].v === 'not') { parts.push('— which is NOT the case'); continue; } // [s p o] mark not = the edge does not hold
-        parts.push(rClause(ch.pred, ch.objs, ch.quals));
+        parts.push(rClause(ch.pred, ch.objs, ch.quals, ch.neg));
       }
       return `“${inner}” ${parts.join(', ')}.`;
     }
     const subjText = rTermRigid(st.subj);
-    const clauses = st.chains.map(ch => rClause(ch.pred, ch.objs, ch.quals));
+    const clauses = st.chains.map(ch => rClause(ch.pred, ch.objs, ch.quals, ch.neg));
     return (subjText + ' ' + clauses.filter(Boolean).join('; ')).trim() + '.';
   }
 
