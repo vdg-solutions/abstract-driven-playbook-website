@@ -162,6 +162,40 @@ each line is simultaneously a rule and a live example of itself. This is possibl
 precisely because the notation is spec-free to read: a model can consume the
 self-definition without a prior grammar.
 
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.88\columnwidth}
+\small\ttfamily
+\#deploy a policy; owner platform.\\
+you run tests !must.\\
+prod $\neg$has feature-flags.\\
+\{tests pass\} =\textgreater\ \{you tag release !must\}.
+\end{minipage}}
+\caption{A small XS3 document. It decodes to six edges: two assert facts about
+\texttt{\#deploy}; \texttt{!must} reifies onto its edge as
+\texttt{[you run tests] mark must}; \texttt{$\neg$has} emits \emph{only} the
+negation meta-edge \texttt{[prod has feature-flags] mark not} and never the
+positive triple; and the rule \texttt{=\textgreater} relates two subgraph nodes.
+Order is irrelevant: any permutation denotes the same graph.}
+\label{fig:example}
+\end{figure}
+
+\begin{table}[t]
+\caption{Qualifier and negation desugaring; each surface form is a graph equation.}
+\label{tab:desugar}
+\centering\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Surface form & Reified edge(s) \\
+\midrule
+\texttt{s p o @t}    & \texttt{\{s p o\} at t} \\
+\texttt{s p o \%n}   & \texttt{\{s p o\} deg n} \\
+\texttt{s p o !m}    & \texttt{[s p o] mark m} \\
+\texttt{s $\neg$p o} & \texttt{[s p o] mark not} \quad(positive triple absent) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Machine Exactness}\label{sec:exact}
 Human readback (graph $\rightarrow$ English) is inherently lossy and is treated
 as non-normative. Machine exactness instead rides a \emph{structural} canonical
@@ -369,6 +403,22 @@ mis-ranking can at worst pack a fact (recoverable via its pointer), never
 silently corrupt it. A full eviction policy and its evaluation across workloads
 remain future work.
 
+\section{Threats to Validity}
+Our comprehension evidence comes from \emph{blind cold reads} scored, in several
+studies, by a single model tier and a single automated grader; sample sizes are
+small and the protocol was not pre-registered. The iconicity and drift studies
+draw primarily on one small-model family, chosen deliberately because a weaker
+reader is a stricter test of spec-free legibility---but findings that hold for a
+small model may not transfer identically to larger ones, and the reverse is also
+possible. In the budgeted-compaction study the token ceiling was followed only
+approximately by the writing model, so the arms are not matched on output size;
+we therefore rest the conclusion on the \emph{failure mode} (silent corruption
+vs.\ visible omission), which is size-independent, rather than on the raw
+retention counts. Finally, the edge-aging results come from a scripted prototype,
+not a deployed system. We report all of the above as directional evidence for the
+design, not as a benchmark, and a larger pre-registered panel across model sizes
+and families remains future work.
+
 \section{Related Work}
 XS3 is closest in spirit to RDF and its reification, and to controlled natural
 languages such as Attempto Controlled English, but it inverts their usual
@@ -410,13 +460,17 @@ DOI \texttt{10.5281/zenodo.21425813}, which always resolves to the latest versio
 \bibitem{rdf} G. Klyne and J. J. Carroll, ``Resource Description Framework (RDF):
 Concepts and Abstract Syntax,'' W3C Recommendation, 2004.
 \bibitem{ace} N. E. Fuchs, K. Kaljurand, and T. Kuhn, ``Attempto Controlled
-English for Knowledge Representation,'' in \emph{Reasoning Web}, 2008.
-\bibitem{hdt} J. D. Fern\'andez et al., ``Binary RDF Representation for
-Publication and Exchange (HDT),'' \emph{J. Web Semantics}, 2013.
+English for Knowledge Representation,'' in \emph{Reasoning Web}, LNCS 5224,
+Springer, 2008, pp.\ 104--124.
+\bibitem{hdt} J. D. Fern\'andez, M. A. Mart\'inez-Prieto, C. Guti\'errez,
+A. Polleres, and M. Arias, ``Binary RDF Representation for Publication and
+Exchange (HDT),'' \emph{J. Web Semantics}, 2013.
 \bibitem{wl} B. Weisfeiler and A. Leman, ``The reduction of a graph to canonical
-form and the algebra which appears therein,'' 1968.
+form and the algebra which appears therein,'' \emph{Nauchno-Tech. Informatsia},
+ser.\ 2, no.\ 9, pp.\ 12--16, 1968.
 \bibitem{cd} L. Beurer-Kellner, M. Fischer, and M. Vechev, ``Guiding LLMs the
-Right Way: Fast, Non-Invasive Constrained Generation,'' in \emph{ICML}, 2024.
+Right Way: Fast, Non-Invasive Constrained Generation,'' in \emph{Proc. ICML},
+PMLR vol.\ 235, 2024.
 \end{thebibliography}
 
 \end{document}
