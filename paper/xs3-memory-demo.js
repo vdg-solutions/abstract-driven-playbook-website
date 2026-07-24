@@ -77,6 +77,17 @@ class XS3Memory {
   }
   // recover the exact original edges of a summary node from the cold tier
   recover(id) { return this.cold.get(id) || []; }
+  // recall on demand: search hot + cold for edges matching a keyword — the addressable payoff.
+  // On an edge set this is a clean filter; on prose you would have to re-read and re-interpret.
+  recall(q) {
+    const hit = e => [e.s, e.p, e.o].some(x => String(x).includes(q));
+    return { hot: this.edges.filter(hit), cold: [...this.cold.values()].flat().filter(hit) };
+  }
+  // persist the whole store (hot + summaries + cold) so nothing is lost across sessions
+  persist(path) {
+    require('fs').writeFileSync(path, JSON.stringify(
+      { edges: this.edges, clusters: this.clusters, cold: [...this.cold] }));
+  }
 
   render() {
     const el = this.edges.map(e => `${e.s} ${e.p} ${e.o}${e.pinned ? ' !🔒' : ''} @t${e.turn}`);
@@ -104,13 +115,14 @@ const CRIT = [
   ['¬', 'negates', 'one-edge'], ['¬{...}', 'is', 'forbidden'],
   ['commit', 'decoder-card', 'f928f15'], ['commit', 'citation', 'c4fb4ce'],
 ];
-const EPH = ['checking', 'ran', 'read', 'grepped', 'edited', 'measured', 'diffed', 'opened', 'listed', 'probed'];
+const EPH_V = ['checked', 'ran', 'read', 'grepped', 'edited', 'measured', 'diffed', 'opened', 'listed', 'probed'];
+const EPH_O = ['decoder-negation', 'card-tilde', 'gate', 'token-count', 'card-diff', 'spec-selfref', 'glyph-table', 'zenodo-files', 'llms-txt', 'haiku-tests'];
 const TURNS = 12, EPH_PER_TURN = 5;
 for (let t = 1; t <= TURNS; t++) {
   m.tick();
   if (CRIT[t - 1]) m.add(...CRIT[t - 1], P);                       // one durable fact this turn
   for (let e = 0; e < EPH_PER_TURN; e++)                           // transient checks (not pinned)
-    m.add('agent', EPH[(t * 7 + e) % EPH.length], `file-${t}-${e}`);
+    m.add('agent', EPH_V[(t * 7 + e) % EPH_V.length], `${EPH_O[(t * 3 + e) % EPH_O.length]}-t${t}`);
   m.compact();
 }
 
@@ -137,4 +149,15 @@ console.log(`hot context carries only the summary line; the ${rec.length} origin
 console.log(rec.slice(0, 3).map(e => `  ${e.s} ${e.p} ${e.o} @t${e.turn}`).join('\n') + (rec.length > 3 ? `\n  … (+${rec.length - 3} more, all exact)` : ''));
 const totalCold = [...m.cold.values()].reduce((n, a) => n + a.length, 0);
 console.log(`cold archive total: ${totalCold} edges across ${m.cold.size} node(s) — off-context yet LOSSLESS-recoverable`);
+
+// ---- persist to disk + recall on demand by content query (pull old facts back anytime) ----
+m.persist('cold-store.json');
+console.log(`\n===== PULL BACK ON DEMAND (persisted to cold-store.json) =====`);
+for (const q of ['gate', 'zenodo', 'token-count']) {
+  const r = m.recall(q);
+  const ex = r.cold[0] ? `  e.g. "${r.cold[0].s} ${r.cold[0].p} ${r.cold[0].o} @t${r.cold[0].turn}"` : '';
+  console.log(`recall("${q}"): ${r.hot.length} in hot context, ${r.cold.length} pulled EXACT from cold${ex}`);
+}
+console.log('cold store persisted — survives across sessions; recall is a clean edge filter, not a re-read');
+
 console.log('\ntoken comparison written to full.txt vs aged.txt');

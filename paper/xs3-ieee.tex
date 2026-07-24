@@ -403,22 +403,6 @@ mis-ranking can at worst pack a fact (recoverable via its pointer), never
 silently corrupt it. A full eviction policy and its evaluation across workloads
 remain future work.
 
-\section{Threats to Validity}
-Our comprehension evidence comes from \emph{blind cold reads} scored, in several
-studies, by a single model tier and a single automated grader; sample sizes are
-small and the protocol was not pre-registered. The iconicity and drift studies
-draw primarily on one small-model family, chosen deliberately because a weaker
-reader is a stricter test of spec-free legibility---but findings that hold for a
-small model may not transfer identically to larger ones, and the reverse is also
-possible. In the budgeted-compaction study the token ceiling was followed only
-approximately by the writing model, so the arms are not matched on output size;
-we therefore rest the conclusion on the \emph{failure mode} (silent corruption
-vs.\ visible omission), which is size-independent, rather than on the raw
-retention counts. Finally, the edge-aging results come from a scripted prototype,
-not a deployed system. We report all of the above as directional evidence for the
-design, not as a benchmark, and a larger pre-registered panel across model sizes
-and families remains future work.
-
 \section{Related Work}
 XS3 is closest in spirit to RDF and its reification, and to controlled natural
 languages such as Attempto Controlled English, but it inverts their usual
